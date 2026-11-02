@@ -23,4 +23,15 @@ if ($Target -eq 'android') {
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-release $presets[$Target] $outputFile
 }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Get-FileHash -Algorithm SHA256 -LiteralPath $outputFile | Format-List
+# Use .NET directly: a BAT starts Windows PowerShell, whose module path can
+# differ from the PowerShell 7 terminal that launched it.
+$hashAlgorithm=[System.Security.Cryptography.SHA256]::Create()
+$stream=[System.IO.File]::OpenRead($outputFile)
+try {
+    $checksum=[System.BitConverter]::ToString($hashAlgorithm.ComputeHash($stream)).Replace('-','').ToLowerInvariant()
+} finally {
+    $stream.Dispose()
+    $hashAlgorithm.Dispose()
+}
+Write-Output "Output: $outputFile"
+Write-Output "SHA256: $checksum"

@@ -4,7 +4,7 @@ Godot 4.5.1 原生 GDScript 项目。当前为第一阶段单机版本：原创�
 
 ## 直接玩
 
-Windows：双击仓库根目录的 **启动游戏.bat**。如果存在本地构建，它会启动 `build/windows/QingyuMahjong.exe`；否则使用 Godot 运行源码。首次源码运行建议先在 Godot 中导入项目。
+Windows：双击仓库根目录的 **启动游戏.bat**。如果存在本地构建，它会启动 `build/windows/QingyuMahjong.exe`；否则自动导入 Godot 资源并运行源码。启动失败时窗口会保留错误信息。
 
 Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。当前开发机的 Godot 路径已作为启动脚本的一个回退；其他机器可设置环境变量 `GODOT_BIN`。
 
@@ -39,6 +39,8 @@ node tools/generate_reference.mjs 'D:\code\my\2\开源麻将\lianhuaguangdongmah
 ```
 
 ## 打包
+
+双击根目录的 **打包游戏.bat**，选择 Windows、Android、macOS 或全部打包。结束后会显示结果并保留窗口，产物位于 `build/` 下的对应平台文件夹。命令行也可使用 `打包游戏.bat windows`、`打包游戏.bat android`、`打包游戏.bat macos` 或 `打包游戏.bat all`；自动化运行时设置 `MAHJONG_NO_PAUSE=1` 可跳过结束等待。
 
 首先运行 `python tools/fetch_templates.py` 下载 Godot 4.5.1 官方模板到被忽略的 `tmp/export_templates/`。脚本只提取所需 ZIP 条目并校验 CRC，不必下载所有平台的完整包。
 
