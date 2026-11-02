@@ -1,0 +1,27 @@
+# Godot's regenerable import/editor/shader cache; keep source .uid files.
+.godot/
+# Local builds, screenshots, logs, downloaded tools and export templates.
+build/
+artifacts/
+tmp/
+*.log
+# Local IDE and operating system files.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+# Signing identities and local machine paths must never enter Git.
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+export_credentials.cfg
+local.settings.json
+# Optional development-only Python / Node environments.
+__pycache__/
+*.pyc
+.venv/
+node_modules/

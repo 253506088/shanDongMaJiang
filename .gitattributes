@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.ttf binary
+*.wav binary
+# Preserve the original legal text, including upstream whitespace.
+assets/fonts/OFL-*.txt -whitespace
+assets/licenses.txt -whitespace
