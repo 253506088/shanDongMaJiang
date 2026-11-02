@@ -82,6 +82,10 @@ func _test_edges() -> void:
 	e=GameEngine.new();e.start({},31)
 	var saved=e.snapshot();saved.opening.wall[0]=999
 	check(not GameEngine.new().restore(saved),"reject malformed saved tile")
+	e.state.players[1].melds=[{"type":"angang","tile":5,"tiles":[5,5,5,5]}]
+	check(e.view(0).players[1].melds[0].tiles==[-1,-1,-1,-1],"opponent concealed kong faces stay private")
+	check(e.view(1).players[1].melds[0].tiles==[5,5,5,5],"owner can see own concealed kong")
+	check(e.state.players[1].melds[0].tile==5,"private view does not mutate authority")
 
 func _test_engine() -> void:
 	var bot=MahjongAI.new()

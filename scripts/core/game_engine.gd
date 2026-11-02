@@ -275,6 +275,11 @@ func view(seat: int) -> Dictionary:
 	for p in result.players:
 		p.hand_count = p.hand.size()
 		if p.seat != seat and not p.ming and state.phase != "settled": p.hand = []
+		if p.seat != seat and state.phase != "settled":
+			for meld in p.melds:
+				if meld.type == "angang":
+					meld.tile = -1
+					meld.tiles = [-1, -1, -1, -1]
 		p.erase("passed_hu"); p.erase("passed_peng")
 	return result
 
