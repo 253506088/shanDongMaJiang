@@ -56,10 +56,7 @@ func run() -> void:
 	for child in app.hand_layer.get_children():
 		if child is TextureButton:card=child;break
 	await click_control(card)
-	check(app.selected==0,"single click selects tile")
-	var action=find_button(app.root,"打出 "+Tiles.title(app.view.players[0].hand[0]))
-	await click_control(action)
-	check(app.session.engine.state.revision==1,"discard button submits one action")
+	check(app.session.engine.state.revision==1,"Lotus desktop single click submits one discard")
 	await click_control(find_button(app.root,"暂停  II"))
 	check(app.session.paused,"pause suspends game")
 	var revision=app.session.engine.state.revision

@@ -4,4 +4,6 @@ $projectDir = Split-Path $PSScriptRoot -Parent
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --editor --import --quit
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/test_runner.gd
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/ux_regressions.gd
 exit $LASTEXITCODE

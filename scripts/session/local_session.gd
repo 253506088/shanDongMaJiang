@@ -16,6 +16,15 @@ var worker_seat = -1
 var worker_hint = false
 var ai = MahjongAI.new()
 var ai_rng = RandomNumberGenerator.new()
+var presentation_delay = 0.0
+
+func action_delay(kind: String) -> float:
+	# A readable beat after the visible action, independent of AI compute time.
+	var seconds = 2.1 if kind in ["chi", "peng", "gang", "angang", "bugang", "bao", "ming"] else 1.8
+	return seconds / maxf(speed, 0.1)
+
+func hold_presentation(seconds: float) -> void:
+	presentation_delay = maxf(presentation_delay, seconds)
 
 func _ready() -> void:
 	ai_rng.randomize()
@@ -23,7 +32,7 @@ func _ready() -> void:
 func start_match(settings: Dictionary) -> void:
 	_join_worker()
 	engine.start(settings, int(Time.get_unix_time_from_system()))
-	paused = false; autopilot = false; delay = 1.2
+	paused = false; autopilot = false; delay = 2.0; presentation_delay = 0
 	_publish()
 
 func _publish() -> void:
@@ -34,7 +43,7 @@ func play(action_id: String, revision: int = -1) -> bool:
 	if paused or engine.state.is_empty(): return false
 	var accepted = engine.submit(0, engine.state.revision if revision < 0 else revision, action_id)
 	if accepted:
-		delay = 0.65 / speed
+		delay = action_delay(engine.state.event.kind)
 		_publish()
 	return accepted
 
@@ -43,7 +52,7 @@ func next_round() -> void:
 	_join_worker()
 	var s = engine.state
 	engine.start(s.settings, ai_rng.randi(), s.round + 1, s.players.map(func(p): return p.score))
-	delay = 1.0; _publish()
+	delay = 2.0; presentation_delay = 0; _publish()
 
 func request_hint() -> void:
 	if worker != null or engine.state.is_empty() or engine.decision_seat() != 0: return
@@ -61,6 +70,7 @@ func _start_worker(hint: bool = false) -> void:
 		worker = null; notice.emit("AI 线程启动失败，请暂停后重试")
 
 func _process(delta: float) -> void:
+	if not paused: presentation_delay = maxf(0, presentation_delay - delta)
 	if worker != null and not worker.is_alive():
 		var move = worker.wait_to_finish(); worker = null
 		if worker_revision != engine.state.get("revision", -1): return
@@ -68,11 +78,12 @@ func _process(delta: float) -> void:
 		elif not move.is_empty():
 			# Pause preserves a pending AI result without advancing the game.
 			if paused: return
+			if worker_seat == 0 and not autopilot: return
 			if engine.submit(worker_seat, worker_revision, str(move.id)):
-				delay = 0.7 / speed; _publish()
+				delay = action_delay(engine.state.event.kind); _publish()
 	if paused or engine.state.is_empty() or worker != null: return
 	delay -= delta
-	if delay > 0 or engine.state.phase == "settled": return
+	if delay > 0 or presentation_delay > 0 or engine.state.phase == "settled": return
 	if engine.decision_seat() != 0 or autopilot: _start_worker()
 
 func has_save() -> bool:
@@ -87,7 +98,7 @@ func resume_match() -> bool:
 		if parser.parse(FileAccess.get_file_as_string(path))!=OK:continue
 		var data=parser.data
 		if not data is Dictionary or not engine.restore(data):continue
-		paused=false;autopilot=false;delay=1.0;changed.emit(engine.view(0))
+		paused=false;autopilot=false;delay=1.8;presentation_delay=0;changed.emit(engine.view(0))
 		if suffix==".bak":notice.emit("主存档无法读取，已从上一手备份恢复。")
 		return true
 	notice.emit("存档无法读取。可以开始新对局，原存档备份仍会保留。")

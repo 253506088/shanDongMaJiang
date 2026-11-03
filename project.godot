@@ -24,7 +24,7 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
 anti_aliasing/quality/msaa_3d=2
-environment/defaults/default_clear_color=Color(0.025, 0.062, 0.06, 1)
+environment/defaults/default_clear_color=Color(0.929, 0.953, 0.949, 1)
 textures/vram_compression/import_etc2_astc=true
 textures/vram_compression/import_s3tc_bptc=true
 

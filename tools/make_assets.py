@@ -22,6 +22,8 @@ def text_center(d, center, text, size, fill, serif=True):
 
 RED = '#a83d36'; GREEN = '#25634d'; INK = '#263d3b'; GOLD = '#bd9459'
 for tile in range(43):
+    if tile < 42 and (A/'licenses'/'lotus-assets.json').exists():
+        continue  # Preserve imported artwork. Rebuild it with import_lotus_assets.py.
     im = Image.new('RGBA', (256, 368), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     d.rounded_rectangle((3, 7, 253, 365), radius=23, fill='#143f37')
     d.rounded_rectangle((3, 0, 253, 351), radius=22, fill='#d5c9a6')
@@ -141,4 +143,7 @@ for kind,duration,base in [('click',.09,1250),('tile',.14,780),('deal',.16,560),
         data.append(struct.pack('<h',int(max(-1,min(1,signal*env))*24000)))
     with wave.open(str(A/'audio'/f'{kind}.wav'),'wb') as w:
         w.setparams((1,2,rate,0,'NONE','not compressed'));w.writeframes(b''.join(data))
-print('Generated 43 tile faces, felt, lobby landscape and 5 original sounds.')
+if (A/'licenses'/'lotus-assets.json').exists():
+    import runpy
+    runpy.run_path(str(ROOT/'tools'/'make_table_texture.py'))
+print('Generated local decor and effects; imported tile artwork is preserved.')

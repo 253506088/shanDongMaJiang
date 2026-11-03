@@ -28,10 +28,15 @@ func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1,
 	journal = []
 	state = {"version": VERSION, "revision": 0, "settings": config, "round": round_number, "dealer": (round_number - 1) % 4, "phase": "turn", "current": (round_number - 1) % 4, "wall": wall, "players": [], "pending": [], "last_discard": {}, "first_discard": true, "last_normal": -1, "result": {}, "event": {"kind": "opening", "seat": 0}, "claim_stage": "", "claim_from": -1, "claim_tile": -1, "claim_seat": -1, "claim_queue": [], "added_index": -1, "dice": [rng.randi_range(1, 6), rng.randi_range(1, 6)]}
 	opening.dice = state.dice.duplicate()
+	# Public physical slots parallel the private wall. The tail's top tile is the
+	# exposed kong head; identities remain stable after head/tail/flower draws.
+	state.wall_slots=range(144)
+	state.wall_slots[142]=143;state.wall_slots[143]=142
 	for seat in range(4):
 		var player = {"seat": seat, "name": ["我", "听松", "观澜", "知秋"][seat], "score": scores[seat] if scores.size() == 4 else 2000, "hand": [], "melds": [], "discards": [], "bao": false, "ming": false, "passed_hu": false, "passed_peng": [], "drawn": -1}
 		var count = 14 if seat == state.dealer else 13
-		for _i in range(count): player.hand.append(wall.pop_front())
+		for _i in range(count):
+			player.hand.append(wall.pop_front());state.wall_slots.pop_front()
 		state.players.append(player)
 	for p in state.players:
 		while true:
@@ -41,7 +46,9 @@ func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1,
 			if flower_index < 0: break
 			var tile = p.hand.pop_at(flower_index)
 			p.melds.append({"type": "flower", "tile": tile, "tiles": [tile]})
-			if not wall.is_empty(): p.hand.append(wall.pop_back())
+			if not wall.is_empty():
+				p.hand.append(wall.pop_back());state.wall_slots.pop_back()
+				_expose_wall_tail()
 		p.hand.sort()
 	Tiles.ensure_tail(wall)
 	state.gang_head = wall.back() if not wall.is_empty() else -1
@@ -57,6 +64,13 @@ func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1,
 
 func _luan() -> bool:
 	return state.settings.jiang == "luan"
+
+func _expose_wall_tail() -> void:
+	var slots=state.wall_slots
+	if slots.size()<2: return
+	var last=int(slots[-1]);var previous=int(slots[-2])
+	if last%2==1 and last/2==previous/2:
+		slots[-1]=previous;slots[-2]=last
 
 func _option(kind: String, extra: Dictionary = {}) -> Dictionary:
 	var move = {"kind": kind}
@@ -90,6 +104,29 @@ func _turn_options() -> void:
 				_option("bao", {"index": i, "tile": tile, "waits": waits_by_tile[tile]})
 				_option("ming", {"index": i, "tile": tile, "waits": waits_by_tile[tile]})
 	if p.bao and not p.ming: _option("upgrade_ming")
+	# Append new locked-hand options so pre-existing replay action IDs stay stable.
+	if locked and not state.wall.is_empty() and p.drawn >= 0:
+		for tile in range(34):
+			if c[tile] == 4 and _locked_kong_preserves_waits(p, tile):
+				_option("angang", {"tile": tile})
+		for i in range(p.melds.size()):
+			if p.melds[i].type == "peng" and c[p.melds[i].tile] > 0 and _locked_kong_preserves_waits(p, p.melds[i].tile, i):
+				_option("bugang", {"meld_index": i, "tile": p.melds[i].tile})
+
+func _locked_kong_preserves_waits(p: Dictionary, tile: int, meld_index: int = -1) -> bool:
+	if p.drawn < 0 or p.drawn >= p.hand.size() or p.hand[p.drawn] != tile: return false
+	var before = p.hand.duplicate(); before.remove_at(p.drawn)
+	var waits_before = Rules.waits(before, p.melds, _luan())
+	if waits_before.is_empty(): return false
+	var after = p.hand.duplicate()
+	var melds = p.melds.duplicate(true)
+	if meld_index >= 0:
+		after.erase(tile)
+		melds[meld_index].type = "gang"; melds[meld_index].tiles.append(tile)
+	else:
+		for _i in range(4): after.erase(tile)
+		melds.append({"type":"angang", "tile":tile, "tiles":[tile,tile,tile,tile]})
+	return waits_before == Rules.waits(after, melds, _luan())
 
 func decision_seat() -> int:
 	if state.is_empty() or state.phase == "settled": return -1
@@ -220,10 +257,13 @@ func _draw(seat: int, reason: String = "normal") -> void:
 		var wall = state.wall
 		if wall.is_empty() or (reason != "kong" and wall.size() < 2): _draw_result(); return
 		var tile: int
-		if reason == "normal": tile = wall.pop_front()
-		elif reason == "flower": tile = wall.pop_at(wall.size() - 2)
+		if reason == "normal":
+			tile = wall.pop_front();state.wall_slots.pop_front()
+		elif reason == "flower":
+			state.wall_slots.pop_at(wall.size()-2);tile = wall.pop_at(wall.size() - 2)
 		else:
-			tile = wall.pop_back()
+			tile = wall.pop_back();state.wall_slots.pop_back()
+			_expose_wall_tail()
 			Tiles.ensure_tail(wall)
 			state.gang_head = wall.back() if not wall.is_empty() else -1
 		var p = state.players[seat]

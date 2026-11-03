@@ -38,4 +38,12 @@ Godot Engine，MIT License。导出程序包含 Godot 的许可证信息；源�
 
 ## 自有素材
 
-牌面、牌背、桌布、大厅几何山景、图标和合成音效由本项目生成脚本创作；字体字形按上述字体许可使用。
+牌背波纹标记、桌布海岸曲线、大厅几何背景、图标和短合成音效由本项目代码创作；字体字形按上述字体许可使用。2026-11-03 的海青桌布与牌背由 `tools/make_table_texture.py` 确定性生成，不包含第三方桌布或人物插图。
+
+## 现有牌面与逐牌语音（2026-11-02）
+
+34 张常规 PNG 牌面、34 段牌名 MP3、吃碰杠胡自摸 5 段动作 MP3 来自上述莲花麻将 MIT 仓库的 `public/tiles` 和 `public/audio`，保留仓库许可于 `assets/licenses/lotus-MIT.txt`。不是本项目原创牌面／录音；原仓库未给这些文件列出独立作者。图片仅放大并适配象牙白牌体，声音保持原文件。文件来源、原图及音频 SHA-256 见 `assets/licenses/lotus-assets.json`；导入脚本为 `tools/import_lotus_assets.py`。
+
+## 八花 SVG
+
+作者 Cangjie6，Wikimedia Commons，CC BY-SA 4.0。沿用莲花麻将裁切后的八花 SVG，保留同许可，完整许可证在 `assets/licenses/flowers-CC-BY-SA-4.0.txt`，逐图来源、修改说明和原始 SHA-256 在 `assets/licenses/flowers-sources.json`。此许可仅适用花牌素材。春夏秋冬梅兰竹菊原图为 MJh1-、MJh2-、MJh3-、MJh4-、MJh5-、MJh6-、MJh8-、MJh7-.svg；来源 https://commons.wikimedia.org/wiki/User:Cangjie6 。

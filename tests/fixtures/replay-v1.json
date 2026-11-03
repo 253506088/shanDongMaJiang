@@ -1,0 +1,963 @@
+{
+	"journal": [
+		{
+			"action": {
+				"id": "9",
+				"index": 9,
+				"kind": "discard",
+				"tile": 29
+			},
+			"revision": 0,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "11",
+				"index": 11,
+				"kind": "discard",
+				"tile": 28
+			},
+			"revision": 1,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "12",
+				"index": 12,
+				"kind": "discard",
+				"tile": 27
+			},
+			"revision": 2,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "9",
+				"index": 9,
+				"kind": "discard",
+				"tile": 29
+			},
+			"revision": 3,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "9",
+				"index": 9,
+				"kind": "discard",
+				"tile": 30
+			},
+			"revision": 4,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "12",
+				"index": 12,
+				"kind": "discard",
+				"tile": 33
+			},
+			"revision": 5,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 16
+			},
+			"revision": 6,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 16,
+				"tiles": [
+					14,
+					15,
+					16
+				]
+			},
+			"revision": 7,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "8",
+				"index": 8,
+				"kind": "discard",
+				"tile": 30
+			},
+			"revision": 8,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "4",
+				"index": 4,
+				"kind": "discard",
+				"tile": 6
+			},
+			"revision": 9,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 18
+			},
+			"revision": 10,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 18,
+				"tiles": [
+					18,
+					19,
+					20
+				]
+			},
+			"revision": 11,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 18
+			},
+			"revision": 12,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "3",
+				"index": 3,
+				"kind": "discard",
+				"tile": 8
+			},
+			"revision": 13,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 8,
+				"tiles": [
+					6,
+					7,
+					8
+				]
+			},
+			"revision": 14,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 26
+			},
+			"revision": 15,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "12",
+				"index": 12,
+				"kind": "discard",
+				"tile": 26
+			},
+			"revision": 16,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 21
+			},
+			"revision": 17,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 21,
+				"tiles": [
+					20,
+					21,
+					22
+				]
+			},
+			"revision": 18,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "3",
+				"index": 3,
+				"kind": "discard",
+				"tile": 16
+			},
+			"revision": 19,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "5",
+				"index": 5,
+				"kind": "discard",
+				"tile": 16
+			},
+			"revision": 20,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 16,
+				"tiles": [
+					14,
+					15,
+					16
+				]
+			},
+			"revision": 21,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "6",
+				"index": 6,
+				"kind": "discard",
+				"tile": 14
+			},
+			"revision": 22,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "3",
+				"index": 3,
+				"kind": "discard",
+				"tile": 6
+			},
+			"revision": 23,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 15
+			},
+			"revision": 24,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "10",
+				"index": 10,
+				"kind": "discard",
+				"tile": 12
+			},
+			"revision": 25,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 12,
+				"tiles": [
+					10,
+					11,
+					12
+				]
+			},
+			"revision": 26,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "3",
+				"index": 3,
+				"kind": "discard",
+				"tile": 12
+			},
+			"revision": 27,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "10",
+				"index": 10,
+				"kind": "discard",
+				"tile": 19
+			},
+			"revision": 28,
+			"seat": 2
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 17
+			},
+			"revision": 29,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "10",
+				"index": 10,
+				"kind": "discard",
+				"tile": 29
+			},
+			"revision": 30,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "7",
+				"index": 7,
+				"kind": "discard",
+				"tile": 31
+			},
+			"revision": 31,
+			"seat": 1
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "peng",
+				"tile": 31
+			},
+			"revision": 32,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "1",
+				"index": 0,
+				"kind": "bao",
+				"tile": 2,
+				"waits": [
+					22,
+					25
+				]
+			},
+			"revision": 33,
+			"seat": 3
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "chi",
+				"tile": 2,
+				"tiles": [
+					0,
+					1,
+					2
+				]
+			},
+			"revision": 34,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "5",
+				"index": 4,
+				"kind": "bao",
+				"tile": 22,
+				"waits": [
+					1,
+					4
+				]
+			},
+			"revision": 35,
+			"seat": 0
+		},
+		{
+			"action": {
+				"id": "0",
+				"kind": "win",
+				"tile": 22
+			},
+			"revision": 36,
+			"seat": 3
+		}
+	],
+	"opening": {
+		"dice": [
+			2,
+			4
+		],
+		"round": 1,
+		"scores": [],
+		"seed": "93000",
+		"settings": {
+			"ai": "efficiency",
+			"chi": true,
+			"jiang": "258",
+			"rounds": 4,
+			"takeover": false
+		},
+		"wall": [
+			29,
+			1,
+			32,
+			0,
+			32,
+			6,
+			36,
+			2,
+			41,
+			7,
+			26,
+			3,
+			6,
+			30,
+			28,
+			22,
+			14,
+			23,
+			22,
+			40,
+			1,
+			7,
+			11,
+			18,
+			26,
+			10,
+			12,
+			4,
+			25,
+			21,
+			9,
+			3,
+			26,
+			6,
+			18,
+			27,
+			8,
+			20,
+			16,
+			11,
+			16,
+			24,
+			30,
+			34,
+			4,
+			2,
+			14,
+			22,
+			31,
+			31,
+			20,
+			29,
+			8,
+			14,
+			4,
+			15,
+			10,
+			21,
+			19,
+			37,
+			15,
+			23,
+			8,
+			6,
+			10,
+			3,
+			15,
+			12,
+			19,
+			17,
+			29,
+			31,
+			15,
+			38,
+			1,
+			12,
+			9,
+			0,
+			28,
+			16,
+			18,
+			5,
+			10,
+			17,
+			25,
+			27,
+			3,
+			0,
+			24,
+			27,
+			13,
+			39,
+			21,
+			29,
+			33,
+			24,
+			33,
+			23,
+			31,
+			19,
+			7,
+			25,
+			32,
+			11,
+			24,
+			30,
+			28,
+			12,
+			9,
+			17,
+			5,
+			25,
+			28,
+			19,
+			8,
+			2,
+			27,
+			35,
+			18,
+			26,
+			33,
+			5,
+			20,
+			23,
+			14,
+			11,
+			9,
+			5,
+			13,
+			7,
+			2,
+			30,
+			21,
+			13,
+			20,
+			13,
+			17,
+			0,
+			16,
+			1,
+			4,
+			33,
+			22,
+			32
+		]
+	},
+	"rng_state": "-6117485885902255135",
+	"state": {
+		"added_index": -1,
+		"claim_from": 0,
+		"claim_queue": [],
+		"claim_seat": 3,
+		"claim_stage": "ron",
+		"claim_tile": 22,
+		"current": 0,
+		"dealer": 0,
+		"dice": [
+			2,
+			4
+		],
+		"event": {
+			"kind": "win",
+			"seat": 3,
+			"tile": 22
+		},
+		"first_discard": false,
+		"gang_head": 1,
+		"last_discard": {
+			"revision": 36,
+			"seat": 0,
+			"tile": 22
+		},
+		"last_normal": -1,
+		"pending": [],
+		"phase": "settled",
+		"players": [
+			{
+				"bao": true,
+				"discards": [
+					29,
+					30,
+					6,
+					26,
+					29,
+					22
+				],
+				"drawn": -1,
+				"hand": [
+					2,
+					3,
+					10,
+					10,
+					32,
+					32,
+					32
+				],
+				"melds": [
+					{
+						"tile": 36,
+						"tiles": [
+							36
+						],
+						"type": "flower"
+					},
+					{
+						"tile": 41,
+						"tiles": [
+							41
+						],
+						"type": "flower"
+					},
+					{
+						"tile": 37,
+						"tiles": [
+							37
+						],
+						"type": "flower"
+					},
+					{
+						"from": 3,
+						"tile": 8,
+						"tiles": [
+							6,
+							7,
+							8
+						],
+						"type": "chi"
+					},
+					{
+						"from": 3,
+						"tile": 2,
+						"tiles": [
+							0,
+							1,
+							2
+						],
+						"type": "chi"
+					}
+				],
+				"ming": false,
+				"name": "我",
+				"passed_hu": false,
+				"passed_peng": [],
+				"score": 1940,
+				"seat": 0
+			},
+			{
+				"bao": false,
+				"discards": [
+					28,
+					33,
+					26,
+					14,
+					12
+				],
+				"drawn": -1,
+				"hand": [
+					1,
+					7,
+					8,
+					21,
+					22,
+					22,
+					23
+				],
+				"melds": [
+					{
+						"tile": 40,
+						"tiles": [
+							40
+						],
+						"type": "flower"
+					},
+					{
+						"from": 0,
+						"tile": 16,
+						"tiles": [
+							14,
+							15,
+							16
+						],
+						"type": "chi"
+					},
+					{
+						"from": 0,
+						"tile": 12,
+						"tiles": [
+							10,
+							11,
+							12
+						],
+						"type": "chi"
+					}
+				],
+				"ming": false,
+				"name": "听松",
+				"passed_hu": false,
+				"passed_peng": [],
+				"score": 2000,
+				"seat": 1
+			},
+			{
+				"bao": false,
+				"discards": [
+					27,
+					18,
+					6,
+					19
+				],
+				"drawn": -1,
+				"hand": [
+					3,
+					3,
+					4,
+					4,
+					6,
+					8,
+					9,
+					11,
+					25,
+					26
+				],
+				"melds": [
+					{
+						"from": 1,
+						"tile": 18,
+						"tiles": [
+							18,
+							19,
+							20
+						],
+						"type": "chi"
+					}
+				],
+				"ming": false,
+				"name": "观澜",
+				"passed_hu": false,
+				"passed_peng": [],
+				"score": 2000,
+				"seat": 2
+			},
+			{
+				"bao": true,
+				"discards": [
+					29,
+					30,
+					16,
+					15,
+					17
+				],
+				"drawn": -1,
+				"hand": [
+					4,
+					4,
+					23,
+					24
+				],
+				"melds": [
+					{
+						"tile": 34,
+						"tiles": [
+							34
+						],
+						"type": "flower"
+					},
+					{
+						"from": 2,
+						"tile": 16,
+						"tiles": [
+							14,
+							15,
+							16
+						],
+						"type": "chi"
+					},
+					{
+						"from": 2,
+						"tile": 21,
+						"tiles": [
+							20,
+							21,
+							22
+						],
+						"type": "chi"
+					},
+					{
+						"from": 1,
+						"tile": 31,
+						"tiles": [
+							31,
+							31,
+							31
+						],
+						"type": "peng"
+					}
+				],
+				"ming": false,
+				"name": "知秋",
+				"passed_hu": false,
+				"passed_peng": [],
+				"score": 2060,
+				"seat": 3
+			}
+		],
+		"result": {
+			"base": 1,
+			"deltas": [
+				-60,
+				0,
+				0,
+				60
+			],
+			"draw": false,
+			"hua": 3,
+			"hua_details": [
+				{
+					"name": "底分",
+					"points": 1
+				},
+				{
+					"name": "花牌（1张）",
+					"points": 1
+				},
+				{
+					"name": "字明刻（中）",
+					"points": 1
+				}
+			],
+			"multiplier": 2,
+			"pattern": "平胡",
+			"patterns": [
+				{
+					"multiplier": 1,
+					"name": "平胡"
+				},
+				{
+					"multiplier": 2,
+					"name": "花胡"
+				},
+				{
+					"multiplier": 1,
+					"name": "报听"
+				}
+			],
+			"points": 60,
+			"round": 1,
+			"source": 0,
+			"win_hand": [
+				4,
+				4,
+				23,
+				24,
+				22
+			],
+			"win_tile": 22,
+			"win_type": "discard",
+			"winner": 3
+		},
+		"revision": 37,
+		"round": 1,
+		"settings": {
+			"ai": "efficiency",
+			"chi": true,
+			"jiang": "258",
+			"rounds": 4,
+			"takeover": false
+		},
+		"version": 1,
+		"wall": [
+			15,
+			38,
+			1,
+			12,
+			9,
+			0,
+			28,
+			16,
+			18,
+			5,
+			10,
+			17,
+			25,
+			27,
+			3,
+			0,
+			24,
+			27,
+			13,
+			39,
+			21,
+			29,
+			33,
+			24,
+			33,
+			23,
+			31,
+			19,
+			7,
+			25,
+			32,
+			11,
+			24,
+			30,
+			28,
+			12,
+			9,
+			17,
+			5,
+			25,
+			28,
+			19,
+			8,
+			2,
+			27,
+			35,
+			18,
+			26,
+			33,
+			5,
+			20,
+			23,
+			14,
+			11,
+			9,
+			5,
+			13,
+			7,
+			2,
+			30,
+			21,
+			13,
+			20,
+			13,
+			17,
+			0,
+			1
+		]
+	},
+	"version": 1
+}

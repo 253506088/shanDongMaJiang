@@ -1,6 +1,6 @@
 # 山东麻将 · 青玉台
 
-Godot 4.5.1 原生 GDScript 项目。当前为第一阶段单机版本：原创青玉牌桌、3D 麻将、三位电脑牌友、山东玩法、存档续玩、结算和牌谱导出。
+Godot 4.5.1 原生 GDScript 项目。当前为第一阶段单机版本：现代海青牌桌、3D 麻将、三位电脑牌友、山东玩法、存档续玩、结算和牌谱导出。
 
 项目定位、用户需求、三阶段安排和本次讨论的交接记录见 [my_doc/README.md](my_doc/README.md)。后续在新项目对话中继续开发时，可从这里了解已确认的共识与待定事项。
 
@@ -8,12 +8,15 @@ Godot 4.5.1 原生 GDScript 项目。当前为第一阶段单机版本：原创�
 
 Windows：双击仓库根目录的 **启动游戏.bat**。如果存在本地构建，它会启动 `build/windows/QingyuMahjong.exe`；否则自动导入 Godot 资源并运行源码。启动失败时窗口会保留错误信息。
 
-Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。当前开发机的 Godot 路径已作为启动脚本的一个回退；其他机器可设置环境变量 `GODOT_BIN`。
+Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本项目的前身“莲花麻将”位于 `D:\code\my\2\开源麻将`，实际源码在 `lianhuaguangdongmahjong`。项目注意事项见 [AGENTS.md](AGENTS.md)，逐项体验迁移清单见 [docs/lotus-ux-migration.md](docs/lotus-ux-migration.md)。
 
-操作：点一下选牌，再点同张牌或“打出”按钮出牌。选中可听牌的弃牌后点“报听”或“明搂”；也可以先点声明，再选带“听”标记的牌。`H` 查看牌效建议，`Esc` 暂停，“交给 AI”开启本家托管。弹窗期间牌局暂停。
+当前开发机的 Godot 路径已作为启动脚本的一个回退；其他机器可设置环境变量 `GODOT_BIN`。
+
+操作沿用莲花麻将：电脑悬停看牌，单击出牌；触屏单击选牌，快速双击或向上划出牌。报听／明搂时先点声明按钮，再打出带“听”标记的牌。`H` 查看牌效建议，`Esc` 暂停，“交给 AI”开启本家托管。弹窗期间牌局暂停。
 
 ## 当前功能
 
+- 浅雾白界面、海青织物与陶瓷桌框；高位透视、圆角双色牌体、立起的三家暗手、随真实牌墙移动的公开杠头。
 - 二五八将／乱将、允许／不允许吃牌、经典／牌效 AI。
 - 东风 4 局、半庄 8 局、自由续局，每局轮庄，积分累计。
 - 起手补花、公开杠头、吃碰明杠暗杠补杠、抢杠、报听、明搂、过圈、截胡、天地胡、海底、八花与现有番型结算。
@@ -29,7 +32,10 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。当�
 ```powershell
 powershell -File tools/test.ps1
 # 真实 Godot 渲染窗口的 UI 输入事件测试：
-powershell -File tools/run.ps1 --script res://tests/ui_smoke.gd
+& tools/run.ps1 -Godot '' --script res://tests/ui_smoke.gd
+& tools/run.ps1 -Godot '' --script res://tests/ux_smoke.gd
+# 立姿、墙尾、旧局亮牌与花牌遮挡的真实渲染回归：
+& tools/run.ps1 -Godot '' --script res://tests/table_art_smoke.gd
 ```
 
 核心测试直接由 Godot 运行，无 npm、Python 或外部游戏服务依赖。包含原项目生成的 1,140 组胡牌／计分参考牌例、64 组 AI 选择参考，以及整局模拟、牌张守恒、积分守恒、私有手牌和存档重放检查。
@@ -60,6 +66,8 @@ powershell -File tools/build.ps1 -Target macos
 - iOS：导出预设已提供。需要 Mac、Xcode、对应导出模板和自己的 Apple 签名身份；本次 Windows 环境不能代替 iOS 实机验证。
 
 详细架构、迁移差异和后续联网约定见 [docs/architecture.md](docs/architecture.md)、[docs/rule-baseline.md](docs/rule-baseline.md)。实际验收结果见 [docs/verification.md](docs/verification.md)。
+
+本轮视觉重做的设计与实现说明见 [docs/table-visual-refresh.md](docs/table-visual-refresh.md)。
 
 ## 文件边界
 

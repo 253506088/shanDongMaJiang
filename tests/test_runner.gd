@@ -34,6 +34,7 @@ func run() -> void:
 	print("AI oracle complete")
 	_test_edges()
 	_test_engine()
+	_test_legacy_replay()
 	_test_storage()
 	print("RESULT: %d checks, %d failures, %.2fs"%[checks,failures.size(),(Time.get_ticks_msec()-start)/1000.0])
 	quit(0 if failures.is_empty() else 1)
@@ -57,14 +58,18 @@ func _test_edges() -> void:
 		var hand=p.hand.duplicate();hand.remove_at(move.index)
 		check(not Rules.waits(hand,p.melds).is_empty(),"declaration validates actual discarded tile")
 	# Flowers replace before the public head; kongs consume and replace it.
-	p.hand=[];p.melds=[];e.state.wall=[34,5,1];e.state.gang_head=1;e.state.phase="turn"
+	p.hand=[];p.melds=[];e.state.wall=[34,5,1];e.state.wall_slots=[140,143,142];e.state.gang_head=1;e.state.phase="turn"
 	e._draw(0,"normal")
 	check(p.hand==[5] and e.state.wall==[1] and e.state.gang_head==1,"flower does not consume gang head")
+	check(e.state.wall_slots==[142],"flower leaves the exposed head in its physical slot")
 	check(Rules.flower_count(p.melds)==1,"flower exposed exactly once")
-	e.state.wall=[4,35,1];e.state.gang_head=1;e._draw(0,"kong")
+	e.state.wall=[4,35,1];e.state.wall_slots=[140,143,142];e.state.gang_head=1;e._draw(0,"kong")
 	check(p.hand.back()==1 and e.state.gang_head==4 and e.state.wall==[35,4],"kong draws public head and replaces flower tail")
-	e.state.wall=[4];e._draw(0,"normal")
+	check(e.state.wall_slots==[140,143],"kong consumes the tail's physical tile")
+	e.state.wall=[4];e.state.wall_slots=[143];e._draw(0,"normal")
 	check(e.state.phase=="settled" and e.state.result.draw,"reserved head cannot be normal draw")
+	e.state.gang_head=4;e._draw(0,"kong")
+	check(e.state.wall.is_empty() and e.state.wall_slots.is_empty() and e.state.gang_head==-1,"last kong consumes the physical head without leaving a ghost tile")
 	# Score transfer conventions, including the separate payer ming multiplier.
 	for scenario in ["self","discard","rob","dihu"]:
 		e=GameEngine.new();e.start({},9312);p=e.state.players[0]
@@ -122,6 +127,18 @@ func _test_engine() -> void:
 		print("Simulation ",match_index+1," / 12: ",steps," decisions, ","draw" if engine.state.result.draw else engine.state.result.pattern)
 
 func _conservation(engine: GameEngine) -> void:
+	check(engine.state.wall_slots.size()==engine.state.wall.size(),"wall visual slots conserve tile count")
+	var unique_slots={}
+	for slot in engine.state.wall_slots: unique_slots[slot]=true
+	check(engine.state.wall_slots.size()==unique_slots.size(),"wall visual slots stay unique")
+	if not engine.state.wall.is_empty():
+		var tail=int(engine.state.wall_slots.back())
+		check(engine.state.gang_head==engine.state.wall.back() and engine.state.gang_head<34,"public kong head is the actual non-flower tail")
+		check(tail%2==0 or tail-1 not in engine.state.wall_slots,"public tail is never covered by the same stack's upper tile")
+	var public_view=engine.view(0)
+	var original_slots=engine.state.wall_slots.duplicate()
+	public_view.wall_slots.clear()
+	check(engine.state.wall_slots==original_slots,"public physical slots are detached from authority")
 	var all=engine.state.wall.duplicate()
 	for p in engine.state.players:
 		all.append_array(p.hand);all.append_array(p.discards)
@@ -129,6 +146,31 @@ func _conservation(engine: GameEngine) -> void:
 	check(all.size()==144,"144 physical tiles")
 	var counts=Tiles.counts(all)
 	for t in range(42):check(counts[t]==(4 if t<34 else 1),"tile count %d"%t)
+
+func _test_legacy_replay() -> void:
+	# Generated from the engine before wall slots and locked-hand kongs existed.
+	# A checked-in old game exercises real historical action IDs, not a snapshot
+	# produced by the implementation whose compatibility is under test.
+	var saved=JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/replay-v1.json"))
+	check(saved is Dictionary and not saved.state.has("wall_slots"),"legacy fixture predates physical wall slots")
+	var restored=GameEngine.new()
+	check(restored.restore(saved),"pre-upgrade version 1 replay loads")
+	if restored.state.is_empty(): return
+	var legacy_state=restored.state.duplicate(true)
+	legacy_state.erase("wall_slots")
+	for p in legacy_state.players:
+		for meld in p.melds: meld.erase("added")
+	# JSON numbers are floats; normalize both sides before comparing nested data.
+	check(JSON.parse_string(JSON.stringify(legacy_state))==saved.state,"legacy replay preserves complete gameplay state and settlement")
+	_conservation(restored)
+	var expected_slots=restored.state.wall_slots.duplicate()
+	# Restore derives physical positions from the accepted journal; it must not
+	# trust arbitrary serialized visual metadata or reveal hidden tile identities.
+	saved.state.wall_slots=[-1,999]
+	check(restored.restore(saved) and restored.state.wall_slots==expected_slots,"restore rebuilds wall slots instead of trusting saved metadata")
+	var migrated=GameEngine.new()
+	check(migrated.restore(JSON.parse_string(JSON.stringify(restored.snapshot()))),"migrated legacy game can be saved and loaded again")
+	check(migrated.state==restored.state,"legacy migration is idempotent")
 
 func _test_storage() -> void:
 	var session=LocalSession.new();root.add_child(session)

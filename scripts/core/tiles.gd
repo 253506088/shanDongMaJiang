@@ -12,6 +12,13 @@ static func title(tile: int) -> String:
 	if tile < 34: return HONOR_NAMES[tile - 27]
 	return FLOWER_NAMES[tile - 34]
 
+static func texture_path(tile: int) -> String:
+	return "res://assets/tiles/%02d.%s" % [tile, "svg" if tile >= 34 and tile < 42 else "png"]
+
+static func spoken_title(tile: int) -> String:
+	if tile >= 27 and tile < 34: return ["东风","南风","西风","北风","红中","发财","白板"][tile-27]
+	return title(tile)
+
 static func code(tile: int) -> String:
 	if tile < 27: return ["m", "p", "s"][tile / 9] + str(tile % 9 + 1)
 	if tile < 34: return ["east", "south", "west", "north", "red", "green", "white"][tile - 27]

@@ -1,10 +1,17 @@
 # Godot's regenerable import/editor/shader cache; keep source .uid files.
 .godot/
-# Local builds, screenshots, logs, downloaded tools and export templates.
+# Reproducible local outputs: Windows/Android/macOS packages, visual QA PNGs,
+# texture previews, performance captures, downloaded Godot and export templates.
+# Keep their generators and regression cases in tools/ and tests/; record the
+# reviewed results in docs/verification.md, not generated binaries in Git.
 build/
 artifacts/
 tmp/
 *.log
+# Exported release archives and device install packages are delivery artifacts.
+*.apk
+*.aab
+*.pck
 # Local IDE and operating system files.
 .idea/
 .vscode/
