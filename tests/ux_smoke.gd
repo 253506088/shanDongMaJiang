@@ -2,7 +2,7 @@ extends "res://tests/ui_smoke.gd"
 
 func run() -> void:
 	create_timer(120).timeout.connect(func():printerr("UX UI watchdog");quit(1))
-	app=load("res://scenes/main.tscn").instantiate();root.add_child(app)
+	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=true;root.add_child(app)
 	app.session.storage_root="user://qa-ux/";app.muted=true;app.session.set_process(false)
 	app._build_hud()
 	var e=load("res://tests/ux_regressions.gd").screenshot_engine()
@@ -10,8 +10,11 @@ func run() -> void:
 	await create_timer(2).timeout
 	check(find_button(app.root,"补杠 四万")!=null,"screenshot Four Characters kong button visible")
 	await capture("ux-four-wan-before")
-	await click_control(find_button(app.root,"听牌一览"));await capture("ux-locked-waits")
-	await click_control(find_button(app.root,"×"))
+	check(is_instance_valid(app.waits_panel) and not is_instance_valid(app.modal),"locked waits remain on table without a modal")
+	await capture("ux-locked-waits")
+	await click_control(find_button(app.root,"收起听牌"))
+	await click_control(find_button(app.root,"听牌一览"))
+	check(not app.session.paused,"locked waits do not pause the game")
 	await click_control(find_button(app.root,"补杠 四万"))
 	check(e.state.players[0].melds[1].tiles.size()==4,"kong button commits physical fourth tile")
 	await create_timer(0.5).timeout

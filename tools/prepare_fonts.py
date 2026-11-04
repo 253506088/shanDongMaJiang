@@ -15,8 +15,8 @@ for folder in ['scripts','tools']:
     for path in (ROOT/folder).rglob('*'):
         if path.suffix in ['.gd','.py']:characters.update(path.read_text(encoding='utf-8'))
 characters.update('東萬發壹貳參肆伍陸柒捌玖→×·…—')
-for name,weight in [('NotoSansSC',500),('NotoSerifSC',600)]:
-    f=TTFont(ROOT/'tmp'/f'{name}.ttf')
+for source,name,weight in [('NotoSansSC','NotoSansSC',600),('NotoSansSC','NotoSansSC-Bold',700),('NotoSerifSC','NotoSerifSC',600)]:
+    f=TTFont(ROOT/'tmp'/f'{source}.ttf')
     instantiateVariableFont(f,{'wght':weight},inplace=True)
     options=subset.Options();options.layout_features=['*'];options.recalc_timestamp=False
     sub=subset.Subsetter(options=options);sub.populate(unicodes=sorted(ord(c) for c in characters));sub.subset(f)

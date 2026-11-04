@@ -69,6 +69,18 @@ func _start_worker(hint: bool = false) -> void:
 	if error != OK:
 		worker = null; notice.emit("AI 线程启动失败，请暂停后重试")
 
+func locked_discard_action() -> Dictionary:
+	# Lotus's local locked turns show the new tile briefly, then discard it.
+	# Keep real choices (winning or a legal wait-preserving kong) with the human.
+	var state = engine.state
+	if state.is_empty() or state.phase != "turn" or state.current != 0: return {}
+	var player = state.players[0]
+	if not (player.bao or player.ming) or player.drawn < 0 or player.drawn >= player.hand.size(): return {}
+	if state.pending.any(func(move): return move.kind in ["win", "angang", "bugang"]): return {}
+	for move in state.pending:
+		if move.kind == "discard" and move.index == player.drawn: return move
+	return {}
+
 func _process(delta: float) -> void:
 	if not paused: presentation_delay = maxf(0, presentation_delay - delta)
 	if worker != null and not worker.is_alive():
@@ -84,7 +96,12 @@ func _process(delta: float) -> void:
 	if paused or engine.state.is_empty() or worker != null: return
 	delay -= delta
 	if delay > 0 or presentation_delay > 0 or engine.state.phase == "settled": return
-	if engine.decision_seat() != 0 or autopilot: _start_worker()
+	if engine.decision_seat() == 0 and not autopilot:
+		var move = locked_discard_action()
+		# Submit the current legal action through the same journal/save/voice path
+		# as a click. No stored timer action can outlive a pause or a new revision.
+		if not move.is_empty(): play(str(move.id), engine.state.revision)
+	else: _start_worker()
 
 func has_save() -> bool:
 	return FileAccess.file_exists(storage_root + "current_match.json") or FileAccess.file_exists(storage_root + "current_match.json.bak")

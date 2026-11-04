@@ -6,4 +6,6 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/test_runner.gd
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/ux_regressions.gd
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/locked_turn_regressions.gd
 exit $LASTEXITCODE

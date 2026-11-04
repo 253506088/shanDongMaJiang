@@ -1,19 +1,27 @@
 class_name UI
 extends RefCounted
-const INK = Color("234047")
-const ACCENT = Color("187f80")
-# Keep the existing semantic name for callers: emphasis now uses sea-glass teal.
+const INK = Color("f3eddf")
+const ACCENT = Color("dec18b")
+# One warm, readable palette connects the lobby, table and reading panels.
 const GOLD = ACCENT
 const TEXT = INK
-const MUTED = Color("647b80")
-const PAPER = Color("f8fbfa")
-const SURFACE = Color("f8fbfaf2")
-const LINE = Color("d4e3e2")
-const SOFT = Color("e5f0ed")
+const MUTED = Color("b6c5bc")
+const PAPER = Color("132e2bfA")
+const SURFACE = Color("183a34ed")
+const LINE = Color("b7c7af38")
+const SOFT = Color("23443c")
 const CORAL = Color("d77763")
+# The playing surface uses translucent panels over the courtyard.
+const TABLE_TEXT = Color("f3eddf")
+const TABLE_MUTED = Color("a8bab2")
+const TABLE_GOLD = Color("dec18b")
+const TABLE_SURFACE = Color("102e2cdb")
+const TABLE_LINE = Color("b7c7af30")
 
-static func font(_serif: bool = false) -> Font:
-	return load("res://assets/fonts/NotoSansSC.ttf")
+static func font(emphasis: bool = false) -> Font:
+	# Static SemiBold/Bold outlines stay substantial at the small HUD sizes;
+	# a single sans family also keeps headings, buttons and numbers consistent.
+	return load("res://assets/fonts/NotoSansSC-Bold.ttf" if emphasis else "res://assets/fonts/NotoSansSC.ttf")
 
 static func style(color: Color, border: Color = Color.TRANSPARENT, radius: int = 12, width: int = 1) -> StyleBoxFlat:
 	var box = StyleBoxFlat.new(); box.bg_color = color
@@ -45,12 +53,12 @@ static func button(parent: Node, rect: Rect2, text: String, callback: Callable, 
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	b.add_theme_font_override("font",font()); b.add_theme_font_size_override("font_size",18)
 	b.add_theme_stylebox_override("normal",style(ACCENT if primary else SURFACE,ACCENT if primary else LINE,12))
-	b.add_theme_stylebox_override("hover",style(Color("259697") if primary else Color("e8f5f1"),Color("72b7b2"),12))
-	b.add_theme_stylebox_override("pressed",style(Color("116467") if primary else Color("d5e9e4"),ACCENT,12))
+	b.add_theme_stylebox_override("hover",style(Color("ebd2a2") if primary else Color("2e5149f2"),ACCENT,12))
+	b.add_theme_stylebox_override("pressed",style(Color("b99a65") if primary else Color("0c2825f2"),ACCENT,12))
 	b.add_theme_stylebox_override("focus",style(Color.TRANSPARENT,ACCENT,12,2))
-	b.add_theme_stylebox_override("disabled",style(Color("e2ebe8cc"),Color("d8e3e080"),12))
-	for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]: b.add_theme_color_override(state,Color.WHITE if primary else TEXT)
-	b.add_theme_color_override("font_disabled_color",Color("8b9e9e"))
+	b.add_theme_stylebox_override("disabled",style(Color("12302a80"),Color("b7c7af16"),12))
+	for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]: b.add_theme_color_override(state,Color("342e21") if primary else TEXT)
+	b.add_theme_color_override("font_disabled_color",Color("71877d"))
 	b.pressed.connect(callback); parent.add_child(b)
 	return b
 
@@ -59,3 +67,47 @@ static func texture(parent: Node, rect: Rect2, image: Texture2D) -> TextureRect:
 	node.texture = image; node.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; node.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE; parent.add_child(node)
 	return node
+
+static func portrait(parent: Node, position: Vector2, diameter: float, seat: int) -> TextureRect:
+	var ring=panel(parent,Rect2(position-Vector2.ONE*2,Vector2.ONE*(diameter+4)),Color("294a40"),Color("dbc59688"),int(diameter/2+2))
+	ring.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var names=["self","tingsong","guanlan","zhiqiu"]
+	return texture(parent,Rect2(position,Vector2.ONE*diameter),load("res://assets/ui/avatars/"+names[seat]+".png"))
+
+static func table_style(active: bool = false, radius: int = 14) -> StyleBoxFlat:
+	var box = style(Color("25483fec") if active else TABLE_SURFACE,TABLE_GOLD if active else TABLE_LINE,radius)
+	box.set_border_width_all(2 if active else 1)
+	box.set_content_margin_all(0)
+	box.shadow_color=Color("030e1038");box.shadow_size=9;box.shadow_offset=Vector2(0,4)
+	return box
+
+static func table_panel(parent: Node, rect: Rect2, active: bool = false, radius: int = 14) -> Panel:
+	var p=Panel.new();p.position=rect.position;p.size=rect.size
+	p.add_theme_stylebox_override("panel",table_style(active,radius));parent.add_child(p)
+	return p
+
+static func table_button(parent: Node, rect: Rect2, text: String, callback: Callable, primary: bool = false, icon_name: String = "") -> Button:
+	var b=button(parent,rect,text,callback)
+	b.add_theme_font_size_override("font_size",20 if primary else 18)
+	var normal=style(Color("d9bb83") if primary else Color("123330dc"),Color("f0d6a3") if primary else TABLE_LINE,12)
+	normal.content_margin_left=12;normal.content_margin_right=12
+	normal.shadow_color=Color("051a1940");normal.shadow_size=7;normal.shadow_offset=Vector2(0,4)
+	b.add_theme_stylebox_override("normal",normal)
+	b.add_theme_stylebox_override("hover",style(Color("ebd2a2") if primary else Color("2e5149f2"),TABLE_GOLD,12))
+	b.add_theme_stylebox_override("pressed",style(Color("b99a65") if primary else Color("0c2825f2"),TABLE_GOLD,12))
+	b.add_theme_stylebox_override("focus",style(Color.TRANSPARENT,TABLE_GOLD,12,2))
+	b.add_theme_stylebox_override("disabled",style(Color("12302a80"),Color("b7c7af16"),12))
+	for state in ["normal","hover","pressed","focus","disabled"]:
+		var box=b.get_theme_stylebox(state)
+		box.content_margin_left=12;box.content_margin_right=12
+	for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
+		b.add_theme_color_override(state,Color("342e21") if primary else TABLE_TEXT)
+	b.add_theme_color_override("font_disabled_color",Color("71877d"))
+	if not icon_name.is_empty():
+		b.icon=load("res://assets/icons/"+icon_name+".svg")
+		b.add_theme_constant_override("icon_max_width",21)
+		b.add_theme_constant_override("h_separation",10)
+		b.add_theme_color_override("icon_normal_color",TABLE_MUTED)
+		b.add_theme_color_override("icon_hover_color",TABLE_TEXT)
+		b.add_theme_color_override("icon_disabled_color",Color("71877d"))
+	return b

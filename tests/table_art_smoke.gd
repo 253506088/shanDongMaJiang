@@ -2,12 +2,22 @@ extends "res://tests/ui_smoke.gd"
 
 func run() -> void:
 	create_timer(180).timeout.connect(func():printerr("ART UI watchdog");quit(1))
-	app=load("res://scenes/main.tscn").instantiate();root.add_child(app)
+	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=true;root.add_child(app)
 	app.session.storage_root="user://qa-art/";app.muted=true;app.session.set_process(false)
 	app._build_hud();app.table.quality("--low-quality" in OS.get_cmdline_user_args())
 	var e=GameEngine.new();e.start({},93000)
 	app.session.engine=e;app.session.paused=false;app._changed(e.view(0))
-	await create_timer(2.1).timeout
+	await create_timer(1.05).timeout
+	for die in app.table.dice_nodes:
+		check(die.visible,"fresh opening rolls visible dice")
+		var bounds=die.global_transform*AABB(Vector3.ONE*-0.215,Vector3.ONE*0.43)
+		check(absf(bounds.position.y-TableLayout.SURFACE_Y)<0.02,"dice settle on the cloth")
+		check(not bounds.intersects(AABB(Vector3(-1.1,0,-1.1),Vector3(2.2,2,2.2))),"dice never obscure the central dial")
+		for key in app.table.pieces:
+			check(not bounds.intersects(app.table.tile_bounds(key)),"opening dice clear tiles: "+key)
+	await capture("art-dice")
+	await create_timer(1.05).timeout
+	check(app.table.dice_nodes.all(func(die):return not die.visible),"dice clear after the opening beat")
 	check(rad_to_deg(-app.table.camera.rotation.x)>52,"camera provides high tabletop view")
 	check(app.table.camera.projection==Camera3D.PROJECTION_PERSPECTIVE,"table uses perspective")
 	_verify_tile_geometry()
@@ -30,6 +40,9 @@ func run() -> void:
 	_verify_wall(e)
 	_verify_clearance()
 	await capture("art-midgame")
+	app.table.last_round=-1
+	app.table.update_view(e.view(0))
+	check(app.table.dice_time==0 and app.table.dice_nodes.all(func(die):return not die.visible),"resuming midgame never rolls over existing rivers")
 	if "--preview" in OS.get_cmdline_user_args(): quit();return
 	var tail=int(e.state.wall_slots.back());var tail_key="w%d"%tail
 	var point=app.table.camera.unproject_position(app.table.pieces[tail_key].global_position+Vector3(0,0.18,0))

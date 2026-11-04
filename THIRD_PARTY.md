@@ -32,13 +32,23 @@ SOFTWARE.
 
 Noto Sans SC / Noto Serif SC，来源 Google Fonts，SIL Open Font License 1.1。完整许可保存在 assets/fonts/OFL-NotoSansSC.txt 与 OFL-NotoSerifSC.txt。
 
+界面统一使用 Noto Sans SC 的 600（SemiBold）字重，标题和中央方位／牌数使用 700（Bold）字重；由 `tools/prepare_fonts.py` 从原始可变字体生成静态子集，不依赖玩家电脑的系统字体。Noto Serif SC 保留为已有素材的兼容字体。
+
 ## 引擎
 
 Godot Engine，MIT License。导出程序包含 Godot 的许可证信息；源码和完整许可见 https://github.com/godotengine/godot/blob/4.5.1-stable/LICENSE.txt 。
 
 ## 自有素材
 
-牌背波纹标记、桌布海岸曲线、大厅几何背景、图标和短合成音效由本项目代码创作；字体字形按上述字体许可使用。2026-11-03 的海青桌布与牌背由 `tools/make_table_texture.py` 确定性生成，不包含第三方桌布或人物插图。
+牌背波纹标记、程序织物、胡桃木与地面纹理、UI 渐变和面板、线形图标及短合成音效由本项目代码创作；字体字形按上述字体许可使用。`tools/make_table_texture.py` 可确定性生成这些程序纹理。2026-11-03 的程序织物和地面仍保留，2026-11-04 的实际庭院、人物和桌布来源如下。
+
+## 用户交付的生成美术（2026-11-04 接入）
+
+用户按 `docs/art-generation-prompts.md` 生成并交付庭院、人物和织物，原始归档为本地 `artifacts/art-delivery-2026-11-03/`。当前使用庭院主选 01、我／听松／观澜／知秋四张人物头像及深青绿织物；它们不是莲花麻将素材，不沿用其 MIT 或花牌的 CC BY-SA 许可声明。交付 README 未提供生成模型、版本或独立许可文本，本项目如实记录为用户提供的生成素材。
+
+运行资源位于 `assets/backgrounds/courtyard_day.jpg`、`assets/ui/avatars/` 和 `assets/textures/felt_delivered.png`。庭院保留原生 1376×768 像素；头像统一裁切为圆形透明 PNG；织物抑制 8px 横纵周期并低通过滤，加入低对比明暗和圆角。处理脚本为 `tools/prepare_delivered_art.py`，原始／命名交付／运行文件的来源对应、SHA-256 与处理说明见 `assets/art_manifest.json`；织物没有对应 raw 导出，清单保留该事实。
+
+Git 保存运行素材与来源清单。原始导出、备选和放大图不入 Git，但不能仅凭脚本重新生成，需保留独立本机备份。
 
 ## 现有牌面与逐牌语音（2026-11-02）
 

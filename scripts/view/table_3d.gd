@@ -16,7 +16,6 @@ var shadow_mesh: PlaneMesh
 var shadow_material: StandardMaterial3D
 var count_label: Label3D
 var round_label: Label3D
-var head_label: Label3D
 var head_marker: MeshInstance3D
 var last_marker: MeshInstance3D
 var last_revision=-1
@@ -26,6 +25,7 @@ var dice_faces: Array=[]
 var dice_time=0.0
 var seat_lights: Array=[]
 var seat_labels: Array=[]
+var courtyard_layer: CanvasLayer
 
 func material(color: Color, metallic: float=0.0) -> StandardMaterial3D:
 	var mat=StandardMaterial3D.new();mat.albedo_color=color
@@ -34,6 +34,11 @@ func material(color: Color, metallic: float=0.0) -> StandardMaterial3D:
 
 func rounded_box(width: float,height: float,depth: float,radius: float) -> ArrayMesh:
 	return TileGeometry.rounded_box(width,height,depth,radius)
+
+func round_plate(radius: float,height: float) -> CylinderMesh:
+	var plate=CylinderMesh.new();plate.top_radius=radius;plate.bottom_radius=radius
+	plate.height=height;plate.radial_segments=96
+	return plate
 
 func mesh_node(mesh: Mesh,mat: Material,pos: Vector3,parent: Node=null) -> MeshInstance3D:
 	var node=MeshInstance3D.new();node.mesh=mesh;node.material_override=mat;node.position=pos
@@ -47,39 +52,70 @@ func _ready() -> void:
 	_build_dice()
 
 func _build_environment() -> void:
+	_build_courtyard()
 	var env=WorldEnvironment.new();env.environment=Environment.new()
-	env.environment.background_mode=Environment.BG_COLOR
-	env.environment.background_color=Color("edf3f2")
+	# Only the negative canvas layer is the 3D background. The playing HUD
+	# remains on layer 1, so it is never drawn behind the physical table.
+	env.environment.background_mode=Environment.BG_CANVAS
+	env.environment.background_canvas_max_layer=-1
+	env.environment.background_color=Color("182a26")
 	env.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
-	env.environment.ambient_light_color=Color("e9f2f4")
-	env.environment.ambient_light_energy=0.45
+	env.environment.ambient_light_color=Color("e6e7d8")
+	env.environment.ambient_light_energy=0.44
 	env.environment.tonemap_mode=Environment.TONE_MAPPER_LINEAR
 	add_child(env)
 	var key=DirectionalLight3D.new();key.rotation_degrees=Vector3(-65,-32,0)
-	key.light_color=Color("fffaf1");key.light_energy=0.36;key.shadow_enabled=true
+	key.light_color=Color("fff4df");key.light_energy=0.39;key.shadow_enabled=true
 	key.directional_shadow_max_distance=40;key.shadow_bias=0.10;key.shadow_normal_bias=0.4;add_child(key)
 	var fill=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-42,132,0)
-	fill.light_color=Color("dcebf0");fill.light_energy=0.10;add_child(fill)
+	fill.light_color=Color("c8e3d9");fill.light_energy=0.12;add_child(fill)
 	# A long lens and a 67-degree elevation keep the far tiles legible and the
 	# table comfortably open, without the distorted near edge of a low camera.
 	camera=Camera3D.new();camera.projection=Camera3D.PROJECTION_PERSPECTIVE;camera.fov=36
 	camera.position=Vector3(0,23.5,10.6);add_child(camera);camera.look_at(Vector3(0,0,0.65));camera.current=true
 
+func _build_courtyard() -> void:
+	# A screen-aligned painting keeps the supplied perspective intact. A floor
+	# plane would stretch it under the high table camera and hide the courtyard.
+	courtyard_layer=CanvasLayer.new();courtyard_layer.layer=-1;add_child(courtyard_layer)
+	var backdrop=TextureRect.new();backdrop.name="Courtyard"
+	backdrop.texture=load("res://assets/backgrounds/courtyard_day.jpg")
+	backdrop.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.mouse_filter=Control.MOUSE_FILTER_IGNORE;courtyard_layer.add_child(backdrop)
+	# Bring the landscape into the same quiet, warm ambience as the table.
+	# This tint leaves the painted leaves and joinery readable at the margins.
+	var shade=Gradient.new()
+	shade.set_color(0,Color("0d252366"));shade.set_color(1,Color("091e1db3"))
+	shade.add_point(0.4,Color("0d25233d"))
+	var gradient=GradientTexture2D.new();gradient.gradient=shade
+	gradient.fill_from=Vector2(0.5,0);gradient.fill_to=Vector2(0.5,1)
+	var veil=TextureRect.new();veil.texture=gradient
+	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	veil.mouse_filter=Control.MOUSE_FILTER_IGNORE;courtyard_layer.add_child(veil)
+	# CanvasLayer visibility does not inherit Node3D visibility automatically.
+	visibility_changed.connect(func(): courtyard_layer.visible=is_visible_in_tree())
+	courtyard_layer.visible=is_visible_in_tree()
+
 func _build_table() -> void:
-	# Porcelain surround, brushed silver reveal, and a soft inset textile.
-	# The dark teal seam gives the rail depth without a heavy black/gold slab.
-	var floor_shadow=material(Color("43616f60"))
+	# The contact shadow anchors the real table over the painted stone floor.
+	var floor_shadow=material(Color("081912e0"))
 	floor_shadow.albedo_texture=load("res://assets/textures/contact_shadow.png")
 	floor_shadow.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
 	floor_shadow.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-	var floor_plane=PlaneMesh.new();floor_plane.size=Vector2(20.8,19.6)
-	mesh_node(floor_plane,floor_shadow,Vector3(0.12,-0.63,0.18))
-	mesh_node(rounded_box(17.08,0.35,15.74,0.52),material(Color("32616b")),Vector3(0,-0.22,0))
-	mesh_node(rounded_box(16.96,0.11,15.62,0.49),material(Color("bed6d6"),0.38),Vector3(0,-0.075,0))
-	var lacquer=material(Color("e0e9e5"),0.05);lacquer.roughness=0.28
-	mesh_node(rounded_box(16.82,0.25,15.48,0.45),lacquer,Vector3(0,-0.015,0))
-	mesh_node(rounded_box(16.18,0.055,14.84,0.30),material(Color("346e77"),0.20),Vector3(0,0.085,0))
-	var felt=material(Color.WHITE);felt.albedo_texture=mip_texture("res://assets/textures/felt.png")
+	var floor_plane=PlaneMesh.new();floor_plane.size=Vector2(22.0,20.8)
+	mesh_node(floor_plane,floor_shadow,Vector3(0.20,-0.70,0.38))
+	mesh_node(rounded_box(17.08,0.39,15.74,0.52),material(Color("30291f")),Vector3(0,-0.24,0))
+	var brass=material(Color("b6a075"),0.48);brass.roughness=0.43
+	mesh_node(rounded_box(16.98,0.07,15.64,0.49),brass,Vector3(0,-0.075,0))
+	var walnut=material(Color.WHITE,0.02);walnut.roughness=0.48;walnut.metallic_specular=0.28
+	walnut.albedo_texture=mip_texture("res://assets/textures/walnut.png")
+	walnut.uv1_triplanar=true;walnut.uv1_scale=Vector3(0.11,0.11,0.11)
+	mesh_node(rounded_box(16.88,0.25,15.54,0.46),walnut,Vector3(0,-0.015,0))
+	mesh_node(rounded_box(16.23,0.047,14.89,0.30),brass,Vector3(0,0.086,0))
+	mesh_node(rounded_box(16.14,0.036,14.80,0.27),material(Color("142f28")),Vector3(0,0.092,0))
+	var felt=material(Color.WHITE);felt.albedo_texture=mip_texture("res://assets/textures/felt_delivered.png")
 	felt.roughness=1;felt.metallic_specular=0.08
 	# A calibrated cloth pass plus per-tile contact shadows stays consistent on
 	# GLES/desktop and avoids shadow-map acne from the closely inset rail layers.
@@ -89,36 +125,37 @@ func _build_table() -> void:
 	var surface=PlaneMesh.new();surface.size=Vector2(16.03,14.69)
 	var cloth=mesh_node(surface,felt,Vector3(0,TableLayout.SURFACE_Y,0))
 	cloth.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	# Flush teal rail inlays repeat the short marks on the centre instrument.
+	# Small brass joinery accents sit within the timber, away from all tiles.
 	for x in [-8.19,8.19]:
 		for z in [-5.8,0,5.8]:
-			mesh_node(rounded_box(0.035,0.016,0.24,0.012),material(Color("659da5"),0.25),Vector3(x,0.112,z))
+			mesh_node(rounded_box(0.025,0.010,0.18,0.010),brass,Vector3(x,0.112,z))
 	for z in [-7.53,7.53]:
 		for x in [-6.5,0,6.5]:
-			mesh_node(rounded_box(0.24,0.016,0.035,0.012),material(Color("659da5"),0.25),Vector3(x,0.112,z))
-	mesh_node(rounded_box(2.02,0.10,1.98,0.20),material(Color("c4dcdb"),0.3),Vector3(0,0.17,0))
-	mesh_node(rounded_box(1.92,0.06,1.88,0.16),material(Color("4b929a"),0.1),Vector3(0,0.23,0))
-	var display_mat=material(Color("163c48"));display_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-	mesh_node(rounded_box(1.79,0.018,1.75,0.12),display_mat,Vector3(0,0.269,0))
-	count_label=label_3d("88",110,Vector3(0,0.289,0.02),Color("f3fcfa"))
-	round_label=label_3d("余 牌",24,Vector3(0,0.290,-0.43),Color("9fc9cf"))
+			mesh_node(rounded_box(0.18,0.010,0.025,0.010),brass,Vector3(x,0.112,z))
+	# Keep the instrument inside the first discard rows, with enough room for
+	# upright, readable winds instead of tiny text rotated away from the player.
+	mesh_node(round_plate(1.075,0.10),material(Color("213d31")),Vector3(0,0.17,0))
+	mesh_node(round_plate(1.045,0.060),brass,Vector3(0,0.225,0))
+	mesh_node(round_plate(1.010,0.027),material(Color("4d6249"),0.12),Vector3(0,0.257,0))
+	var display_mat=material(Color("123a32"));display_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	mesh_node(round_plate(0.975,0.018),display_mat,Vector3(0,0.272,0))
+	count_label=label_3d("88",130,Vector3(0,0.289,0.035),Color("fff5d9"))
+	round_label=label_3d("余牌",30,Vector3(0,0.290,-0.43),Color("d8dfca"))
 	for seat in range(4):
-		var pos=Vector3(0,0.291,0.63).rotated(Vector3.UP,seat*PI/2)
-		var lab=label_3d(["东","南","西","北"][seat],25,pos,Color("7ea0aa"));lab.rotation.y=seat*PI/2;seat_labels.append(lab)
-		var led_mat=material(Color("47717a"));led_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		var led=mesh_node(rounded_box(0.56,0.012,0.035,0.016),led_mat,Vector3(0,0.287,0.80).rotated(Vector3.UP,seat*PI/2))
+		var pos=Vector3(0,0.291,0.79).rotated(Vector3.UP,seat*PI/2)
+		var lab=label_3d(["东","南","西","北"][seat],60,pos,Color("d5dfcd"));seat_labels.append(lab)
+		var led_mat=material(Color("425f48"));led_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+		var led=mesh_node(rounded_box(0.36,0.012,0.032,0.012),led_mat,Vector3(0,0.288,1.005).rotated(Vector3.UP,seat*PI/2))
 		led.rotation.y=seat*PI/2;seat_lights.append(led)
-	var marker_mat=material(Color("ecb092"));marker_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	var marker_mat=material(Color("c9b174"));marker_mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
 	var marker=PlaneMesh.new();marker.size=Vector2(0.61,0.83)
 	head_marker=mesh_node(marker,marker_mat,Vector3.ZERO);head_marker.visible=false
-	head_label=label_3d("杠头",25,Vector3.ZERO,Color("fff7eb"));head_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;head_label.rotation=Vector3.ZERO
-	head_label.outline_size=4;head_label.outline_modulate=Color("815b49");head_label.visible=false
 	var last_plane=PlaneMesh.new();last_plane.size=Vector2(0.54,0.75)
 	last_marker=mesh_node(last_plane,marker_mat,Vector3.ZERO);last_marker.visible=false
 
 func _build_tile_assets() -> void:
 	body_material=material(Color("f4f1e8"));body_material.roughness=0.30;body_material.metallic_specular=0.46
-	back_material=material(Color("248d9a"));back_material.roughness=0.28;back_material.metallic_specular=0.38
+	back_material=material(Color("246c6c"));back_material.roughness=0.30;back_material.metallic_specular=0.36
 	cap_mesh=rounded_box(0.515,0.23,0.735,0.062)
 	base_mesh=rounded_box(0.52,0.11,0.74,0.065)
 	face_mesh=PlaneMesh.new();face_mesh.size=Vector2(0.456,0.668)
@@ -171,7 +208,7 @@ func mip_texture(path: String,crop_card: bool=false) -> Texture2D:
 	return ImageTexture.create_from_image(image)
 
 func label_3d(text: String,size: int,pos: Vector3,color: Color) -> Label3D:
-	var label=Label3D.new();label.font=UI.font();label.text=text;label.font_size=size;label.pixel_size=0.006
+	var label=Label3D.new();label.font=UI.font(true);label.text=text;label.font_size=size;label.pixel_size=0.006
 	label.modulate=color;label.outline_size=0;label.no_depth_test=false
 	label.rotation.x=-PI/2;label.position=pos;add_child(label);return label
 
@@ -212,16 +249,20 @@ func update_view(view: Dictionary) -> void:
 	count_label.text=str(view.wall_count)
 	for seat in range(4):
 		var active=seat==view.decision_seat and view.phase!="settled"
-		seat_lights[seat].material_override.albedo_color=Color("8ce2d5") if active else Color("3c6570")
-		seat_labels[seat].modulate=Color("d1fff4") if active else Color("7ea0aa")
+		seat_lights[seat].material_override.albedo_color=Color("e6c981") if active else Color("425f48")
+		seat_labels[seat].modulate=Color("ffdb8f") if active else Color("d5dfcd")
 	if last_round!=view.round:
-		last_round=view.round;dice_time=1.8
+		last_round=view.round;dice_time=1.8 if view.revision==0 else 0.0
 		for i in range(2):
-			var die=dice_nodes[i];die.get_child(1).material_override=dice_faces[int(view.dice[i])-1]
-			die.position=Vector3(-0.34 if i==0 else 0.34,1.6,0)
-			die.rotation=Vector3(PI*3,PI*5,PI*2);die.visible=true
+			var die=dice_nodes[i];die.visible=dice_time>0
+			# Resuming a played round must not roll over existing discards. At a
+			# fresh opening, roll in the empty lower-left field, clear of the dial.
+			if not die.visible:continue
+			die.get_child(1).material_override=dice_faces[int(view.dice[i])-1]
+			die.position=Vector3(-3.6 if i==0 else -2.9,1.4,2.4)
+			die.rotation=Vector3(PI*3,PI*5,PI*2)
 			var tween=create_tween().set_parallel()
-			tween.tween_property(die,"position:y",0.50,0.9).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+			tween.tween_property(die,"position:y",TableLayout.SURFACE_Y+0.225,0.9).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 			tween.tween_property(die,"rotation",Vector3(0,0.15,0),0.9)
 	var slots: Array=view.get("wall_slots",[])
 	if slots.size()!=view.wall_count: slots=range(144-view.wall_count,144) # synthetic view fixtures
@@ -229,11 +270,10 @@ func update_view(view: Dictionary) -> void:
 	for index in slots:
 		var is_head=index==tail and view.gang_head>=0
 		_piece("w%d"%index,view.gang_head if is_head else -1,TableLayout.wall(index,slots),-(index/36)*PI/2,false,"face" if is_head else "back")
-	head_marker.visible=tail>=0 and view.gang_head>=0;head_label.visible=head_marker.visible
+	head_marker.visible=tail>=0 and view.gang_head>=0
 	if head_marker.visible:
 		var pos=TableLayout.wall(tail,slots)
 		head_marker.position=Vector3(pos.x,TableLayout.SURFACE_Y+0.006,pos.z);head_marker.rotation.y=-(tail/36)*PI/2
-		head_label.position=pos+Vector3(0,0.38,0.48).rotated(Vector3.UP,-(tail/36)*PI/2)
 	for p in view.players:
 		var angle=p.seat*PI/2
 		for i in range(p.discards.size()):

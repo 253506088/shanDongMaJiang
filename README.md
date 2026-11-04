@@ -1,6 +1,6 @@
 # 山东麻将 · 青玉台
 
-Godot 4.5.1 原生 GDScript 项目。当前为第一阶段单机版本：现代海青牌桌、3D 麻将、三位电脑牌友、山东玩法、存档续玩、结算和牌谱导出。
+Godot 4.5.1 原生 GDScript 项目。当前为第一阶段单机版本：庭院茶室、深青绿织物与暖木牌桌、3D 麻将、三位电脑牌友、山东玩法、存档续玩、结算和牌谱导出。
 
 项目定位、用户需求、三阶段安排和本次讨论的交接记录见 [my_doc/README.md](my_doc/README.md)。后续在新项目对话中继续开发时，可从这里了解已确认的共识与待定事项。
 
@@ -14,9 +14,13 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本�
 
 操作沿用莲花麻将：电脑悬停看牌，单击出牌；触屏单击选牌，快速双击或向上划出牌。报听／明搂时先点声明按钮，再打出带“听”标记的牌。`H` 查看牌效建议，`Esc` 暂停，“交给 AI”开启本家托管。弹窗期间牌局暂停。
 
+报听／明搂后，非胡的新摸牌会按动作与语音节拍自动打出，胡牌和合法暗杠／补杠仍等真人选择。未听时的“听牌一览”可点击窗口外关闭；已听时改为常驻听口、未见余张和自摸预估番数，可收起、展开及滚动，显示期间继续行牌。
+
 ## 当前功能
 
-- 浅雾白界面、海青织物与陶瓷桌框；高位透视、圆角双色牌体、立起的三家暗手、随真实牌墙移动的公开杠头。
+- 用户交付的庭院背景、四位圆形人物头像和深青绿细织物；暖木桌边、深色大厅／信息面板／弹窗／结算、金色重点操作。
+- 暖白开源牌面、圆角双色牌体、立起的三家暗手、随真实牌墙移动的公开杠头；手牌直接展示于桌面，保留目标牌图与牌名，去掉重复的“杠头”标签和牌桌左上品牌。
+- Noto Sans SC 600／700 随包字体，中央方位与余牌计数放大，统一厚实的文字层次。
 - 二五八将／乱将、允许／不允许吃牌、经典／牌效 AI。
 - 东风 4 局、半庄 8 局、自由续局，每局轮庄，积分累计。
 - 起手补花、公开杠头、吃碰明杠暗杠补杠、抢杠、报听、明搂、过圈、截胡、天地胡、海底、八花与现有番型结算。
@@ -31,9 +35,13 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本�
 
 ```powershell
 powershell -File tools/test.ps1
+# 批量验收 1440×810、960×540 的五组真实渲染；分别保存日志、截图和结果。
+powershell -File tools/test_ui.ps1
 # 真实 Godot 渲染窗口的 UI 输入事件测试：
 & tools/run.ps1 -Godot '' --script res://tests/ui_smoke.gd
 & tools/run.ps1 -Godot '' --script res://tests/ux_smoke.gd
+& tools/run.ps1 -Godot '' --script res://tests/touch_smoke.gd
+& tools/run.ps1 -Godot '' --script res://tests/waits_smoke.gd
 # 立姿、墙尾、旧局亮牌与花牌遮挡的真实渲染回归：
 & tools/run.ps1 -Godot '' --script res://tests/table_art_smoke.gd
 ```
@@ -71,6 +79,8 @@ powershell -File tools/build.ps1 -Target macos
 
 ## 文件边界
 
-提交源码、原创素材、字体许可、规则参考数据、Godot `.uid`／导入配置、导出预设和构建工具。`.gitignore` 排除 `.godot` 缓存、`build` 安装包、`tmp` 下载与测试截图、日志、本机 IDE 配置、证书和签名密码。玩家存档位于 Godot `user://`，不在源码仓库；“关于”可打开存档文件夹。
+提交源码、`assets/` 内实际运行素材及来源清单、字体许可、规则参考数据、Godot `.uid`／导入配置、导出预设和构建工具。`.gitignore` 排除 `.godot` 缓存、`build` 安装包、`tmp` 下载与测试产物、`artifacts` 美术交付原始归档／备选／放大图／验收截图、日志、本机 IDE 配置、证书和签名密码。玩家存档位于 Godot `user://`，不在源码仓库；“关于”可打开存档文件夹。
+
+美术整理脚本为 `tools/prepare_delivered_art.py`，原始文件对应关系、SHA-256 和处理步骤保存在 `assets/art_manifest.json`。庭院使用原生 1376×768 主选图，不把插值版当作原生 2K。运行和打包只需已提交的 `assets/`；重新裁切／处理需要本地 `artifacts/art-delivery-2026-11-03/` 归档。该归档中的生成原图不能仅凭脚本再生成，须单独保留本机备份，不能按普通构建缓存清理。素材细节见 [docs/asset-guide.md](docs/asset-guide.md)。
 
 代码和素材来源见 [THIRD_PARTY.md](THIRD_PARTY.md)。本仓库没有自动上传遥测，也不需要配置 API Key。

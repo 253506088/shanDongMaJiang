@@ -1,11 +1,22 @@
 # Godot's regenerable import/editor/shader cache; keep source .uid files.
 .godot/
-# Reproducible local outputs: Windows/Android/macOS packages, visual QA PNGs,
-# texture previews, performance captures, downloaded Godot and export templates.
-# Keep their generators and regression cases in tools/ and tests/; record the
-# reviewed results in docs/verification.md, not generated binaries in Git.
+# Rebuildable Windows/Android/macOS packages; keep export presets and tools.
 build/
+# Local QA screenshots, previews and performance captures, plus user-delivered
+# art archives (including raw originals, alternate candidates and upscaled copies).
+# IMPORTANT: art-delivery-*/raw and the supplied source images are NOT rebuildable
+# from the scripts. Keep a separate local backup; do not clean them as caches.
+# Commit selected runtime images under assets/, preparation tools, source hashes
+# in assets/art_manifest.json and reviewed results in docs/verification.md instead.
 artifacts/
+# Superseded procedural cloth/floor previews are reproducible with
+# tools/make_table_texture.py. Keep local copies for design comparison;
+# the delivered cloth and courtyard are the runtime assets tracked in Git.
+/assets/textures/felt.png
+/assets/textures/felt.png.import
+/assets/textures/room_floor.png
+/assets/textures/room_floor.png.import
+# Downloaded Godot/export templates, scratch files and repeatable test outputs.
 tmp/
 *.log
 # Exported release archives and device install packages are delivery artifacts.

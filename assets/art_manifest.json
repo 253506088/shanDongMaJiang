@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "delivery": "art-delivery-2026-11-03",
+  "origin": "User-supplied AI-generated art, based on docs/art-generation-prompts.md.",
+  "generation_model": "Not supplied in the delivery README.",
+  "source_archive": "artifacts/art-delivery-2026-11-03 (local, excluded from Git)",
+  "preparation_tool": "tools/prepare_delivered_art.py",
+  "resolution_note": "1376x768 is the background's native resolution. The delivered 2560x1440 interpolation is not used.",
+  "assets": [
+    {
+      "file": "assets/backgrounds/courtyard_day.jpg",
+      "sha256": "b174594181be3367fb250e640a97dece2a96c47239f5abc170934072d2bade96",
+      "bytes": 221529,
+      "pixel_dimensions": [
+        1376,
+        768
+      ],
+      "mode": "RGB",
+      "source": {
+        "file": "courtyard-day-01.png",
+        "sha256": "e7637d6f810b499e6dbc0f52fe1f8599c87ee74552e305bed7e7f36af9a2c795",
+        "pixel_dimensions": [
+          1376,
+          768
+        ],
+        "raw_file": "raw/chinese_courtyard_teahouse_bg_1793720221923.jpg",
+        "raw_sha256": "5da7994e3a59747b5cf3d94b3275141087d48fec2bb7455fe5efc4914da3e36e",
+        "raw_pixel_match": true
+      },
+      "processing": "Native-size JPEG, quality 92, 4:4:4 chroma; no upscale or color grading."
+    },
+    {
+      "file": "assets/ui/avatars/self.png",
+      "sha256": "153f485b63a7b31b8c7974b76f169cff7301dadc9432991471d68d72fae90d92",
+      "bytes": 84925,
+      "pixel_dimensions": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "source": {
+        "file": "avatar-self.png",
+        "sha256": "5573dbcc9c3e4ed9baf2a4f5ee0eb44972be4d4ea8ba438914fbfec78b5cf5d2",
+        "pixel_dimensions": [
+          1024,
+          1024
+        ],
+        "raw_file": "raw/avatar_self_female_player_1793720360623.jpg",
+        "raw_sha256": "3bbe5ad31604818ec2935b182b71f1199098392f59d1ab3e42e4a746435c483d",
+        "raw_pixel_match": true
+      },
+      "processing": "1024 source crop [112,32,912,832], Lanczos to 256, supersampled circular alpha.",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/ui/avatars/tingsong.png",
+      "sha256": "ef5e4e58476fa25bb0cfe6e0af7e15a5167de99b87026f3351f2310cb380e86f",
+      "bytes": 84129,
+      "pixel_dimensions": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "source": {
+        "file": "avatar-tingsong.png",
+        "sha256": "618f6152ddd929020cf343b39c798337ea66b912fd9d5b8c218321eea1dc053e",
+        "pixel_dimensions": [
+          1024,
+          1024
+        ],
+        "raw_file": "raw/avatar_tingsong_v2_1793720392127.jpg",
+        "raw_sha256": "38e9e948f32a78965857852a73eafc7efc52f9c7c2be7791e3ceb958a691edb6",
+        "raw_pixel_match": true
+      },
+      "processing": "1024 source crop [112,32,912,832], Lanczos to 256, supersampled circular alpha.",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/ui/avatars/guanlan.png",
+      "sha256": "c4612089904ad93df1023554ceae3d889e149b59a8f6ac8b9cf27841ab2796e5",
+      "bytes": 77437,
+      "pixel_dimensions": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "source": {
+        "file": "avatar-guanlan.png",
+        "sha256": "9f542d3263c5abc822d54b64eb52bb7f65034c399910e9ca5797cf6b3ba0687a",
+        "pixel_dimensions": [
+          1024,
+          1024
+        ],
+        "raw_file": "raw/avatar_guanlan_1793720369139.jpg",
+        "raw_sha256": "f65dd3c80bfdc27fe46fca90a5aabfd83d81f1806856a6284471dc10a410eacc",
+        "raw_pixel_match": true
+      },
+      "processing": "1024 source crop [112,32,912,832], Lanczos to 256, supersampled circular alpha.",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/ui/avatars/zhiqiu.png",
+      "sha256": "8f444e4d904ca499a8f98203aec7a7630bfa89b4768893c3e4cc49116f0aac42",
+      "bytes": 86179,
+      "pixel_dimensions": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "source": {
+        "file": "avatar-zhiqiu.png",
+        "sha256": "0dac622125790043da37f9470925cb2e442e903cc3ea420c53af457173f42902",
+        "pixel_dimensions": [
+          1024,
+          1024
+        ],
+        "raw_file": "raw/avatar_zhiqiu_1793720383677.jpg",
+        "raw_sha256": "6e7dd4450abddb5884f83a470aa3bc11b85c96347496ed9b730a37eed2597721",
+        "raw_pixel_match": true
+      },
+      "processing": "1024 source crop [112,32,912,832], Lanczos to 256, supersampled circular alpha.",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "assets/textures/felt_delivered.png",
+      "sha256": "7fb7f34804a67d622d3230c8b547c9c71878fecb01c3d947a4d0632b15ee7854",
+      "bytes": 1205860,
+      "pixel_dimensions": [
+        2048,
+        2048
+      ],
+      "mode": "RGBA",
+      "source": {
+        "file": "felt-teal-seamless.png",
+        "sha256": "526df86d17d3e5c8159f95038010dc06c8d8d0280659ef4871a98602b56e5282",
+        "pixel_dimensions": [
+          2048,
+          2048
+        ],
+        "raw_file": null,
+        "note": "Supplied PNG texture; no matching raw generation export supplied."
+      },
+      "processing": "Native 2048 weave; suppress row/column periodic detail by 90%, periodic Gaussian sigma 0.65px, remaining detail contrast 50%; 0.91-1.08 broad light multiplier, subtle piping and rounded alpha; full table map.",
+      "alpha_extrema": [
+        0,
+        255
+      ]
+    }
+  ]
+}

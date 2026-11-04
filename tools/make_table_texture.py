@@ -1,6 +1,6 @@
-"""Reproducible sea-glass cloth, enamel tile backs and soft contact shadows.
+"""Reproducible jade cloth, walnut rails, quiet room floor and enamel backs.
 
-The coastal contour artwork and wave emblem are original, deterministic geometry.
+All fabric, wood grain, botanical silhouettes and back emblems are original.
 No fonts, third-party pictures or network access are required to rebuild them.
 """
 from pathlib import Path
@@ -26,72 +26,89 @@ def curve(points, samples=100):
 def make_cloth():
     size = 3072
     y, x = np.mgrid[0:size, 0:size]
-    # Broad illumination is baked very gently, keeping the playing field calm.
-    radius = ((x-size*.46)/(size*.71))**2 + ((y-size*.40)/(size*.78))**2
-    light = np.exp(-radius*1.5)
-    # The cloth is almost smooth at gameplay zoom. Low-pass random grain adds
-    # material depth at close range without any repeated weave or sharp pixels.
-    grain_image = Image.fromarray(RNG.integers(108,149,(768,768),dtype=np.uint8))
-    grain_image = grain_image.filter(ImageFilter.GaussianBlur(1.8))
+    # Wide, soft light is deliberately independent of shadow-map quality.
+    # A two-scale irregular weave reads as fabric rather than a screen grid.
+    radius = ((x-size*.38)/(size*.82))**2 + ((y-size*.32)/(size*.92))**2
+    light = np.exp(-radius*1.8)
+    grain_image = Image.fromarray(RNG.integers(85,170,(1024,1024),dtype=np.uint8))
+    grain_image = grain_image.filter(ImageFilter.GaussianBlur(.5))
     grain_image = grain_image.resize((size,size),Image.Resampling.BICUBIC)
-    grain = (np.asarray(grain_image,dtype=float)-128)*.09
-    rgb = np.stack([64+light*35+grain, 113+light*40+grain,
-                    125+light*33+grain], axis=2)
+    grain = (np.asarray(grain_image,dtype=np.float32)-128)*.11
+    warp = np.sin(x*1.14 + np.sin(y*.051)*.33)
+    weft = np.sin(y*1.31 + np.sin(x*.029)*.48)
+    weave = (warp + weft)*.50
+    cloud_image = Image.fromarray(RNG.integers(90,166,(64,64),dtype=np.uint8))
+    cloud_image = cloud_image.resize((size,size),Image.Resampling.BICUBIC).filter(ImageFilter.GaussianBlur(13))
+    cloud = (np.asarray(cloud_image,dtype=np.float32)-128)*.045
+    grain = grain + weave + cloud
+    rgb = np.stack([20+light*15+grain, 72+light*35+grain,
+                    67+light*30+grain], axis=2)
     cloth = Image.fromarray(np.clip(rgb, 0, 255).astype("uint8")).convert("RGBA")
     art = Image.new("RGBA", cloth.size)
     d = ImageDraw.Draw(art)
 
-    # Two tailored seams and a thin shaded inner edge feel like an inset cloth.
-    for inset, color, width in [(18, (220,244,244,100), 3),
-                                (25, (30,75,88,90), 2),
-                                (77, (218,241,239,75), 2)]:
+    # Fine piping leaves the playable area free of decorative registration lines.
+    for inset, color, width in [(20, (15,43,39,170), 5),
+                                (27, (174,186,151,50), 2),
+                                (68, (184,186,139,38), 2)]:
         d.rounded_rectangle((inset, inset, size-inset-1, size-inset-1),
                             radius=55, outline=color, width=width)
-    for t in range(120, size-120, 14):
-        for edge in [53, size-54]:
-            d.line([(t, edge), (t+5, edge)], fill=(219,240,237,55), width=2)
-            d.line([(edge, t), (edge, t+5)], fill=(219,240,237,55), width=2)
-
-    # Quiet topographic ribbons appear only in the outer corners. Their open
-    # silhouettes leave the hands, rivers and walls on unpatterned fabric.
+    # Tone-on-tone ginkgo leaves stay in the corners, like a jacquard weave.
+    # Their asymmetry avoids a concentric / default vector ornament look.
     corner = Image.new("RGBA", (650, 650))
     c = ImageDraw.Draw(corner)
-    for i in range(7):
-        shift = i*21
-        points = [(98+shift, 590), (55+shift, 302),
-                  (242, 68+shift), (592, 96+shift)]
-        c.line(curve(points, 130), fill=(220,241,237,68-i*6), width=2)
-    for i in range(3):
-        shift = i*23
-        c.line(curve([(144+shift,540), (172+shift,326),
-                      (353,178+shift), (551,156+shift)], 100),
-               fill=(25,76,91,35), width=2)
-    # The corner seam ends in a spare navigation diamond, not a floral seal.
-    c.polygon([(212,191),(222,201),(212,211),(202,201)],
-              fill=(218,239,234,125))
-    c.line([(212,221),(212,246)], fill=(219,239,234,68), width=2)
-    c.line([(232,201),(257,201)], fill=(219,239,234,68), width=2)
+    for cx, cy, radius, angle in [(190,195,135,-2.14),(380,132,82,-1.18),(122,375,95,-2.76)]:
+        fan = [(cx,cy)]
+        for a in np.linspace(angle-.8,angle+.8,60):
+            r = radius*(1+.045*math.sin(a*17))
+            fan.append((cx+r*math.cos(a),cy+r*math.sin(a)))
+        c.polygon(fan,fill=(163,181,139,6))
+        for a in np.linspace(angle-.72,angle+.72,9):
+            c.line([(cx,cy),(cx+radius*.93*math.cos(a),cy+radius*.93*math.sin(a))],
+                   fill=(195,196,149,8),width=2)
+        c.line(curve([(cx,cy),(cx+34,cy+40),(cx+51,cy+96),(cx+92,cy+131)]),fill=(162,181,137,8),width=3)
     for rotation, position in enumerate([(86,86), (size-736,86),
                                           (size-736,size-736),(86,size-736)]):
         art.alpha_composite(corner.rotate(-90*rotation), position)
-
-    # A restrained registration circle frames the centre display. Short marks
-    # imply the four seats without adding typography or distracting symbols.
-    middle = size/2
-    for r, alpha in [(299,42),(311,24),(372,19)]:
-        d.ellipse((middle-r,middle-r,middle+r,middle+r),
-                  outline=(220,241,237,alpha), width=2)
-    for angle in range(0,360,90):
-        a = math.radians(angle)
-        nx, ny = math.cos(a), math.sin(a)
-        d.line([(middle+327*nx,middle+327*ny),
-                (middle+349*nx,middle+349*ny)],
-               fill=(225,242,238,67), width=3)
     cloth = Image.alpha_composite(cloth, art)
     mask = Image.new("L", cloth.size)
     ImageDraw.Draw(mask).rounded_rectangle((0,0,size-1,size-1),radius=42,fill=255)
     cloth.putalpha(mask)
     cloth.save(ROOT / "felt.png")
+
+
+def make_wood():
+    """Long, mildly wavy walnut fibres, without a repeating stripe graphic."""
+    size = 2048
+    y, x = np.mgrid[0:size,0:size]
+    bend = np.sin(x/size*math.tau)*8 + np.sin(x/size*math.tau*3)*2
+    grain = np.sin((y+bend)*.11) + .45*np.sin((y+bend)*.41)
+    pore = RNG.normal(0,.65,(size,size))
+    tone = np.sin((y+bend)*.018)*4 + grain*2.4 + pore
+    # Neutral chocolate walnut keeps warm scene lighting from turning it orange.
+    rgb = np.stack([76+tone*1.25,59+tone,44+tone*.8],axis=2)
+    Image.fromarray(np.clip(rgb,0,255).astype("uint8")).save(ROOT / "walnut.png")
+
+
+def make_room_floor():
+    """A low-detail wooden interior, with broad diffused window light."""
+    size = 2048
+    y, x = np.mgrid[0:size,0:size]
+    light = np.exp(-(((x-size*.14)/(size*.60))**2+((y-size*.22)/(size*.71))**2)*2)
+    grain = np.sin(y*.43+np.sin(x*.005)*3)*.45 + RNG.normal(0,.3,(size,size))
+    boards = (np.mod(y,171)/171)*1.7
+    rgb = np.stack([24+light*24+grain+boards,36+light*22+grain+boards,32+light*16+grain+boards],axis=2)
+    floor = Image.fromarray(np.clip(rgb,0,255).astype("uint8")).convert("RGBA")
+    shadow = Image.new("RGBA",(size,size))
+    d = ImageDraw.Draw(shadow)
+    # Soft diagonal shadows imply window lattice without painted scene objects.
+    for offset in [-450,-40,370,780,1190,1600]:
+        d.line([(offset,-100),(offset+1200,size+100)],fill=(6,18,16,54),width=24)
+    for offset in [80,490,900,1310,1720]:
+        d.line([(-100,offset),(size+100,offset-680)],fill=(6,18,16,35),width=19)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(21))
+    floor = Image.alpha_composite(floor,shadow)
+    floor.convert("RGB").save(ROOT / "room_floor.png")
 
 
 def make_back():
@@ -161,6 +178,8 @@ def make_shadow():
 
 if __name__ == "__main__":
     make_cloth()
+    make_wood()
+    make_room_floor()
     make_back()
     make_shadow()
-    print("Built sea-glass cloth, silver-wave enamel backs and contact shadow.")
+    print("Built jade cloth, walnut, room floor, enamel backs and contact shadow.")

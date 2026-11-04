@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfmqlu6vtomju"
-path="res://.godot/imported/felt.png-576927f79831480c5ca2ef3c66245c8b.ctex"
+uid="uid://48kyioffgnhb"
+path="res://.godot/imported/help.svg-eff2b300f28a3f4a48f0dfc867812bd3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/felt.png"
-dest_files=["res://.godot/imported/felt.png-576927f79831480c5ca2ef3c66245c8b.ctex"]
+source_file="res://assets/icons/help.svg"
+dest_files=["res://.godot/imported/help.svg-eff2b300f28a3f4a48f0dfc867812bd3.ctex"]
 
 [params]
 
@@ -38,3 +38,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false
