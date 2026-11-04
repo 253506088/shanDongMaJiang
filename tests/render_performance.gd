@@ -43,12 +43,13 @@ func _measure(scene_name: String) -> Dictionary:
 		var start=Time.get_ticks_usec();RenderingServer.force_draw(false)
 		times.append((Time.get_ticks_usec()-start)/1000.0)
 	times.sort()
-	var draw_calls=root.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)
+	var scene=app.table.get_viewport()
+	var draw_calls=scene.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)
 	check(draw_calls>0 and draw_calls<200,"%s stays below 200 actual draw calls (got %d)"%[scene_name,draw_calls])
 	_verify_batches()
 	return {"scene":scene_name,"pieces":app.table.pieces.size(),
 		"visible_draw_calls":draw_calls,
-		"shadow_draw_calls":root.get_render_info(Viewport.RENDER_INFO_TYPE_SHADOW,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME),
+		"shadow_draw_calls":scene.get_render_info(Viewport.RENDER_INFO_TYPE_SHADOW,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME),
 		"samples":sample_count,"render_submit_ms_median":times[sample_count/2],"render_submit_ms_p95":times[mini(sample_count-1,int(ceil(sample_count*0.95))-1)]}
 
 func _verify_batches() -> void:

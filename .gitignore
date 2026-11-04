@@ -2,6 +2,11 @@
 .godot/
 # Rebuildable Windows/Android/macOS packages; keep export presets and tools.
 build/
+# Windows motion bridge DLL, objects, linker outputs: rebuilt by
+# tools/build_native.ps1 from native/windows sources; exported copies ship in
+# build/windows beside the EXE. They are generated binaries, not source assets.
+/native/windows/bin/
+/native/windows/build/
 # Local QA screenshots, previews and performance captures, plus user-delivered
 # art archives (including raw originals, alternate candidates and upscaled copies).
 # IMPORTANT: art-delivery-*/raw and the supplied source images are NOT rebuildable

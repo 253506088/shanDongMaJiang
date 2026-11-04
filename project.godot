@@ -3,10 +3,12 @@ config_version=5
 
 [application]
 config/name="山东麻将 · 青玉台"
-config/version="0.1.0"
+config/version="0.1.1"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://assets/icon.svg"
+; Start gently before Windows can elevate the render/main thread priority.
+run/low_processor_mode.windows=true
 
 [display]
 window/size/viewport_width=1600

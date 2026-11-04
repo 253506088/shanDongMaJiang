@@ -38,6 +38,8 @@ Noto Sans SC / Noto Serif SC，来源 Google Fonts，SIL Open Font License 1.1�
 
 Godot Engine，MIT License。导出程序包含 Godot 的许可证信息；源码和完整许可见 https://github.com/godotengine/godot/blob/4.5.1-stable/LICENSE.txt 。
 
+Windows 窗口移动模块使用 Godot 4.5.1 官方 `gdextension_interface.h`（MIT），原始接口与来源说明在 `native/windows/vendor/`。完整 Godot MIT 许可同时随包保存在 `assets/licenses/godot-MIT.txt`。窗口模块自身源码为本项目实现，未编入 godot-cpp 或外部运行库。
+
 ## 自有素材
 
 牌背波纹标记、程序织物、胡桃木与地面纹理、UI 渐变和面板、线形图标及短合成音效由本项目代码创作；字体字形按上述字体许可使用。`tools/make_table_texture.py` 可确定性生成这些程序纹理。2026-11-03 的程序织物和地面仍保留，2026-11-04 的实际庭院、人物和桌布来源如下。

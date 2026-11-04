@@ -12,7 +12,15 @@
 
 Godot 4.5.1 Windows 在原生拖动／调整尺寸的消息循环中，通过 `WM_TIMER` 同步执行 `Main::iteration()`。绘制、VSync 等待和 `Engine.max_fps` 睡眠因此会占用窗口消息线程。参见该版本 [Windows 源码](https://github.com/godotengine/godot/blob/4.5.1-stable/platform/windows/display_server_windows.cpp#L5872)。
 
-`scripts/ui/desktop_window.gd` 同时观察位置与尺寸变化。在 Windows 窗口调整期间临时关闭 VSync 等待，并将帧率上限暂设 120，连续 180ms 没有变化后恢复。始终保留上限，避免短暂移动也变成无约束渲染。尺寸改变时临时使用固定 1600×900 的 viewport 拉伸，避免每个尺寸都重建 MSAA 渲染目标和中文字体缓存；稳定后恢复原生分辨率的 `canvas_items`，保证静止时文字和牌面清晰。仅移动窗口时保持原生画布，不切换渲染尺寸。平时省电画质采用 30 FPS，大厅和精致画质采用 60 FPS。
+上一版在 `_process` 发现变化后临时切 `VIEWPORT`，用户实测仍卡顿。进一步检查源码发现，原生 `WM_WINDOWPOSCHANGED` 会同步调用 `Window::_update_viewport_size`，当场重新分配 OpenGL 颜色／深度及场景缓冲，发生在 `_process` 之前；自动字体采样也随窗口比例改变，旧采样级别的字形缓存会被释放。仅降低绘制调用或切换限帧不能解决这一条路径。
+
+`scripts/ui/scene_surface.gd` 将整张牌桌、背景和 UI 放进独立 `SubViewport`，保留原有 1600×900 逻辑坐标；尺寸变化后等待 **400ms 稳定再更新场景的实际渲染尺寸**。它减少场景／MSAA 缓冲重建，但用户实测这一版仍卡顿：外层窗口仍同步重配普通缓冲，原生定时器仍执行完整游戏帧。不能把场景目标仅更新一次等同于实际拖动已经流畅。
+
+子视口显式使用独立 World3D，避免牌桌的 BG_CANVAS 环境让外层窗口再次创建场景缓冲；外层禁用 3D 和多重采样。外层普通颜色／深度缓冲仍随窗口改变，这是剩余的系统／合成成本，不宣称零分配。两个视口固定字体采样 2.0，保留厚实字体。容器通过 Godot 内置输入变换转发到原逻辑坐标，选牌、触摸和桌面拾取不手写二次补偿。
+
+当前 0.1.1 新增 `native/windows/motion_gate.cpp`，只对本进程主窗口的原生移动／缩放手势生效。进入手势时保留 Godot 的输入释放与窗口状态，再取消其重绘定时器；手势期间不把尺寸变化和绘制请求送进游戏主循环，保留上一帧，结束后同步一次实际窗口尺寸并刷新。期间游戏帧暂停，新增边缘区域的显示取决于 Windows／显卡驱动，未承诺实时重绘内容。编辑器、headless 和未经核对的引擎版本跳过原生接管。
+
+`scripts/ui/desktop_window.gd` 中旧的 120 FPS／VSync 临时切换已移除，避免松手后再次切换显示状态。平时省电画质为 30 FPS，大厅和精致画质为 60 FPS；静止场景按需绘制。项目从启动时启用 Windows 低处理器模式，避免引擎主动提高进程／主线程优先级。模块来源、构建和保护范围见 [原生窗口模块](../native/windows/README.md)。
 
 没有打开该 Godot 版本仍标为实验性且存在缩放崩溃风险的独立渲染线程，也没有全局关闭 VSync 或永久降低画质。
 
@@ -31,4 +39,6 @@ Windows、Godot 4.5.1 Compatibility、Intel Arc，1440×810 精致画质，相�
 
 原始测量、同场景截图保存在本机 `artifacts/window-performance-baseline/` 和 `artifacts/window-performance-batched/`，按 `.gitignore` 排除。运行 `tests/render_performance.gd` 可重测当前版本。实际窗口交互、截图复核和本轮发布包结果见 [验收记录](verification.md)。
 
-上表是首次实现时的历史测量。用户反馈密集测试影响其他项目后，已停止后续可见测试；性能回归改为默认 30 FPS／6 次采样，显式 `--benchmark` 也只采样 30 次且保持 60 FPS 上限，不再提供无限帧采样。全屏往返测试从默认批次移出，必须单独指定 `window_smoke` 和 `-AllowDesktopChanges`。限帧修订后的版本没有再次进行可见窗口验收，不把历史耗时冒充最终版本重测结果。
+上表是首次合批实现时的历史测量，不代表原生拖动延迟。性能回归默认 30 FPS／6 次采样，显式 `--benchmark` 也只有 30 次采样及 60 FPS 上限，不提供无限帧采样。全屏往返测试从默认批次移出，必须单独指定 `window_smoke` 和 `-AllowDesktopChanges`。
+
+最终 Windows 包曾启动并确认原生模块已装载；诊断记录收到一次原生手势，将 26 次尺寸消息延后为一次同步。但桌面自动操作被用户以 Esc 终止，**未完成受控拖动、移动和恢复验收，不宣称卡顿已经消除**。现已明确停止未经授权的桌面控制及可见测试；后续默认仅代码与无界面检查。本次只提交本地 Git，不推送远端。

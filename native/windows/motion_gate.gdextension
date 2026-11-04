@@ -1,0 +1,7 @@
+[configuration]
+entry_symbol = "motion_gate_init"
+compatibility_minimum = "4.5"
+reloadable = false
+
+[libraries]
+windows.x86_64 = "res://native/windows/bin/motion_gate.windows.x86_64.dll"

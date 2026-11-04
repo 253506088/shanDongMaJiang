@@ -17,6 +17,7 @@ var config = {"jiang": "258", "chi": true, "ai": "efficiency", "rounds": 4}
 var muted = false
 var low_quality = false
 var desktop_window: DesktopWindow
+var scene_surface: SceneSurface
 var display_button: Button
 # Render/input checks must neither read nor overwrite a player's preferences.
 var qa_mode = "--qa" in OS.get_cmdline_user_args()
@@ -41,6 +42,10 @@ var last_actor_label: Label
 var waits_button: Button
 var waits_panel: Panel
 var waits_expanded = true
+var opponent_waits_panels: Dictionary = {}
+var opponent_waits_cache: Dictionary = {}
+var opponent_waits_round = -1
+var public_tiles_button: Button
 var inspect_layer: Control
 var last_touch_ms = -1000
 var touch_started = Vector2.ZERO
@@ -54,16 +59,17 @@ func _ready() -> void:
 	Engine.max_fps=60
 	desktop_window = DesktopWindow.new(); add_child(desktop_window)
 	desktop_window.fullscreen_changed.connect(_display_changed)
+	scene_surface = SceneSurface.new(); add_child(scene_surface)
 	for t in range(43): tile_textures.append(load(Tiles.texture_path(t)))
 	for name in ["click", "tile", "deal", "notify", "win"]: sounds[name] = load("res://assets/audio/" + name + ".wav")
 	sfx = AudioStreamPlayer.new(); add_child(sfx)
 	voice = TileVoice.new(); add_child(voice)
 	session = LocalSession.new(); add_child(session)
 	session.changed.connect(_changed); session.hint_ready.connect(_hint); session.notice.connect(_toast)
-	table = Table3D.new(); add_child(table)
+	table = Table3D.new(); scene_surface.scene_viewport.add_child(table)
 	table.tile_inspected.connect(func(tile,position):
 		if current_screen=="table" and not is_instance_valid(modal): _inspect_tile(tile,position.x,position.y))
-	canvas = CanvasLayer.new(); add_child(canvas)
+	canvas = CanvasLayer.new(); scene_surface.scene_viewport.add_child(canvas)
 	root = Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.mouse_filter = Control.MOUSE_FILTER_IGNORE; canvas.add_child(root)
 	root.theme=Theme.new();root.theme.default_font=UI.font();root.theme.default_font_size=18
 	_load_preferences()
@@ -102,6 +108,7 @@ func _show_lobby() -> void:
 	if is_instance_valid(voice): voice.stop_all()
 	table.visible=false;desktop_window.set_frame_limit(60)
 	_clear(root); modal = null; hud = null; toast_label = null
+	opponent_waits_panels.clear();opponent_waits_cache.clear();opponent_waits_round=-1
 	lobby = _layer()
 	var courtyard=UI.texture(lobby,Rect2(0,0,1600,900),load("res://assets/backgrounds/courtyard_day.jpg"))
 	courtyard.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -171,6 +178,7 @@ func _build_hud() -> void:
 	table.visible=true;desktop_window.set_frame_limit(30 if low_quality else 60)
 	hud = _layer(); selected = -1; declare_mode = ""; last_revision = -1
 	waits_panel=null;waits_expanded=true
+	opponent_waits_panels.clear();opponent_waits_cache.clear();opponent_waits_round=-1
 	var badge = UI.table_panel(hud,Rect2(625,24,350,36),false,18)
 	round_text = UI.label(badge,Rect2(0,0,350,36),"",18,UI.TABLE_TEXT); round_text.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	UI.table_button(hud,Rect2(1245,23,96,42),"玩法",_show_rules,false,"help")
@@ -206,7 +214,7 @@ func _build_hud() -> void:
 		auto_button.text="收回操作" if session.autopilot else "交给 AI",false,"bot")
 	hand_layer = _layer(); action_layer = _layer(); inspect_layer = _layer()
 	waits_button = UI.table_button(hud,Rect2(1406,716,166,44),"听牌一览",_show_waits,false,"tiles")
-	UI.table_button(hud,Rect2(28,500,176,42),"查看桌面牌",_show_public_tiles,false,"eye")
+	public_tiles_button=UI.table_button(hud,Rect2(28,500,176,42),"查看桌面牌",_show_public_tiles,false,"eye")
 
 func _changed(new_view: Dictionary) -> void:
 	view = new_view
@@ -246,7 +254,7 @@ func _changed(new_view: Dictionary) -> void:
 	hint_button.disabled = view.decision_seat != 0 or view.phase=="settled"
 	auto_button.disabled = view.phase=="settled"
 	waits_button.disabled = view.phase == "settled"
-	_draw_hand(); _draw_actions(); _draw_waits_panel()
+	_draw_hand(); _draw_actions(); _draw_waits_panel(); _draw_opponent_waits()
 	if view.decision_seat == 0 and view.pending.any(func(a):return a.kind in ["win","gang","peng","chi","angang","bugang"]): _sound("notify")
 	if view.phase=="settled": _celebrate()
 
@@ -459,7 +467,7 @@ func _visible_remaining(tile: int) -> int:
 	for p in view.players:
 		visible += p.discards.count(tile)
 		for meld in p.melds: visible += meld.tiles.count(tile)
-		if p.seat != 0 and not p.hand.is_empty(): visible += p.hand.count(tile)
+		if p.seat != 0 and (p.ming or view.phase=="settled") and not p.hand.is_empty(): visible += p.hand.count(tile)
 	if view.gang_head == tile: visible += 1
 	return maxi(0,4-visible)
 
@@ -545,6 +553,69 @@ func _locked_waits() -> Array:
 	for tile in Rules.waits(base,p.melds,view.settings.jiang=="luan"):
 		entries.append({"tile":tile,"remaining":_visible_remaining(tile),"fan":_wait_score(base,tile).get("multiplier",1)})
 	return entries
+
+func _opponent_waits(seat: int) -> Array:
+	if view.is_empty() or seat not in [1,2,3] or view.phase=="settled":return []
+	var p=view.players[seat]
+	# Only the public seat view is used. An unexposed hand, including a player
+	# who only declared bao, never gets a wait calculation or a card.
+	if not p.ming or p.hand.is_empty():return []
+	var base=p.hand.duplicate()
+	if base.size()%3==2 and p.drawn>=0 and p.drawn<base.size():base.remove_at(p.drawn)
+	var signature=var_to_str([base,p.melds,view.settings.jiang])
+	if not opponent_waits_cache.has(seat) or opponent_waits_cache[seat].signature!=signature:
+		opponent_waits_cache[seat]={"signature":signature,"tiles":Rules.waits(base,p.melds,view.settings.jiang=="luan")}
+	var entries: Array=[]
+	for tile in opponent_waits_cache[seat].tiles:
+		entries.append({"tile":tile,"remaining":_visible_remaining(tile)})
+	return entries
+
+func _remove_opponent_waits(seat: int) -> void:
+	if opponent_waits_panels.has(seat):
+		var panel=opponent_waits_panels[seat]
+		if is_instance_valid(panel):panel.hide();panel.queue_free()
+		opponent_waits_panels.erase(seat)
+
+func _draw_opponent_waits() -> void:
+	if opponent_waits_round!=view.round:
+		for seat in opponent_waits_panels.keys():_remove_opponent_waits(seat)
+		opponent_waits_cache.clear();opponent_waits_round=view.round
+	for seat in range(1,4):
+		if not view.players[seat].ming or view.phase=="settled":
+			_remove_opponent_waits(seat);opponent_waits_cache.erase(seat);continue
+		var entries=_opponent_waits(seat)
+		var scroll_position=0
+		if opponent_waits_panels.has(seat):
+			var previous=opponent_waits_panels[seat]
+			if previous.get_meta("entries")==entries:continue
+			scroll_position=previous.get_node("WaitsScroll").scroll_vertical
+			_remove_opponent_waits(seat)
+		var width=142 if seat==2 else 176
+		var body_height=mini(108,maxi(54,entries.size()*54))
+		var height=body_height+46
+		# The top/right cards occupy separate columns outside the physical table.
+		# Leave the lower-right lane for the local player's existing wait panel.
+		var position={1:Vector2(1396,374-height),2:Vector2(1242,208),3:Vector2(28,488)}[seat]
+		var panel=UI.table_panel(hud,Rect2(position,Vector2(width,height)))
+		panel.name="OpponentWaits%d"%seat;panel.set_meta("entries",entries)
+		opponent_waits_panels[seat]=panel
+		var heading=UI.label(panel,Rect2(12,5,width-24,27),"明搂听口",18,UI.TABLE_GOLD)
+		heading.mouse_filter=Control.MOUSE_FILTER_PASS
+		heading.tooltip_text="%s的公开听口。未见余张按你的手牌、桌面明牌、明搂手牌和杠头计算；也可能在其他人的暗手中。"%view.players[seat].name
+		var scroll=ScrollContainer.new();scroll.name="WaitsScroll"
+		scroll.position=Vector2(12,36);scroll.size=Vector2(width-24,body_height)
+		scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;panel.add_child(scroll)
+		var body=Control.new();body.custom_minimum_size=Vector2(width-38,maxi(54,entries.size()*54));scroll.add_child(body)
+		for i in range(entries.size()):
+			var entry=entries[i];var y=i*54
+			var face=UI.texture(body,Rect2(0,y+2,34,48),tile_textures[entry.tile])
+			face.set_meta("wait_tile",entry.tile)
+			UI.label(body,Rect2(42,y,width-80,26),Tiles.spoken_title(entry.tile),20,UI.TABLE_TEXT)
+			UI.label(body,Rect2(42,y+27,width-80,23),"未见%d张"%entry.remaining,17,UI.TABLE_MUTED)
+			if entry.remaining==0:face.modulate.a=0.45
+		if entries.is_empty():UI.label(body,Rect2(0,3,width-38,48),"听口更新中",17,UI.TABLE_MUTED)
+		scroll.set_deferred("scroll_vertical",scroll_position)
+	public_tiles_button.position.y=opponent_waits_panels[3].get_rect().end.y+10 if opponent_waits_panels.has(3) else 500
 
 func _draw_waits_panel() -> void:
 	var scroll_position=0
@@ -676,7 +747,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,108,671,210),"山东麻将 · 青玉台  0.1.0\nGodot 4.5 · 原生 GDScript · 离线运行\n\n规则迁移自莲花广麻项目的山东麻将（MIT）。\n牌面图片与逐牌语音沿用莲花麻将；花牌 CC BY-SA 4.0。\n字体：Noto Sans SC / Noto Serif SC（SIL OFL 1.1）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,108,671,210),"山东麻将 · 青玉台  0.1.1\nGodot 4.5 · 原生 GDScript · 离线运行\n\n规则迁移自莲花广麻项目的山东麻将（MIT）。\n牌面图片与逐牌语音沿用莲花麻将；花牌 CC BY-SA 4.0。\n字体：Noto Sans SC / Noto Serif SC（SIL OFL 1.1）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 

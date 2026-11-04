@@ -189,3 +189,27 @@ Windows 包：`build/windows/QingyuMahjong.exe`，根目录 `启动游戏.bat` �
 SHA-256：`9ec3f54009745b5630e17293f476ca725d10f5f2ada0fed2b93ee60e4175885f`。
 
 本轮没有修改规则、存档和牌谱格式，也没有重测或打包移动端与 macOS。
+
+## 2026-11-04：明搂公开听口与原生窗口模块（0.1.1，本地提交）
+
+三家明搂后在头像旁显示公开听口、牌图／牌名和按本家已知信息计算的未见余张；剥离新摸牌以稳定听口，多听口滚动、零余张保留、新局清理。未明搂的暗手不参与显示或余张推算。
+
+牌桌和 UI 改用独立 SubViewport，保持 1600×900 输入坐标、固定字体采样，尺寸稳定后仅更新一次场景目标。用户仍反馈缩放卡顿后，再增加 Windows 4.5.1 原生窗口模块：拖动时暂停主循环里的绘制／尺寸回调，松手后同步实际几何；删除旧的临时 120 FPS／VSync 切换。此项改变了拖动时的显示策略，不能仅凭代码或计数认定手感问题解决。
+
+| 验证 | 已有结果与边界 |
+| --- | --- |
+| 规则／AI／存档回归 | 本轮前期 `tools/test.ps1` 的 72,930 项检查通过；规则及存档实现未改 |
+| `scene_surface.gd`、`opponent_waits.gd`、`touch_smoke.gd` | 最终原生模块接入后均通过 headless 检查，0 失败；不等同于实体鼠标／触屏设备验收 |
+| 原生模块 | MSVC x64 编译成功；增量构建复用已有 DLL；编辑器／headless 跳过接管，无界面加载无错误 |
+| Windows 导出包 | EXE 与原生 DLL 已重新生成；包内模块 headless 装载通过，随后实际窗口确认模块已安装 |
+| 现有原生日志 | 一次进入／退出，26 次窗口尺寸消息延后，最终同步 1 次，取消重绘定时器失败数 0；只能证明该路径被执行 |
+| 可见操作 | 用户通过 Esc 停止桌面接管；未完成受控的缩放、移动、取消和恢复验收，卡顿是否消除尚未确认 |
+
+用户随后明确禁止未经新授权再次控制鼠标／键盘或自动弹出测试窗口。本次提交阶段不启动游戏、不重跑测试，只整理现有代码、忽略规则和记录；**只提交本地 Git，不推送远端**。
+
+构建输出需保留整个 `build/windows/`：
+
+- `QingyuMahjong.exe`：108,314,392 字节；SHA-256 `d6a29fa24cc20be7221535498d6471bca38bc5fd4604bc73aaedff23d43bee2e`。
+- `motion_gate.windows.x86_64.dll`：290,304 字节；SHA-256 `241f2f723963cef7d99906ae94313240a660a46f0f4787dcfa089f5f1a5cf3cd`。
+
+诊断在本机 `artifacts/native-motion-final/`、`artifacts/native-package-probe/`、`artifacts/native-motion-headless-fixed/`，均排除 Git。此前 SubViewport 方案日志在 `artifacts/window-ming-native/`，其中 19 次尺寸事件／1 次场景更新不是流畅性证明。原生 DLL 与对象／链接输出位于被忽略的 `native/windows/bin/` 和 `native/windows/build/`；提交其 C++ 源码、接口头／许可、GDExtension 配置和增量构建脚本。未重新验证其他平台。

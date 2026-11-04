@@ -6,6 +6,8 @@
 
 `scripts/session/local_session.gd` 是本机对局适配器。它驱动 AI 工作线程、控制表现节奏、存档和重放恢复。`scripts/app.gd` 和 `scripts/view/table_3d.gd` 只消费座位视图、呈现动作和接收输入。
 
+Windows 的 `native/windows/` GDExtension 只处理本进程主窗口的原生移动／缩放消息：手势期间阻止 Godot 重入完整帧、延后尺寸同步，结束后同步一次。规则和存档仍由 GDScript 管理；拖动期间主循环暂停，已完成的动作保存不会被切成半次提交。`scripts/ui/scene_surface.gd` 将游戏场景与外层窗口隔离，保持原有逻辑坐标与输入路径。
+
 每次请求包含 `seat + revision + action_id`。引擎只接受当前决策座位、当前版本和当次生成的合法动作，拒绝重复／过期／伪造请求。动画只展示结果，不参与发牌、判定和计分。
 
 `GameEngine.view(seat)` 不包含牌墙、响应候选队列、其他未亮手玩家的手牌；其他玩家的暗杠也只保留张数，不泄漏牌面。AI 消费同样的视图。不会直接把 `snapshot()` 发给客户端；`snapshot()` 是权威端本地持久化数据，含完整牌墙及操作日志。
