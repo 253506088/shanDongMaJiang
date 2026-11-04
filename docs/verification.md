@@ -213,3 +213,31 @@ SHA-256：`9ec3f54009745b5630e17293f476ca725d10f5f2ada0fed2b93ee60e4175885f`。
 - `motion_gate.windows.x86_64.dll`：290,304 字节；SHA-256 `241f2f723963cef7d99906ae94313240a660a46f0f4787dcfa089f5f1a5cf3cd`。
 
 诊断在本机 `artifacts/native-motion-final/`、`artifacts/native-package-probe/`、`artifacts/native-motion-headless-fixed/`，均排除 Git。此前 SubViewport 方案日志在 `artifacts/window-ming-native/`，其中 19 次尺寸事件／1 次场景更新不是流畅性证明。原生 DLL 与对象／链接输出位于被忽略的 `native/windows/bin/` 和 `native/windows/build/`；提交其 C++ 源码、接口头／许可、GDExtension 配置和增量构建脚本。未重新验证其他平台。
+
+## 2026-11-04：附近同桌（0.2.0，本地提交）
+
+新增同 Wi-Fi／手机热点下的房间发现、创建、加入、准备、房主规则配置和 1–4 真人／空位机器人。使用 ENet 权威对局与 UDP 查询发现，安卓和 Windows 共用协议；真人各自看到以本人为下家的牌桌。房主规则开局后固定，按局轮庄、累计积分、自由续局；掉线保留座位，默认等待，可由房主开启托管，进程内重连收回控制。用法与边界见 [附近同桌](lan-play.md)。
+
+| 检查 | 结果 |
+| --- | --- |
+| `tools/test.ps1` | 全部断言零失败；规则／AI／存档 39,516，布局／合法杠 33,377，锁听自动摸打 37；场景目标与明搂听口无界面检查通过 |
+| `lan_discovery_test.gd` | 13 项通过；真实 UDP 查询、房间更新、超时消失、地址及包校验 |
+| `lan_session_test.gd` 最终版 | 264 项通过；真实 ENet 四人房、准备与规则锁定、满房／晚加入、机器人、私有手牌／暗杠事件、伪造／重复／旧局动作、续到第九局、掉线托管／重连、即时重建与半握手取消 |
+| `lan_ui_test.gd` 最终版 | 38 项通过；大厅与房间状态、连接忙时防重入、弹窗不暂停整桌、结算重开、断线重连入口、跨局清理、回到单机与偏好／QA 隔离 |
+| Windows 发布程序四进程 | `tools/test_lan_process.ps1` 通过；实际 EXE 启动四个独立 headless 进程，通过真实 ENet 完成一局流局、续到第二局，四席唯一且累计积分一致（各 2000） |
+| Windows 包 | 无界面导出成功，0.2.0 EXE 与原生 DLL 均保留；没有自动打开可见游戏窗口 |
+| Android 包 | 调试 APK 导出、签名校验通过；版本 0.2.0／code 2，arm64-v8a 与 x86_64，min SDK 24／target 35；已核对 INTERNET、ACCESS_NETWORK_STATE、ACCESS_WIFI_STATE 权限 |
+
+完整回归中的 `scene_surface.gd` 和 `opponent_waits.gd` 虽断言通过，退出时仍报告 ObjectDB／3–5 个资源引用未释放；verbose 显示核心脚本资源，以及前者正在播放的两路音频。基线大厅代码复核也出现音频退出提示；不能据此将全部退出日志写成无错误。新增 LAN 会话、LAN UI 与四进程包测试日志无这些提示，旧 UI 退出资源清理仍需单独排查；本轮未改变规则核心或无关窗口实现。
+
+Android 第一次导出在签名时因 C 盘临时空间不足失败，不计通过。`tools/build.ps1` 已改为仅在 Android 导出子进程中使用项目下 `tmp/android-export/` 的独立子目录，成功或失败后清理本次临时目录并恢复原环境；重试导出及 `apksigner verify` 均成功。没有删除既有用户文件、原始美术或备份。
+
+最终本机产物：
+
+- `build/windows/QingyuMahjong.exe`：108,357,784 字节；SHA-256 `d63c64c816d1a83ff3bd4f1a144e54be8ad12826543a3ea3acd92b91817522ce`。
+- `build/windows/motion_gate.windows.x86_64.dll`：290,304 字节；SHA-256 `241f2f723963cef7d99906ae94313240a660a46f0f4787dcfa089f5f1a5cf3cd`。
+- `build/android/qingyu-mahjong-debug.apk`：67,766,409 字节；SHA-256 `61f69c363d45f952908ea2d681883f6b24170f42c7da6a224318076de30b9d22`。
+
+用户随后明确要求清理本次产生的临时文件。已将验证结论保留在本文；本轮 `artifacts/lan-*.log`、四进程测试结果目录、`tmp/lan-baseline-*.gd` 临时探针和签名临时目录均清理，最终安装包、测试源码和既有美术／备份保留。最终重新导出并核对 Android 签名，确认构建结束后 `tmp/android-export/` 自动删除。
+
+未进行可见真实渲染、鼠标／键盘接管、手机操作或 Wi-Fi／热点跨设备实测，不把回环测试或 APK 导出当作安卓／Windows 实机混玩验收。房间发现受网络隔离和广播策略影响，保留地址加入。LAN 房间只支持进程内重连，尚不支持关闭应用后的房主日志恢复／凭据恢复、二维码邀请或房主迁移；单机存档及旧重放格式未变。本轮只提交本地 Git，不推送远端。

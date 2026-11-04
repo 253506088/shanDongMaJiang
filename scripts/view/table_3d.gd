@@ -304,6 +304,7 @@ func update_view(view: Dictionary) -> void:
 	count_label.text=str(view.wall_count)
 	for seat in range(4):
 		var active=seat==view.decision_seat and view.phase!="settled"
+		seat_labels[seat].text=["东","南","西","北"][(seat+int(view.get("local_seat",0)))%4]
 		seat_lights[seat].material_override.albedo_color=Color("e6c981") if active else Color("425f48")
 		seat_labels[seat].modulate=Color("ffdb8f") if active else Color("d5dfcd")
 	if last_round!=view.round:

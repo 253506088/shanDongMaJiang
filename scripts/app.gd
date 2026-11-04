@@ -54,6 +54,11 @@ var touch_index = -1
 var last_tap_index = -1
 var last_tap_ms = -1000
 var suppress_click_until = -1
+var lan_lobby: LanLobby
+var discovery: LanDiscovery
+var lan_player_name = "牌友"
+var lan_address = ""
+var lan_room_menu = false
 
 func _ready() -> void:
 	Engine.max_fps=60
@@ -66,6 +71,8 @@ func _ready() -> void:
 	voice = TileVoice.new(); add_child(voice)
 	session = LocalSession.new(); add_child(session)
 	session.changed.connect(_changed); session.hint_ready.connect(_hint); session.notice.connect(_toast)
+	discovery = LanDiscovery.new(); add_child(discovery)
+	discovery.rooms_changed.connect(_lan_rooms_changed)
 	table = Table3D.new(); scene_surface.scene_viewport.add_child(table)
 	table.tile_inspected.connect(func(tile,position):
 		if current_screen=="table" and not is_instance_valid(modal): _inspect_tile(tile,position.x,position.y))
@@ -104,6 +111,8 @@ func _layer() -> Control:
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE; root.add_child(node); return node
 
 func _show_lobby() -> void:
+	if _is_lan(): _confirm_leave_lan(); return
+	discovery.stop()
 	current_screen = "lobby"; session.paused = true
 	if is_instance_valid(voice): voice.stop_all()
 	table.visible=false;desktop_window.set_frame_limit(60)
@@ -152,12 +161,153 @@ func _show_lobby() -> void:
 	UI.label(options,Rect2(25,180,665,28),"底分 10  ·  起始 2000 分  ·  144 张含花牌  ·  每局轮庄",16,UI.MUTED)
 	UI.button(lobby,Rect2(105,726,279,66),"入 座 开 局   →",func(): _start_game(true),true)
 	if session.has_save(): UI.button(lobby,Rect2(402,726,221,66),"继续上次牌局",_resume)
-	UI.label(lobby,Rect2(105,839,1000,24),"离线畅玩   ·   自动续存",14,UI.MUTED)
+	UI.button(lobby,Rect2(641,726,183,66),"附近同桌",_show_lan_browser)
+	UI.label(lobby,Rect2(105,839,1000,24),"单机续玩   ·   同一 Wi-Fi / 热点联机",14,UI.MUTED)
 	UI.button(lobby,Rect2(1426,829,120,42),"关于",_about)
 
 func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callable) -> void:
 	var b = UI.button(parent,rect,text,callback,on)
 	b.add_theme_font_size_override("font_size",16)
+
+func _is_lan() -> bool:
+	return session is LanSession
+
+func _replace_session(next: LocalSession) -> void:
+	var previous = session
+	var previous_speed = previous.speed
+	previous.changed.disconnect(_changed); previous.hint_ready.disconnect(_hint); previous.notice.disconnect(_toast)
+	if previous is LanSession:
+		previous.room_changed.disconnect(_lan_room_changed)
+		previous.connection_closed.disconnect(_lan_closed)
+		previous.leave_room()
+	previous.set_process(false); previous.queue_free()
+	session = next; session.speed = previous_speed
+	if qa_mode: session.storage_root = "user://qa/"
+	add_child(session)
+	session.changed.connect(_changed); session.hint_ready.connect(_hint); session.notice.connect(_toast)
+	if session is LanSession:
+		session.room_changed.connect(_lan_room_changed)
+		session.connection_closed.connect(_lan_closed)
+	view = {}; last_revision = -1
+
+func _make_lan_screen() -> void:
+	current_screen = "lan"; table.visible = false; desktop_window.set_frame_limit(60)
+	voice.stop_all(); _clear(root); modal = null; hud = null; lobby = null; toast_label = null
+	opponent_waits_panels.clear(); opponent_waits_cache.clear(); opponent_waits_round = -1
+	lan_lobby = LanLobby.new(); root.add_child(lan_lobby)
+	lan_lobby.back_requested.connect(func():
+		lan_player_name = lan_lobby.nickname; lan_address = lan_lobby.address
+		if _is_lan(): _leave_lan()
+		else: _show_lobby())
+	lan_lobby.host_requested.connect(_host_lan)
+	lan_lobby.join_requested.connect(_join_lan)
+	lan_lobby.ready_requested.connect(func(ready):
+		if _is_lan(): (session as LanSession).set_ready(ready))
+	lan_lobby.start_requested.connect(func():
+		if _is_lan() and not (session as LanSession).start_room(): _toast("请等待在座牌友全部准备。"))
+	lan_lobby.settings_requested.connect(func(settings):
+		if _is_lan(): (session as LanSession).set_room_settings(settings))
+	lan_lobby.disconnect_autoplay_requested.connect(func(enabled):
+		if _is_lan(): (session as LanSession).set_disconnect_autoplay(enabled))
+	lan_lobby.leave_requested.connect(_confirm_leave_lan)
+
+func _show_lan_browser() -> void:
+	if _is_lan(): _leave_lan(false)
+	session.paused = true
+	_make_lan_screen()
+	lan_lobby.show_browser(config,lan_player_name,lan_address)
+	if discovery.start_browser() != OK:
+		lan_lobby.set_status("附近房间搜索暂不可用，仍可输入房主地址加入。")
+
+func _host_lan(settings: Dictionary, player_name: String) -> void:
+	lan_player_name = player_name
+	discovery.stop(); _replace_session(LanSession.new())
+	var error = (session as LanSession).host_room(settings,player_name)
+	if error != OK:
+		_replace_session(LocalSession.new()); _show_lan_browser()
+		lan_lobby.set_status("创建房间失败，请检查网络或是否已经开着另一间房。")
+		return
+	if discovery.start_host((session as LanSession).room) != OK:
+		_toast("房间已创建，附近搜索暂不可用；牌友仍可输入房主地址加入。")
+
+func _join_lan(address: String, player_name: String, port: int = 32141) -> void:
+	lan_player_name = player_name; lan_address = address+(":%d"%port if port != 32141 else "")
+	discovery.stop(); _replace_session(LanSession.new())
+	lan_lobby.set_busy(true,"正在连接房主…")
+	var error = (session as LanSession).join_room(address,player_name,port)
+	if error != OK: _lan_closed("连接失败，请检查房主地址和网络。")
+
+func _lan_rooms_changed(rooms: Array) -> void:
+	if current_screen == "lan" and is_instance_valid(lan_lobby): lan_lobby.update_rooms(rooms)
+
+func _lan_room_changed(room: Dictionary) -> void:
+	if not _is_lan(): return
+	var lan = session as LanSession
+	if lan.is_host: discovery.update_room(room)
+	if current_screen == "table" and is_instance_valid(auto_button):
+		auto_button.text = "收回操作" if session.autopilot else "交给 AI"
+	if current_screen == "lan" and not room.get("started",false):
+		lan_lobby.show_room(room,lan.is_host,lan.local_seat)
+	elif current_screen == "table" and lan_room_menu:
+		_show_lan_room_menu()
+
+func _lan_closed(reason: String) -> void:
+	if not _is_lan(): return
+	if is_instance_valid(lan_lobby): lan_lobby.set_busy(false,reason)
+	_popup("连接已中断",Vector2(760,380))
+	var detail = UI.label(modal,Rect2(43,101,672,94),reason+"\n请确认所有设备仍连接同一 Wi-Fi / 热点，且房主在游戏前台。",21,UI.MUTED)
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.button(modal,Rect2(43,264,279,59),"返回附近房间",_show_lan_browser)
+	UI.button(modal,Rect2(340,264,374,59),"重新连接",_reconnect_lan,true)
+
+func _reconnect_lan() -> void:
+	if not _is_lan(): return
+	_close_modal()
+	if (session as LanSession).room.is_empty():
+		var parts = lan_address.split(":")
+		_join_lan(parts[0],lan_player_name,int(parts[1]) if parts.size()==2 else 32141)
+	elif (session as LanSession).reconnect_room() != OK: _lan_closed("暂时无法重新连接。")
+	else: _toast("正在重新连接原房间…")
+
+func _confirm_leave_lan() -> void:
+	if not _is_lan(): _show_lobby(); return
+	if (session as LanSession).room.is_empty(): _leave_lan(); return
+	var host = (session as LanSession).is_host
+	_popup("解散房间" if host else "离开房间",Vector2(680,354))
+	UI.label(modal,Rect2(43,100,594,98),"解散后，所有牌友都会离开本桌。\n当前局域网牌局不会保存为单机存档。" if host else "离开后，这个座位将交给电脑。\n本桌开局后不能作为新玩家再次加入。",21,UI.MUTED)
+	UI.button(modal,Rect2(43,251,274,56),"继续留在房间",_close_modal)
+	UI.button(modal,Rect2(335,251,301,56),"解散并返回大厅" if host else "离开并返回大厅",_leave_lan,true)
+
+func _leave_lan(show_lobby: bool = true) -> void:
+	discovery.stop(); _close_modal()
+	if _is_lan(): _replace_session(LocalSession.new())
+	lan_room_menu = false
+	if show_lobby: _show_lobby()
+
+func _show_lan_room_menu() -> void:
+	if not _is_lan(): return
+	var lan = session as LanSession
+	_popup("本桌房间",Vector2(820,626)); lan_room_menu = true
+	var names: Array = []
+	for member in lan.room.get("seats",[]):
+		var suffix = "电脑" if member.get("bot",false) else ("在线" if member.get("connected",true) else "离线，保留座位")
+		names.append(str(member.get("name","电脑"))+" · "+suffix)
+	UI.label(modal,Rect2(43,101,729,154),"\n".join(names),22,UI.TEXT)
+	var addresses: Array = lan.room.get("host_addresses",[])
+	var addresses_label = UI.label(modal,Rect2(43,275,729,59),"房主地址："+"、".join(addresses.map(func(item):return str(item))),18,UI.MUTED)
+	addresses_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if lan.is_host:
+		UI.button(modal,Rect2(43,355,729,51),"掉线托管：开启" if lan.room.get("disconnect_autoplay",false) else "掉线托管：关闭",func():
+			lan.set_disconnect_autoplay(not bool(lan.room.get("disconnect_autoplay",false))))
+	else:
+		UI.label(modal,Rect2(43,355,729,51),"掉线托管当前"+("开启" if lan.room.get("disconnect_autoplay",false) else "关闭")+"，由房主控制。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,427,729,52),"查看房间时对局继续。房主请保持游戏在前台。" if lan.connected else "连接已中断。检查网络后可重新连接原座位。",20,UI.MUTED)
+	var settled = view.get("phase","") == "settled"
+	if not lan.connected:
+		UI.button(modal,Rect2(43,520,352,57),"重新连接",_reconnect_lan,true)
+	else:
+		UI.button(modal,Rect2(43,520,352,57),"查看本局结算" if settled else "回到牌桌",_show_result if settled else _close_modal,true)
+	UI.button(modal,Rect2(412,520,360,57),"解散房间" if lan.is_host else "离开房间",_confirm_leave_lan)
 
 func _start_game(confirm_replace: bool) -> void:
 	if confirm_replace and session.has_save():
@@ -183,7 +333,7 @@ func _build_hud() -> void:
 	round_text = UI.label(badge,Rect2(0,0,350,36),"",18,UI.TABLE_TEXT); round_text.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	UI.table_button(hud,Rect2(1245,23,96,42),"玩法",_show_rules,false,"help")
 	UI.table_button(hud,Rect2(1351,23,96,42),"设置",_show_settings,false,"settings")
-	UI.table_button(hud,Rect2(1457,23,115,42),"暂停  II",_pause).tooltip_text="暂停对局（Esc）"
+	UI.table_button(hud,Rect2(1457,23,115,42),"房间" if _is_lan() else "暂停  II",_pause).tooltip_text="查看房间（Esc）" if _is_lan() else "暂停对局（Esc）"
 	var gang = UI.table_panel(hud,Rect2(28,108,152,78))
 	gang.tooltip_text="当前公开的杠头牌；开杠后从牌墙末端补入。"
 	head_tile = UI.texture(gang,Rect2(12,8,44,61),tile_textures[42])
@@ -192,8 +342,9 @@ func _build_hud() -> void:
 	for seat in range(4):
 		var pos = [Vector2(28,778),Vector2(1396,386),Vector2(1242,108),Vector2(28,386)][seat]
 		var panel = UI.table_panel(hud,Rect2(pos,Vector2(176,92)))
-		UI.portrait(panel,Vector2(12,12),54,seat)
+		UI.portrait(panel,Vector2(12,12),54,(seat+(session as LanSession).local_seat)%4 if _is_lan() else seat)
 		var name_label = UI.label(panel,Rect2(78,6,58,28),["我","听松","观澜","知秋"][seat],20,UI.TABLE_TEXT)
+		name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		var state_label = UI.label(panel,Rect2(135,12,24,22),"",15,UI.TABLE_GOLD)
 		state_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		var score = UI.label(panel,Rect2(78,33,92,31),"2000",24,UI.TABLE_TEXT)
@@ -217,6 +368,10 @@ func _build_hud() -> void:
 	public_tiles_button=UI.table_button(hud,Rect2(28,500,176,42),"查看桌面牌",_show_public_tiles,false,"eye")
 
 func _changed(new_view: Dictionary) -> void:
+	var new_result = new_view.phase == "settled" and (view.is_empty() or view.phase != "settled" or view.round != new_view.round)
+	if _is_lan() and current_screen == "lan": _build_hud()
+	if _is_lan() and not view.is_empty() and view.round != new_view.round:
+		_close_modal(); last_revision = -1
 	view = new_view
 	if current_screen != "table": return
 	if last_revision != view.revision:
@@ -243,6 +398,7 @@ func _changed(new_view: Dictionary) -> void:
 	head_name.text=Tiles.spoken_title(view.gang_head) if view.gang_head>=0 else "—"
 	for seat in range(4):
 		var p = view.players[seat]; var info = players_ui[seat]
+		info.name.text = str(p.name); info.panel.tooltip_text = str(p.name)
 		info.score.text = str(p.score)
 		info.state.text = "庄" if seat==view.dealer else ""
 		var flowers=Rules.flower_count(p.melds)
@@ -253,10 +409,11 @@ func _changed(new_view: Dictionary) -> void:
 		info.panel.add_theme_stylebox_override("panel",UI.table_style(active))
 	hint_button.disabled = view.decision_seat != 0 or view.phase=="settled"
 	auto_button.disabled = view.phase=="settled"
+	auto_button.text = "收回操作" if session.autopilot else "交给 AI"
 	waits_button.disabled = view.phase == "settled"
 	_draw_hand(); _draw_actions(); _draw_waits_panel(); _draw_opponent_waits()
 	if view.decision_seat == 0 and view.pending.any(func(a):return a.kind in ["win","gang","peng","chi","angang","bugang"]): _sound("notify")
-	if view.phase=="settled": _celebrate()
+	if view.phase == "settled" and (not _is_lan() or new_result): _celebrate()
 
 func _show_cue(event: Dictionary) -> void:
 	var names={"bao":"报 听","ming":"明 搂","upgrade_ming":"明 搂","chi":"吃","peng":"碰","gang":"杠","angang":"暗 杠","bugang":"补 杠"}
@@ -287,7 +444,9 @@ func _celebrate() -> void:
 		tween.tween_property(box,"scale",Vector2.ONE,0.38).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		await get_tree().create_timer(1.3).timeout
 		if is_instance_valid(effect):effect.queue_free()
-	if current_screen=="table" and view.round==round_number and view.phase=="settled":_show_result()
+	if current_screen=="table" and view.round==round_number and view.phase=="settled":
+		if _is_lan() and not (session as LanSession).connected: return
+		_show_result()
 
 func _draw_hand() -> void:
 	_clear(hand_layer)
@@ -460,7 +619,7 @@ func _show_move_picker(moves: Array) -> void:
 		for j in range(tiles.size()): UI.texture(modal,Rect2(x+j*44,113,42,58),tile_textures[tiles[j]])
 		var caption = "吃这组" if move.kind == "chi" else ("暗杠 " if move.kind == "angang" else "补杠 ") + Tiles.title(move.tile)
 		UI.button(modal,Rect2(x,195,165,53),caption,func(): _close_modal(); session.play(move.id,revision),true)
-	UI.label(modal,Rect2(45,293,760,32),"牌局已暂停，选定后继续。关闭窗口可取消选择。",18,UI.MUTED)
+	UI.label(modal,Rect2(45,293,760,32),"请选择本次操作。关闭窗口可取消选择。" if _is_lan() else "牌局已暂停，选定后继续。关闭窗口可取消选择。",18,UI.MUTED)
 
 func _visible_remaining(tile: int) -> int:
 	var visible = view.players[0].hand.count(tile)
@@ -682,7 +841,8 @@ func _hint(move: Dictionary) -> void:
 	else: _toast("建议操作："+{"win":"胡牌","peng":"碰牌","gang":"杠牌","chi":"吃牌","angang":"暗杠","bugang":"补杠","pass":"过"}.get(move.kind,move.kind))
 
 func _popup(title: String, dimensions: Vector2, dismiss_outside: bool = false) -> void:
-	_close_modal(); session.paused=true
+	_close_modal()
+	if not _is_lan(): session.paused=true
 	var shade=ColorRect.new(); shade.color=Color("061512b8"); shade.size=Vector2(1600,900); root.add_child(shade)
 	shade.name="ModalShade"
 	shade.mouse_filter=Control.MOUSE_FILTER_STOP
@@ -702,13 +862,15 @@ func _popup(title: String, dimensions: Vector2, dismiss_outside: bool = false) -
 	UI.button(modal,Rect2(dimensions.x-78,29,42,42),"×",_close_modal)
 
 func _close_modal() -> void:
+	lan_room_menu = false
 	var shade=root.get_node_or_null("ModalShade") if is_instance_valid(root) else null
 	if shade: shade.name="ClosingModal";shade.queue_free()
 	modal=null
-	if current_screen=="table": session.paused=false
+	if current_screen=="table" and not _is_lan(): session.paused=false
 
 func _pause() -> void:
 	if is_instance_valid(modal): _close_modal(); return
+	if _is_lan(): _show_lan_room_menu(); return
 	_popup("暂歇一会",Vector2(640,374))
 	UI.label(modal,Rect2(43,106,556,66),"当前牌局已自动保存。\n关闭游戏后，也可以从大厅继续。",22,UI.MUTED)
 	UI.button(modal,Rect2(44,212,552,57),"继续对局",_close_modal,true)
@@ -731,12 +893,14 @@ func _show_settings() -> void:
 	UI.label(modal,Rect2(44,183,230,40),"画质",22)
 	UI.button(modal,Rect2(307,181,325,49),"省电 · 关闭阴影" if low_quality else "精致 · 柔和阴影",func(): low_quality=not low_quality; table.quality(low_quality); desktop_window.set_frame_limit(30 if low_quality and current_screen=="table" else 60); _save_preferences(); _show_settings())
 	UI.label(modal,Rect2(44,258,230,40),"电脑行牌速度",22)
-	UI.button(modal,Rect2(307,256,325,49),("舒缓 · 约 2.4 秒" if session.speed < 1 else ("标准 · 约 1.8 秒" if session.speed == 1 else "利落 · 约 1.2 秒")),func(): session.speed=1.0 if session.speed<1 else (1.5 if session.speed==1 else 0.75); _save_preferences(); _show_settings())
+	var pace_button = UI.button(modal,Rect2(307,256,325,49),("舒缓 · 约 2.4 秒" if session.speed < 1 else ("标准 · 约 1.8 秒" if session.speed == 1 else "利落 · 约 1.2 秒")),func(): session.speed=1.0 if session.speed<1 else (1.5 if session.speed==1 else 0.75); _save_preferences(); _show_settings())
+	if _is_lan() and not (session as LanSession).is_host:
+		pace_button.text = "由房主控制"; pace_button.disabled = true
 	if desktop:
 		UI.label(modal,Rect2(44,333,230,40),"显示模式",22)
 		display_button = UI.button(modal,Rect2(307,331,325,49),_display_text(),func(): desktop_window.set_fullscreen(not desktop_window.is_fullscreen()))
 		UI.label(modal,Rect2(307,388,325,29),"F11 / Alt + Enter  切换",17,UI.MUTED)
-	UI.label(modal,Rect2(44,440 if desktop else 340,585,69),"对局规则在开局时固定。\n新一局的将牌、吃牌与 AI 设置请返回大厅选择。",18,UI.MUTED)
+	UI.label(modal,Rect2(44,440 if desktop else 340,585,69),"对局规则在开局时固定。\n局域网玩法由房主创建房间时设置。" if _is_lan() else "对局规则在开局时固定。\n新一局的将牌、吃牌与 AI 设置请返回大厅选择。",18,UI.MUTED)
 
 func _display_text() -> String:
 	return "无边框全屏" if desktop_window.is_fullscreen() else "窗口模式"
@@ -747,7 +911,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,108,671,210),"山东麻将 · 青玉台  0.1.1\nGodot 4.5 · 原生 GDScript · 离线运行\n\n规则迁移自莲花广麻项目的山东麻将（MIT）。\n牌面图片与逐牌语音沿用莲花麻将；花牌 CC BY-SA 4.0。\n字体：Noto Sans SC / Noto Serif SC（SIL OFL 1.1）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,108,671,210),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.2.0"))+"\nGodot 4.5 · 单机与局域网同桌\n\n规则迁移自莲花广麻项目的山东麻将（MIT）。\n牌面图片与逐牌语音沿用莲花麻将；花牌 CC BY-SA 4.0。\n字体：Noto Sans SC / Noto Serif SC（SIL OFL 1.1）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 
@@ -786,6 +950,19 @@ func _show_result() -> void:
 		UI.label(modal,Rect2(519,y+8,180,36),str(view.players[i].score)+" 分",21,UI.MUTED)
 		UI.label(modal,Rect2(778,y+6,148,39),("+" if r.deltas[i]>0 else "")+str(r.deltas[i]),25,UI.GOLD if r.deltas[i]>0 else UI.TEXT)
 	var ended=view.settings.rounds>0 and view.round>=view.settings.rounds
+	if _is_lan():
+		UI.label(modal,Rect2(45,561,882,35),"每局轮庄 · 下一局由%s坐庄"%view.players[(view.dealer+1)%4].name,19,UI.MUTED)
+		UI.button(modal,Rect2(44,630,239,57),"查看房间",_show_lan_room_menu)
+		var host = (session as LanSession).is_host
+		var replay = UI.button(modal,Rect2(301,630,269,57),"导出本局牌谱",func():
+			var path = session.export_replay()
+			_toast("牌谱已保存到本地 replays 文件夹" if not path.is_empty() else "导出失败"))
+		replay.disabled = not host
+		replay.tooltip_text = "完整牌谱由房主导出" if not host else ""
+		var next = UI.button(modal,Rect2(588,630,353,57),"继续下一局 →" if host else "等待房主开始下一局",func():
+			_close_modal(); session.next_round(),host)
+		next.disabled = not host
+		return
 	UI.label(modal,Rect2(45,561,882,35),"本场结束。回大厅开启新一场。" if ended else "每局轮庄 · 下一局由%s坐庄"%view.players[(view.dealer+1)%4].name,19,UI.MUTED)
 	UI.button(modal,Rect2(44,630,239,57),"返回大厅",_show_lobby)
 	UI.button(modal,Rect2(301,630,269,57),"导出本局牌谱",func():
@@ -816,14 +993,22 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if is_instance_valid(modal):_close_modal()
 		elif is_instance_valid(inspect_layer) and inspect_layer.get_child_count()>0: _clear(inspect_layer)
 		elif current_screen=="table":_pause()
+		elif current_screen=="lan":
+			if _is_lan(): _confirm_leave_lan()
+			else: _show_lobby()
 	elif current_screen=="table" and not is_instance_valid(modal):
 		if event.keycode==KEY_H:session.request_hint()
 		if event.keycode in [KEY_SPACE,KEY_ENTER] and selected>=0:_discard_selected()
 
 func _notification(what: int) -> void:
-	if what==NOTIFICATION_WM_CLOSE_REQUEST:get_tree().quit()
+	if what==NOTIFICATION_WM_CLOSE_REQUEST:
+		if _is_lan(): (session as LanSession).leave_room()
+		get_tree().quit()
 	if what==NOTIFICATION_APPLICATION_PAUSED or what==NOTIFICATION_WM_GO_BACK_REQUEST:
 		if current_screen=="table" and not is_instance_valid(modal):_pause()
+		elif what==NOTIFICATION_WM_GO_BACK_REQUEST and current_screen=="lan":
+			if _is_lan(): _confirm_leave_lan()
+			else: _show_lobby()
 
 func _save_preferences() -> void:
 	if qa_mode:return

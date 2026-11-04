@@ -18,7 +18,34 @@ if ($Target -eq 'macos') {
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --editor --import --quit
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Target -eq 'android') {
-    & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-debug $presets[$Target] $outputFile
+    # apksigner writes a second APK in the Java temporary directory. Keep that
+    # rebuildable scratch data on the project drive instead of filling C:.
+    $androidTempRoot = Join-Path $projectDir 'tmp/android-export'
+    $androidTempDirectory = Join-Path $androidTempRoot ([Guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Force -Path $androidTempDirectory | Out-Null
+    $previousTemp = $env:TEMP
+    $previousTmp = $env:TMP
+    try {
+        $env:TEMP = $androidTempDirectory
+        $env:TMP = $androidTempDirectory
+        & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-debug $presets[$Target] $outputFile
+    } finally {
+        $env:TEMP = $previousTemp
+        $env:TMP = $previousTmp
+        # Delete only this invocation's private scratch folder, including when
+        # signing fails. Never remove another build's files or delivered art.
+        if (Test-Path -LiteralPath $androidTempDirectory) {
+            $cleanupRoot = [System.IO.Path]::GetFullPath($androidTempRoot)
+            $cleanupTarget = (Resolve-Path -LiteralPath $androidTempDirectory).Path
+            if (-not $cleanupTarget.StartsWith($cleanupRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) {
+                throw "Refusing to clean outside Android export scratch directory: $cleanupTarget"
+            }
+            Remove-Item -LiteralPath $cleanupTarget -Recurse -Force
+            if (-not (Get-ChildItem -LiteralPath $cleanupRoot -Force | Select-Object -First 1)) {
+                Remove-Item -LiteralPath $cleanupRoot -Force
+            }
+        }
+    }
 } else {
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-release $presets[$Target] $outputFile
 }
