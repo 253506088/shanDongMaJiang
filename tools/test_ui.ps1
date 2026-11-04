@@ -1,11 +1,17 @@
 param(
     [string]$Godot = $env:GODOT_BIN,
     [string[]]$Resolutions = @('1440x810', '960x540'),
-    [ValidateSet('ui_smoke', 'ux_smoke', 'touch_smoke', 'waits_smoke', 'table_art_smoke')]
+    [ValidateSet('ui_smoke', 'ux_smoke', 'touch_smoke', 'waits_smoke', 'table_art_smoke', 'window_smoke', 'render_performance')]
     [string[]]$Suites = @('ui_smoke', 'ux_smoke', 'touch_smoke', 'waits_smoke', 'table_art_smoke'),
+    [switch]$AllowDesktopChanges,
     [string]$OutputDir = 'artifacts/ui-verification'
 )
 $ErrorActionPreference = 'Stop'
+# Fullscreen/resize tests take over the desktop. Keep them explicit, especially
+# while the user is working in other projects. Performance sampling is opt-in.
+if ('window_smoke' -in $Suites -and -not $AllowDesktopChanges) {
+    throw 'window_smoke changes desktop windows. Run it separately with -AllowDesktopChanges when the desktop is available.'
+}
 $projectDir = Split-Path $PSScriptRoot -Parent
 if (-not [System.IO.Path]::IsPathRooted($OutputDir)) {
     $OutputDir = Join-Path $projectDir $OutputDir

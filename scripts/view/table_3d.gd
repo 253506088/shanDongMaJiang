@@ -26,6 +26,9 @@ var dice_time=0.0
 var seat_lights: Array=[]
 var seat_labels: Array=[]
 var courtyard_layer: CanvasLayer
+const TILE_BATCH_CAPACITY=144
+var tile_batches: Dictionary={}
+var tile_tweens: Dictionary={}
 
 func material(color: Color, metallic: float=0.0) -> StandardMaterial3D:
 	var mat=StandardMaterial3D.new();mat.albedo_color=color
@@ -174,6 +177,59 @@ func _build_tile_assets() -> void:
 	shadow_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
 	shadow_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
 	shadow_material.depth_draw_mode=BaseMaterial3D.DEPTH_DRAW_DISABLED
+	# The Lotus renderer instances the repeated tile parts. Keep the same source
+	# meshes and textures here, but submit one batch per material instead of five
+	# draw calls per tile (plus their repeated directional-shadow passes).
+	_tile_batch("base",base_mesh,back_material,true)
+	_tile_batch("cap",cap_mesh,body_material,true)
+	_tile_batch("back",face_mesh,back_face_material)
+	_tile_batch("shadow",shadow_mesh,shadow_material)
+
+func _tile_batch(key: String,mesh: Mesh,mat: Material,cast: bool=false) -> MultiMesh:
+	if tile_batches.has(key):return tile_batches[key].multimesh
+	var batch=MultiMeshInstance3D.new();batch.name="TileBatch_"+key
+	batch.multimesh=MultiMesh.new();batch.multimesh.transform_format=MultiMesh.TRANSFORM_3D
+	batch.multimesh.mesh=mesh;batch.multimesh.instance_count=maxi(TILE_BATCH_CAPACITY,pieces.size())
+	batch.multimesh.visible_instance_count=0;batch.material_override=mat
+	batch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON if cast else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# All 144 physical pieces stay inside these table-local bounds, including the
+	# short discard lift. Avoid recalculating a union every animated frame.
+	batch.multimesh.custom_aabb=AABB(Vector3(-9,-1,-9),Vector3(18,4,18))
+	add_child(batch);tile_batches[key]=batch
+	return batch.multimesh
+
+func _rebuild_tile_batches() -> void:
+	# Real games have at most 144 physical tiles. Allow larger synthetic layout
+	# fixtures without dropping instances; retain the allocation for later views.
+	for batch in tile_batches.values():
+		if pieces.size()>batch.multimesh.instance_count:
+			batch.multimesh.instance_count=pieces.size()
+	var counts={"base":pieces.size(),"cap":pieces.size(),"back":pieces.size(),"shadow":pieces.size()}
+	var index=0
+	for key in pieces:
+		var piece=pieces[key];var tile=int(piece.get_meta("tile"))
+		var face_key="face_%d"%tile
+		_tile_batch(face_key,face_mesh,face_materials[tile] if tile>=0 else body_material)
+		piece.set_meta("batch_index",index);piece.set_meta("face_batch",face_key)
+		piece.set_meta("face_index",int(counts.get(face_key,0)))
+		counts[face_key]=int(counts.get(face_key,0))+1;index+=1
+		_sync_render_piece(key)
+	for key in tile_batches:
+		tile_batches[key].multimesh.visible_instance_count=int(counts.get(key,0))
+
+func _sync_render_piece(key: String) -> void:
+	var piece=pieces[key];var index=int(piece.get_meta("batch_index"))
+	var model=piece.transform*piece.get_node("Model").transform
+	tile_batches.base.multimesh.set_instance_transform(index,model*Transform3D(Basis.IDENTITY,Vector3(0,-0.115,0)))
+	tile_batches.cap.multimesh.set_instance_transform(index,model*Transform3D(Basis.IDENTITY,Vector3(0,0.055,0)))
+	tile_batches.back.multimesh.set_instance_transform(index,model*Transform3D(Basis(Vector3.RIGHT,PI),Vector3(0,-0.171,0)))
+	tile_batches.shadow.multimesh.set_instance_transform(index,shadows[key].transform)
+	tile_batches[piece.get_meta("face_batch")].multimesh.set_instance_transform(int(piece.get_meta("face_index")),model*Transform3D(Basis.IDENTITY,Vector3(0,0.171,0)))
+
+func _animate_piece(position: Vector3,key: String) -> void:
+	if not pieces.has(key):return
+	pieces[key].position=position
+	_sync_render_piece(key)
 
 func _build_dice() -> void:
 	for number in range(1,7):
@@ -219,23 +275,22 @@ func _piece(key: String,tile: int,pos: Vector3,yaw: float=0,animate: bool=false,
 	else:
 		piece=Node3D.new();add_child(piece);pieces[key]=piece
 		var model=Node3D.new();model.name="Model";piece.add_child(model)
-		mesh_node(base_mesh,back_material,Vector3(0,-0.115,0),model)
-		mesh_node(cap_mesh,body_material,Vector3(0,0.055,0),model)
-		var front=mesh_node(face_mesh,body_material,Vector3(0,0.171,0),model);front.name="Face"
-		var back=mesh_node(face_mesh,back_face_material,Vector3(0,-0.171,0),model);back.rotation.x=PI
-		var shadow=mesh_node(shadow_mesh,shadow_material,Vector3.ZERO)
-		shadow.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;shadows[key]=shadow
+		# Lightweight transforms retain the existing picking and layout contract;
+		# the visible geometry lives in the material batches above.
+		var shadow=Node3D.new();add_child(shadow);shadows[key]=shadow
 		piece.position=pos+Vector3(0,0.42,0) if animate else pos
 	var model=piece.get_node("Model")
-	model.get_node("Face").material_override=face_materials[tile] if tile>=0 else body_material
 	model.rotation.x=PI/2 if pose=="standing" else (PI if pose=="back" else 0.0)
 	piece.rotation.y=yaw;piece.scale=Vector3.ONE*scale_factor
 	piece.set_meta("tile",tile);piece.set_meta("pose",pose)
 	var shadow=shadows[key]
 	shadow.position=Vector3(pos.x+0.04,TableLayout.SURFACE_Y+0.002,pos.z-0.05)
 	shadow.rotation.y=yaw;shadow.scale=Vector3(scale_factor,1,scale_factor*(0.56 if pose=="standing" else 1.0))
+	if tile_tweens.has(key):tile_tweens[key].kill();tile_tweens.erase(key)
 	if animate and piece.position.distance_to(pos)>0.01:
-		create_tween().tween_property(piece,"position",pos,0.30).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		var tween=create_tween();tile_tweens[key]=tween
+		tween.tween_method(_animate_piece.bind(key),piece.position,pos,0.30).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.finished.connect(func():tile_tweens.erase(key))
 	else: piece.position=pos
 
 func tile_bounds(key: String) -> AABB:
@@ -304,7 +359,9 @@ func update_view(view: Dictionary) -> void:
 			offset+=local_offset+0.22
 	for key in pieces.keys():
 		if not used.has(key):
+			if tile_tweens.has(key):tile_tweens[key].kill();tile_tweens.erase(key)
 			pieces[key].queue_free();pieces.erase(key);shadows[key].queue_free();shadows.erase(key)
+	_rebuild_tile_batches()
 	last_marker.visible=not view.last_discard.is_empty()
 	if last_marker.visible:
 		var seat=int(view.last_discard.seat)

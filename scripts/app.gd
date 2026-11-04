@@ -16,6 +16,8 @@ var declare_mode = ""
 var config = {"jiang": "258", "chi": true, "ai": "efficiency", "rounds": 4}
 var muted = false
 var low_quality = false
+var desktop_window: DesktopWindow
+var display_button: Button
 # Render/input checks must neither read nor overwrite a player's preferences.
 var qa_mode = "--qa" in OS.get_cmdline_user_args()
 var players_ui: Array = []
@@ -50,6 +52,8 @@ var suppress_click_until = -1
 
 func _ready() -> void:
 	Engine.max_fps=60
+	desktop_window = DesktopWindow.new(); add_child(desktop_window)
+	desktop_window.fullscreen_changed.connect(_display_changed)
 	for t in range(43): tile_textures.append(load(Tiles.texture_path(t)))
 	for name in ["click", "tile", "deal", "notify", "win"]: sounds[name] = load("res://assets/audio/" + name + ".wav")
 	sfx = AudioStreamPlayer.new(); add_child(sfx)
@@ -76,7 +80,7 @@ func _ready() -> void:
 
 func _capture(path: String) -> void:
 	await get_tree().create_timer(3).timeout
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	get_viewport().get_texture().get_image().save_png(path)
 	print("CAPTURE_SAVED ",path)
 	if "--capture-exit" in OS.get_cmdline_user_args(): get_tree().quit()
@@ -96,7 +100,7 @@ func _layer() -> Control:
 func _show_lobby() -> void:
 	current_screen = "lobby"; session.paused = true
 	if is_instance_valid(voice): voice.stop_all()
-	table.visible=false;Engine.max_fps=30
+	table.visible=false;desktop_window.set_frame_limit(60)
 	_clear(root); modal = null; hud = null; toast_label = null
 	lobby = _layer()
 	var courtyard=UI.texture(lobby,Rect2(0,0,1600,900),load("res://assets/backgrounds/courtyard_day.jpg"))
@@ -164,7 +168,7 @@ func _resume() -> void:
 func _build_hud() -> void:
 	current_screen = "table"; _clear(root); modal = null; lobby = null; toast_label = null
 	voice.stop_all();voice.last_key="";table.last_round=-1;table.last_revision=-1
-	table.visible=true;Engine.max_fps=30 if low_quality else 60
+	table.visible=true;desktop_window.set_frame_limit(30 if low_quality else 60)
 	hud = _layer(); selected = -1; declare_mode = ""; last_revision = -1
 	waits_panel=null;waits_expanded=true
 	var badge = UI.table_panel(hud,Rect2(625,24,350,36),false,18)
@@ -648,14 +652,27 @@ func _show_rules() -> void:
 	modal.add_child(text)
 
 func _show_settings() -> void:
-	_popup("桌边设置",Vector2(680,454))
+	var desktop = desktop_window.supported
+	_popup("桌边设置",Vector2(680,554 if desktop else 454))
+	display_button = null
 	UI.label(modal,Rect2(44,108,230,40),"声音",22)
 	UI.button(modal,Rect2(307,106,325,49),"已静音" if muted else "已开启",func(): muted=not muted; voice.stop_all(); _save_preferences(); _show_settings())
 	UI.label(modal,Rect2(44,183,230,40),"画质",22)
-	UI.button(modal,Rect2(307,181,325,49),"省电 · 关闭阴影" if low_quality else "精致 · 柔和阴影",func(): low_quality=not low_quality; table.quality(low_quality); _save_preferences(); _show_settings())
+	UI.button(modal,Rect2(307,181,325,49),"省电 · 关闭阴影" if low_quality else "精致 · 柔和阴影",func(): low_quality=not low_quality; table.quality(low_quality); desktop_window.set_frame_limit(30 if low_quality and current_screen=="table" else 60); _save_preferences(); _show_settings())
 	UI.label(modal,Rect2(44,258,230,40),"电脑行牌速度",22)
 	UI.button(modal,Rect2(307,256,325,49),("舒缓 · 约 2.4 秒" if session.speed < 1 else ("标准 · 约 1.8 秒" if session.speed == 1 else "利落 · 约 1.2 秒")),func(): session.speed=1.0 if session.speed<1 else (1.5 if session.speed==1 else 0.75); _save_preferences(); _show_settings())
-	UI.label(modal,Rect2(44,340,585,69),"对局规则在开局时固定。\n新一局的将牌、吃牌与 AI 设置请返回大厅选择。",18,UI.MUTED)
+	if desktop:
+		UI.label(modal,Rect2(44,333,230,40),"显示模式",22)
+		display_button = UI.button(modal,Rect2(307,331,325,49),_display_text(),func(): desktop_window.set_fullscreen(not desktop_window.is_fullscreen()))
+		UI.label(modal,Rect2(307,388,325,29),"F11 / Alt + Enter  切换",17,UI.MUTED)
+	UI.label(modal,Rect2(44,440 if desktop else 340,585,69),"对局规则在开局时固定。\n新一局的将牌、吃牌与 AI 设置请返回大厅选择。",18,UI.MUTED)
+
+func _display_text() -> String:
+	return "无边框全屏" if desktop_window.is_fullscreen() else "窗口模式"
+
+func _display_changed(_enabled: bool) -> void:
+	if is_instance_valid(display_button): display_button.text = _display_text()
+	_save_preferences()
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
@@ -740,7 +757,7 @@ func _notification(what: int) -> void:
 func _save_preferences() -> void:
 	if qa_mode:return
 	var file=FileAccess.open("user://preferences.json",FileAccess.WRITE)
-	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2}))
+	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen()}))
 
 func _load_preferences() -> void:
 	if qa_mode:return
@@ -749,3 +766,4 @@ func _load_preferences() -> void:
 	if not prefs is Dictionary:return
 	config.merge(prefs.get("config",{}),true); muted=prefs.get("muted",false);low_quality=prefs.get("low_quality",false)
 	session.speed=clampf(prefs.get("speed",1.0),0.75,1.5) if prefs.get("pace_version",0)==2 else 1.0;table.quality(low_quality)
+	desktop_window.set_fullscreen(prefs.get("fullscreen",false) == true)

@@ -14,6 +14,8 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本�
 
 操作沿用莲花麻将：电脑悬停看牌，单击出牌；触屏单击选牌，快速双击或向上划出牌。报听／明搂时先点声明按钮，再打出带“听”标记的牌。`H` 查看牌效建议，`Esc` 暂停，“交给 AI”开启本家托管。弹窗期间牌局暂停。
 
+电脑端可在 **设置 → 显示模式** 切换窗口／无边框全屏，也可按 `F11` 或 `Alt+Enter`。全屏选择会保存，退出全屏恢复原窗口位置、大小或最大化状态。Windows 拖动、缩放期间自动减轻渲染等待，停手后恢复清晰画面与正常帧率；实现和测量见 [桌面窗口与渲染优化](docs/window-performance.md)。
+
 报听／明搂后，非胡的新摸牌会按动作与语音节拍自动打出，胡牌和合法暗杠／补杠仍等真人选择。未听时的“听牌一览”可点击窗口外关闭；已听时改为常驻听口、未见余张和自摸预估番数，可收起、展开及滚动，显示期间继续行牌。
 
 ## 当前功能
@@ -27,7 +29,7 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本�
 - AI 工作线程，按玩家可见信息计算；画面不控制规则推进。
 - 每次有效操作自动存档，关闭后续玩，当前存档保留一份 `.bak`。
 - 导出本局 JSON 牌谱（完整初始牌墙和操作日志）；这是本地调试／复盘数据，不是局域网广播内容。
-- 省电画质、声音开关、AI 行牌速度。横屏设计，其他比例保留画面比例。
+- 无边框全屏、省电画质、声音开关、AI 行牌速度。横屏设计，其他比例保留画面比例。
 
 第一阶段**没有联网建房**。局域网房间的设置和行为基线已记录，权威引擎／座位视图／动作接口已分离；第二阶段再实现传输、入座、准备与重连。
 
@@ -35,7 +37,7 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本�
 
 ```powershell
 powershell -File tools/test.ps1
-# 批量验收 1440×810、960×540 的五组真实渲染；分别保存日志、截图和结果。
+# 常规五组真实渲染（会打开游戏窗口）；工作桌面空闲时再运行。
 powershell -File tools/test_ui.ps1
 # 真实 Godot 渲染窗口的 UI 输入事件测试：
 & tools/run.ps1 -Godot '' --script res://tests/ui_smoke.gd
@@ -44,6 +46,10 @@ powershell -File tools/test_ui.ps1
 & tools/run.ps1 -Godot '' --script res://tests/waits_smoke.gd
 # 立姿、墙尾、旧局亮牌与花牌遮挡的真实渲染回归：
 & tools/run.ps1 -Godot '' --script res://tests/table_art_smoke.gd
+# 全屏往返／移动／缩放会操作桌面，只在桌面空闲时单独运行：
+& tools/test_ui.ps1 -Suites window_smoke -Resolutions 1440x810 -AllowDesktopChanges
+# 单独执行合批正确性回归，默认限帧且仅少量采样：
+& tools/run.ps1 -Godot '' --script res://tests/render_performance.gd -- --qa
 ```
 
 核心测试直接由 Godot 运行，无 npm、Python 或外部游戏服务依赖。包含原项目生成的 1,140 组胡牌／计分参考牌例、64 组 AI 选择参考，以及整局模拟、牌张守恒、积分守恒、私有手牌和存档重放检查。

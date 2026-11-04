@@ -8,6 +8,8 @@ build/
 # from the scripts. Keep a separate local backup; do not clean them as caches.
 # Commit selected runtime images under assets/, preparation tools, source hashes
 # in assets/art_manifest.json and reviewed results in docs/verification.md instead.
+# Window/fullscreen QA screenshots and render/resize benchmark JSON also belong
+# here; commit their reproducible tests and reviewed measurements, not captures.
 artifacts/
 # Superseded procedural cloth/floor previews are reproducible with
 # tools/make_table_texture.py. Keep local copies for design comparison;
