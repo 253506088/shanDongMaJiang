@@ -30,6 +30,8 @@ tmp/
 *.apk
 *.aab
 *.pck
+# APK v4 signature sidecars are generated with installers and stay local too.
+*.apk.idsig
 # Local IDE and operating system files.
 .idea/
 .vscode/
