@@ -30,6 +30,50 @@ func finish(code: int) -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_directory))
 	quit(code)
 
+func _verify_field_badge_clearance() -> void:
+	var engine=fixture("wildcard")
+	for seat in range(1,4):
+		var player=engine.state.players[seat]
+		player.hand=[0,1,2,3,4,5,9,10,11,18,19,20,22,22]
+		player.melds=[];player.ming=true;player.bao=true;player.drawn=13
+	app._changed(engine.view(0));await pause_frames(2)
+	var old_badge=Rect2(595,69,410,39)
+	var reproduces_report=false
+	for key in app.table.pieces:
+		if not key.begins_with("h2-"):continue
+		if old_badge.intersects(_project_tile(key)):reproduces_report=true
+	expect(reproduces_report,"fixture reproduces the reported banner over the opposite open hand")
+	for id in FieldRules.IDS:
+		for status in ["", " · 可用", " · 已用"]:
+			app.field_button.text="场地 · "+str(FieldRules.info(id).name)+status
+			await pause_frames(1)
+			var rect=app.field_button.get_global_rect()
+			expect(rect.end.y<=70 and rect.end.x<app.round_text.get_parent().get_global_rect().position.x,"every field name and status stays inside its toolbar space")
+	var viewport=app.scene_surface.scene_viewport
+	var original_size=viewport.size
+	app.field_button.text="场地 · 天使的施舍 · 已用"
+	for pixels in [Vector2i(960,540),Vector2i(1600,900),Vector2i(1920,1080)]:
+		viewport.size=pixels;await pause_frames(2)
+		# Include the soft shadow as well as the button's hit area.
+		var rect=app.field_button.get_global_rect().grow(11)
+		var clear=true
+		for key in app.table.pieces:
+			if rect.intersects(_project_tile(key)):clear=false;break
+		expect(clear,"field entry and shadow clear all projected hands, melds and wall at %s"%pixels)
+		for control in app.hud.get_children():
+			if not control is Control or control==app.field_button or not control.visible:continue
+			expect(not rect.intersects(control.get_global_rect()),"field entry clears the round label and side information at %s"%pixels)
+	viewport.size=original_size
+	app.field_button.pressed.emit();await pause_frames(2)
+	expect(is_instance_valid(app.modal) and labels(app.modal).has("癞子"),"relocated field entry still opens the current rule")
+	app._close_modal()
+
+func _project_tile(key: String) -> Rect2:
+	var bounds=app.table.tile_bounds(key)
+	var rect=Rect2(app.table.camera.unproject_position(bounds.get_endpoint(0)),Vector2.ZERO)
+	for corner in range(1,8):rect=rect.expand(app.table.camera.unproject_position(bounds.get_endpoint(corner)))
+	return rect
+
 func run() -> void:
 	if DisplayServer.get_name()!="headless":printerr("Field UI checks require --headless");quit(1);return
 	create_timer(100).timeout.connect(func():printerr("FIELD_UI watchdog timeout");await finish(1))
@@ -53,6 +97,7 @@ func run() -> void:
 	app.discovery.stop();app._build_hud()
 	fixture("");await pause_frames(2)
 	expect(not app.field_button.visible,"normal table has no field badge")
+	await _verify_field_badge_clearance()
 	var engine=fixture("diamond_finger");await pause_frames(2)
 	expect(app.field_button.visible and app.field_button.text.contains("大力金刚指"),"table identifies active field")
 	expect(find_button(app.root,"场地能力")!=null,"legal field skill has a table action")

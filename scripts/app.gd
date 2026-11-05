@@ -335,7 +335,9 @@ func _build_hud() -> void:
 	opponent_waits_panels.clear();opponent_waits_cache.clear();opponent_waits_round=-1
 	var badge = UI.table_panel(hud,Rect2(625,24,350,36),false,18)
 	round_text = UI.label(badge,Rect2(0,0,350,36),"",18,UI.TABLE_TEXT); round_text.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	field_button = UI.table_button(hud,Rect2(595,69,410,39),"",_show_current_field)
+	# The second row belongs to the opposite player's exposed hand. Keep the
+	# field entry in the top toolbar band, beside the centred round information.
+	field_button = UI.table_button(hud,Rect2(28,23,300,42),"",_show_current_field)
 	field_button.visible = false
 	UI.table_button(hud,Rect2(1245,23,96,42),"玩法",_show_rules,false,"help")
 	UI.table_button(hud,Rect2(1351,23,96,42),"设置",_show_settings,false,"settings")
