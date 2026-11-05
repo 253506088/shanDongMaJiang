@@ -9,7 +9,7 @@
 | 优化 | 莲花麻将依据（相对前身源码根目录） | 山东麻将本次处理 |
 | --- | --- | --- |
 | 电脑鼠标悬停看牌、单击出牌 | `src/components/table/GameTableHud.vue` 的 `handleTileHover` / `handleTileActivation` | 迁移，鼠标直接点击打牌，不再强迫二次点击 |
-| 触屏单击选牌、短时双击打出、上划打出，空白处取消选择 | 同文件 `beginTileGesture` / `finishTileGesture` / `clearMobileSelection` | 迁移双击 360ms、上划 28px / 700ms 门槛；触屏设备手感仍需实机体验 |
+| 触屏选牌、再次点击打出、上划打出，空白处取消选择 | 同文件 `beginTileGesture` / `finishTileGesture` / `clearMobileSelection` | 2026-11-05 按用户要求取消原 360ms 双击门槛：再点选中牌打出，点其他牌切换；保留上划 28px / 700ms 门槛；设备手感仍需实机体验 |
 | 新摸牌与原手牌隔开；选中牌抬起；可听弃牌有标识 | 同文件 `hand-rack` / `hand-tile-slot` | 保留间隔、抬起与“听”标记，增加“新摸”文字 |
 | 看本牌和同花色相邻牌的未见张数 | `src/components/table/tileInspection.ts`、`TileUnseenHint.vue` | 悬停放大牌面，展示相邻牌和未见张数 |
 | 检查公开弃牌、副露、明搂牌；不泄露暗牌 | `GameTableHud.vue` 的 `inspectPublicTile`、`three/tilePicking.ts` | 支持点击 3D 明牌查看，也可打开“查看桌面牌”大图列表 |

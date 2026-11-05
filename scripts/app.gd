@@ -51,8 +51,6 @@ var last_touch_ms = -1000
 var touch_started = Vector2.ZERO
 var touch_started_ms = 0
 var touch_index = -1
-var last_tap_index = -1
-var last_tap_ms = -1000
 var suppress_click_until = -1
 var lan_lobby: LanLobby
 var discovery: LanDiscovery
@@ -376,7 +374,7 @@ func _changed(new_view: Dictionary) -> void:
 	if current_screen != "table": return
 	if last_revision != view.revision:
 		selected = -1; declare_mode = ""
-		last_tap_index=-1; _clear(inspect_layer)
+		_clear(inspect_layer)
 		if last_revision >= 0:
 			_sound("win" if view.phase=="settled" and not view.result.draw else ("notify" if view.event.kind in ["bao","ming","gang","angang","bugang","peng","chi"] else "tile"))
 			_show_cue(view.event)
@@ -523,9 +521,9 @@ func _activate_tile(index: int) -> void:
 	if not view.pending.any(func(a):return a.kind=="discard" and a.index==index): return
 	if now-last_touch_ms > 500:
 		selected=index; _discard_selected(); return
-	if last_tap_index==index and now-last_tap_ms<=360:
-		last_tap_index=-1; selected=index; _discard_selected(); return
-	last_tap_index=index;last_tap_ms=now;selected=index;_draw_hand();_draw_actions()
+	# Touch confirms the visibly selected tile, regardless of time between taps.
+	# Activation stays on button release to avoid handling its paired mouse twice.
+	_select(index)
 
 func _input(event: InputEvent) -> void:
 	if current_screen != "table" or is_instance_valid(modal): return
@@ -536,7 +534,7 @@ func _input(event: InputEvent) -> void:
 			for button in hand_layer.get_children():
 				if button is TextureButton and button.get_global_rect().has_point(event.position): touch_index=button.get_meta("hand_index")
 			if touch_index<0 and not _touch_over_button(event.position):
-				selected=-1;declare_mode="";last_tap_index=-1;last_tap_ms=-1000
+				selected=-1;declare_mode=""
 				_draw_hand();_draw_actions();_clear(inspect_layer)
 		elif touch_index>=0:
 			var travel=event.position-touch_started
@@ -852,7 +850,7 @@ func _popup(title: String, dimensions: Vector2, dismiss_outside: bool = false) -
 			var touch_release=event is InputEventScreenTouch and not event.pressed
 			if mouse_release or touch_release:
 				shade.accept_event();suppress_click_until=Time.get_ticks_msec()+500
-				touch_index=-1;last_tap_index=-1;_close_modal())
+				touch_index=-1;_close_modal())
 	modal=UI.panel(shade,Rect2((Vector2(1600,900)-dimensions)/2,dimensions),UI.PAPER,Color("baa57966"),20)
 	var rim=modal.get_theme_stylebox("panel").duplicate()
 	rim.shadow_color=Color("020c0ab0");rim.shadow_size=28;rim.shadow_offset=Vector2(0,12)
