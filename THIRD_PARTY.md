@@ -2,6 +2,14 @@
 
 本仓库为用户的独立私有项目。这里列出第三方部分的许可，不对项目全部自有代码另行授予开源许可。
 
+## 斗地主与离线中文报牌（2026-11-05）
+
+`scripts/doudizhu/` 的规则实现、AI、牌桌与矢量扑克牌由本项目独立编写。玩法核对 [Pagat — Dou Dizhu](https://www.pagat.com/climbing/doudizhu.html) 等公开资料，未复制网页正文或第三方斗地主源码。采用的规则变体与资料差异见 `docs/doudizhu-rules.md`。
+
+`assets/doudizhu/audio/` 的60段中文报牌为开放模型生成音频，并非从商业游戏提取的录音。模型为 [hexgrad/Kokoro-82M-v1.1-zh](https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh)，固定revision `01e7505bd6a7a2ac4975463114c3a7650a9f7218`；采用Apache-2.0的 [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) 1.12.40 CPU转换模型离线生成，音色zm_010。仅分发24kHz PCM WAV，不分发模型与生成环境，运行时不联网。
+
+完整Apache-2.0许可、来源声明、上游模型卡与逐文件SHA-256清单分别保存在 `assets/licenses/doudizhu-Apache-2.0.txt`、`doudizhu-voice-NOTICE.txt`、`doudizhu-Kokoro-model-card.md` 和 `doudizhu-voice-manifest.json`。剪静音、音量处理及可复核生成脚本为 `tools/import_doudizhu_audio.py`；调查和准确授权边界见 `docs/doudizhu-sources.md`。游戏内「关于 → 查看开源许可」同时收录来源和许可正文。
+
 ## 山东麻将规则和 AI 的移植
 
 来源：https://github.com/253506088/lianhuaguangdongmahjong （上游 BestGuo2020/lianhuaguangdongmahjong）。

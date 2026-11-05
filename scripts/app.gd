@@ -1,4 +1,6 @@
 extends Node
+const DoudizhuMode = preload("res://scripts/doudizhu/mode.gd")
+var doudizhu: Control
 var session: LocalSession
 var table: Table3D
 var canvas: CanvasLayer
@@ -85,7 +87,9 @@ func _ready() -> void:
 	_show_lobby()
 	get_tree().auto_accept_quit = false
 	var args = OS.get_cmdline_user_args()
-	if "--demo" in args:
+	if "--doudizhu" in args:
+		_open_doudizhu()
+	elif "--demo" in args:
 		_start_game(false)
 	if "--autoplay" in args: session.autopilot = true; session.speed = 8
 	if "--capture" in args:
@@ -113,6 +117,10 @@ func _layer() -> Control:
 
 func _show_lobby() -> void:
 	if _is_lan(): _confirm_leave_lan(); return
+	if is_instance_valid(doudizhu):
+		doudizhu.session.shutdown()
+		doudizhu.voice.stop_all()
+		doudizhu = null
 	discovery.stop()
 	current_screen = "lobby"; session.paused = true
 	if is_instance_valid(voice): voice.stop_all()
@@ -129,6 +137,8 @@ func _show_lobby() -> void:
 	var bg = UI.texture(lobby,Rect2(0,0,1600,900),backdrop);bg.stretch_mode = TextureRect.STRETCH_SCALE
 	UI.table_button(lobby,Rect2(1314,40,110,46),"玩法",_show_rules,false,"help")
 	UI.table_button(lobby,Rect2(1436,40,110,46),"设置",_show_settings,false,"settings")
+	UI.button(lobby,Rect2(105,90,180,46),"山东麻将",func(): pass,true)
+	UI.button(lobby,Rect2(297,90,180,46),"斗地主",_open_doudizhu)
 	UI.label(lobby,Rect2(104,157,650,30),"山 东 麻 将  ·  青 玉 台",20,UI.ACCENT,true)
 	UI.label(lobby,Rect2(98,215,740,106),"好牌，慢慢来。",70,UI.TEXT,true)
 	UI.label(lobby,Rect2(105,344,660,65),"一方庭院，四席牌友。\n熟悉的山东玩法，随时落座，随时续玩。",22,UI.MUTED)
@@ -170,8 +180,25 @@ func _show_lobby() -> void:
 	UI.button(lobby,Rect2(105,726,279,66),"入 座 开 局   →",func(): _start_game(true),true)
 	if session.has_save(): UI.button(lobby,Rect2(402,726,221,66),"继续上次牌局",_resume)
 	UI.button(lobby,Rect2(641,726,183,66),"附近同桌",_show_lan_browser)
-	UI.label(lobby,Rect2(105,839,1000,24),"单机续玩   ·   同一 Wi-Fi / 热点联机",14,UI.MUTED)
+	UI.label(lobby,Rect2(105,839,1000,24),"麻将单机 / 附近同桌   ·   斗地主单机",14,UI.MUTED)
 	UI.button(lobby,Rect2(1426,829,120,42),"关于",_about)
+
+func _open_doudizhu() -> void:
+	if _is_lan(): return
+	session.paused = true
+	discovery.stop()
+	voice.stop_all()
+	current_screen = "doudizhu"
+	table.visible = false
+	desktop_window.set_frame_limit(60)
+	_clear(root)
+	modal = null; lobby = null; hud = null; toast_label = null
+	doudizhu = DoudizhuMode.new()
+	doudizhu.muted = muted
+	doudizhu.qa_mode = qa_mode
+	doudizhu.exit_requested.connect(_show_lobby)
+	doudizhu.mute_changed.connect(func(value): muted = value; _save_preferences())
+	root.add_child(doudizhu)
 
 func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callable) -> void:
 	var b = UI.button(parent,rect,text,callback,on)
@@ -1311,7 +1338,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,108,671,210),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.2.0"))+"\nGodot 4.5 · 单机与局域网同桌\n\n规则迁移自莲花广麻项目的山东麻将（MIT）。\n牌面图片与逐牌语音沿用莲花麻将；花牌 CC BY-SA 4.0。\n字体：Noto Sans SC / Noto Serif SC（SIL OFL 1.1）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.5.0"))+"\n山东麻将单机 / 附近同桌 · 独立单机斗地主\n\n麻将规则、牌面和语音参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克为程序绘制；斗地主语音由开放模型生成。\nKokoro / sherpa-onnx：Apache-2.0，详见开源许可。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 
@@ -1389,6 +1416,9 @@ func _process(delta: float) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:return
+	if current_screen=="doudizhu":
+		if event.keycode==KEY_ESCAPE and is_instance_valid(doudizhu): doudizhu.pause_menu()
+		return
 	if event.keycode==KEY_ESCAPE:
 		if is_instance_valid(modal):_close_modal()
 		elif is_instance_valid(inspect_layer) and inspect_layer.get_child_count()>0: _clear(inspect_layer)
@@ -1405,7 +1435,10 @@ func _notification(what: int) -> void:
 		if _is_lan(): (session as LanSession).leave_room()
 		get_tree().quit()
 	if what==NOTIFICATION_APPLICATION_PAUSED or what==NOTIFICATION_WM_GO_BACK_REQUEST:
-		if current_screen=="table" and not is_instance_valid(modal):_pause()
+		if current_screen=="doudizhu" and is_instance_valid(doudizhu):
+			if what==NOTIFICATION_APPLICATION_PAUSED: doudizhu.pause_on_background()
+			else: doudizhu.pause_menu()
+		elif current_screen=="table" and not is_instance_valid(modal):_pause()
 		elif what==NOTIFICATION_WM_GO_BACK_REQUEST and current_screen=="lan":
 			if _is_lan(): _confirm_leave_lan()
 			else: _show_lobby()

@@ -26,6 +26,9 @@ artifacts/
 # Downloaded Godot/export templates, scratch files and repeatable test outputs.
 # Field-rule build logs and headless multi-process package probes also use tmp/;
 # retain source tests and verification notes, and clean only the current run.
+# Dou Dizhu voice-generation models/dependencies and download scratch also use
+# tmp/ddz-audio-research-*/; keep only runtime WAVs, license/source manifests,
+# generation tools and reviewed evidence. Clean this task's scratch after use.
 tmp/
 *.log
 # Exported release archives and device install packages are delivery artifacts.

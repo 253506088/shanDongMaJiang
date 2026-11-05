@@ -1,0 +1,27 @@
+Dou Dizhu offline speech — provenance notice
+
+The WAV clips in assets/doudizhu/audio were generated for this project from
+the project's short Chinese card/action phrases. They are synthesized audio,
+not a repackaged commercial-game recording library or a human recording pack.
+
+Model: hexgrad/Kokoro-82M-v1.1-zh (Apache License 2.0)
+Model revision: 01e7505bd6a7a2ac4975463114c3a7650a9f7218
+https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh
+Model architecture credits: StyleTTS 2 / ISTFTNet; trained by @rzvzn.
+The model card credits LongMaoData for permissively provided Chinese data.
+A copy of the upstream model card is doudizhu-Kokoro-model-card.md.
+
+Offline inference: sherpa-onnx 1.12.40, CPU, Kokoro v1.1 int8 ONNX conversion.
+Voice: zm_010 (speaker ID 59); speed: 1.0; mono 24 kHz PCM16 WAV.
+https://github.com/k2-fsa/sherpa-onnx
+Copyright (c) 2023-2025 Xiaomi Corporation and sherpa-onnx contributors.
+Apache License 2.0; full text is included as doudizhu-Apache-2.0.txt.
+
+Generation tool: tools/import_doudizhu_audio.py
+Exact artifact URL, model/file hashes, voice, parameters, generated phrase
+text and each resulting WAV's SHA-256 are in doudizhu-voice-manifest.json.
+The generated audio is trimmed, peak-normalized and faded at its endpoints.
+
+Only the generated PCM WAV files are runtime dependencies. The model weights,
+ONNX synthesizer and Python development dependencies are not distributed with
+the game. No operating-system voice, network connection or microphone is used.
