@@ -20,7 +20,7 @@ var presentation_delay = 0.0
 
 func action_delay(kind: String) -> float:
 	# A readable beat after the visible action, independent of AI compute time.
-	var seconds = 2.1 if kind in ["chi", "peng", "gang", "angang", "bugang", "bao", "ming"] else 1.8
+	var seconds = 2.1 if kind in ["chi", "peng", "gang", "angang", "bugang", "bao", "ming"] or kind.begins_with("field_") else 1.8
 	return seconds / maxf(speed, 0.1)
 
 func hold_presentation(seconds: float) -> void:
@@ -69,6 +69,11 @@ func _start_worker(hint: bool = false) -> void:
 	if error != OK:
 		worker = null; notice.emit("AI 线程启动失败，请暂停后重试")
 
+static func keeps_human_choice(move: Dictionary) -> bool:
+	# A once-per-round ability remains the owner's decision. Discarding the
+	# drawn tile skips it for this turn; using it restores automatic play.
+	return move.kind in ["win", "angang", "bugang", "field_rebirth", "field_transform", "field_reclaim", "field_peek_wall", "field_peek_waits"]
+
 func locked_discard_action() -> Dictionary:
 	# Lotus's local locked turns show the new tile briefly, then discard it.
 	# Keep real choices (winning or a legal wait-preserving kong) with the human.
@@ -76,7 +81,7 @@ func locked_discard_action() -> Dictionary:
 	if state.is_empty() or state.phase != "turn" or state.current != 0: return {}
 	var player = state.players[0]
 	if not (player.bao or player.ming) or player.drawn < 0 or player.drawn >= player.hand.size(): return {}
-	if state.pending.any(func(move): return move.kind in ["win", "angang", "bugang"]): return {}
+	if state.pending.any(keeps_human_choice): return {}
 	for move in state.pending:
 		if move.kind == "discard" and move.index == player.drawn: return move
 	return {}

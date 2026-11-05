@@ -19,11 +19,18 @@ static func for_seat(source: Dictionary, local_seat: int) -> Dictionary:
 		player.absolute_seat = absolute_seat
 		for meld in player.melds:
 			if meld.has("from"): meld.from = relative(int(meld.from), local_seat)
+		var private_field: Dictionary = player.get("field_private", {})
+		if private_field.has("peek_target"):
+			private_field.peek_target = relative(int(private_field.peek_target), local_seat)
 		players.append(player)
 	result.players = players
+	for move in result.get("pending", []):
+		if move.has("target"): move.target = relative(int(move.target), local_seat)
 	for key in ["event", "last_discard"]:
 		if result.get(key, {}).has("seat"):
 			result[key].seat = relative(int(result[key].seat), local_seat)
+		if result.get(key, {}).has("target"):
+			result[key].target = relative(int(result[key].target), local_seat)
 	var settlement: Dictionary = result.get("result", {})
 	for key in ["winner", "source"]:
 		if settlement.has(key): settlement[key] = relative(int(settlement[key]), local_seat)

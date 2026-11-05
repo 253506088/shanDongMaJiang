@@ -5,6 +5,10 @@ $projectDir = Split-Path $PSScriptRoot -Parent
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/test_runner.gd
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+foreach ($suite in @('field_rules_test', 'field_engine_test', 'field_session_test', 'field_ui_test', 'field_review_test')) {
+    & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script "res://tests/$suite.gd" -- --qa
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/ux_regressions.gd
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/locked_turn_regressions.gd

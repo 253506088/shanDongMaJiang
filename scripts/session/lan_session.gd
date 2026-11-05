@@ -7,7 +7,7 @@ signal room_changed(room: Dictionary)
 signal connection_closed(reason: String)
 
 const GAME_PORT = 32141
-const PROTOCOL = 1
+const PROTOCOL = 2
 const APP_ID = "qingyu-shandong-lan"
 const MAX_PACKET = 65536
 const HEARTBEAT_SECONDS = 2.0
@@ -64,7 +64,8 @@ func _new_token() -> String:
 
 func _settings(value: Dictionary) -> Dictionary:
 	return {"jiang": "luan" if value.get("jiang") == "luan" else "258", "chi": value.get("chi", true) == true,
-		"ai": "classic" if value.get("ai") == "classic" else "efficiency", "rounds": 0, "takeover": false}
+		"ai": "classic" if value.get("ai") == "classic" else "efficiency", "rounds": 0, "takeover": false,
+		"field_rules": value.get("field_rules", false) is bool and value.get("field_rules", false)}
 
 func host_room(settings: Dictionary, player_name: String = "房主", port: int = GAME_PORT) -> Error:
 	leave_room()
@@ -359,7 +360,7 @@ func _valid_room(value: Variant) -> bool:
 
 func _valid_view(value: Dictionary) -> bool:
 	if value.has("wall") or value.has("journal") or value.has("claim_queue"): return false
-	if value.get("phase") not in ["turn", "claim", "settled"] or not value.get("revision") is int or not value.get("round") is int: return false
+	if value.get("phase") not in ["turn", "claim", "settled", "draw_choice", "gift_choice", "exchange"] or not value.get("revision") is int or not value.get("round") is int: return false
 	if not value.get("players") is Array or value.players.size() != 4 or not value.get("pending") is Array: return false
 	for player in value.players:
 		if not player is Dictionary or not player.get("hand") is Array or not player.get("melds") is Array or not player.get("discards") is Array: return false
@@ -440,7 +441,7 @@ func _locked_discard(seat: int) -> Dictionary:
 	if state.is_empty() or state.phase != "turn" or state.current != seat: return {}
 	var player: Dictionary = state.players[seat]
 	if not (player.bao or player.ming) or player.drawn < 0 or player.drawn >= player.hand.size(): return {}
-	if state.pending.any(func(move): return move.kind in ["win", "angang", "bugang"]): return {}
+	if state.pending.any(keeps_human_choice): return {}
 	for move in state.pending:
 		if move.kind == "discard" and move.index == player.drawn: return move
 	return {}

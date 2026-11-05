@@ -13,7 +13,7 @@ var toast_time = 0.0
 var view: Dictionary = {}
 var selected = -1
 var declare_mode = ""
-var config = {"jiang": "258", "chi": true, "ai": "efficiency", "rounds": 4}
+var config = {"jiang": "258", "chi": true, "ai": "efficiency", "rounds": 4, "field_rules": false}
 var muted = false
 var low_quality = false
 var desktop_window: DesktopWindow
@@ -57,6 +57,8 @@ var discovery: LanDiscovery
 var lan_player_name = "牌友"
 var lan_address = ""
 var lan_room_menu = false
+var field_button: Button
+var field_exchange_selection: Array = []
 
 func _ready() -> void:
 	Engine.max_fps=60
@@ -141,7 +143,7 @@ func _show_lobby() -> void:
 		UI.portrait(companions,Vector2(x,14),56,seat)
 		var caption=UI.label(companions,Rect2(x-12,77,80,26),["","听松","观澜","知秋"][seat],16,UI.TABLE_TEXT)
 		caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	var options = UI.table_panel(lobby,Rect2(104,465,720,229),false,18)
+	var options = UI.table_panel(lobby,Rect2(104,465,720,249),false,18)
 	UI.label(options,Rect2(25,17,240,32),"本桌约定",22,UI.TEXT)
 	UI.label(options,Rect2(25,67,65,42),"将牌",17,UI.MUTED)
 	_toggle(options,Rect2(89,68,124,42),"二五八将",config.jiang=="258",func(): config.jiang="258"; _save_preferences(); _show_lobby())
@@ -156,7 +158,10 @@ func _show_lobby() -> void:
 	for i in range(3):
 		var rounds = [4,8,0][i]
 		_toggle(options,Rect2(420+i*92,120,86,42),["东风","半庄","自由"][i],config.rounds==rounds,func(): config.rounds=rounds; _save_preferences(); _show_lobby())
-	UI.label(options,Rect2(25,180,665,28),"底分 10  ·  起始 2000 分  ·  144 张含花牌  ·  每局轮庄",16,UI.MUTED)
+	UI.label(options,Rect2(25,180,65,42),"场地",17,UI.MUTED)
+	_toggle(options,Rect2(89,180,124,42),"不开启",not config.get("field_rules",false),func(): config.field_rules=false; _save_preferences(); _show_lobby())
+	_toggle(options,Rect2(219,180,124,42),"每局随机",config.get("field_rules",false),func(): config.field_rules=true; _save_preferences(); _show_lobby())
+	UI.button(options,Rect2(419,180,272,42),"场地规则 · 查看全部",_show_field_catalog)
 	UI.button(lobby,Rect2(105,726,279,66),"入 座 开 局   →",func(): _start_game(true),true)
 	if session.has_save(): UI.button(lobby,Rect2(402,726,221,66),"继续上次牌局",_resume)
 	UI.button(lobby,Rect2(641,726,183,66),"附近同桌",_show_lan_browser)
@@ -205,6 +210,7 @@ func _make_lan_screen() -> void:
 		if _is_lan() and not (session as LanSession).start_room(): _toast("请等待在座牌友全部准备。"))
 	lan_lobby.settings_requested.connect(func(settings):
 		if _is_lan(): (session as LanSession).set_room_settings(settings))
+	lan_lobby.field_catalog_requested.connect(_show_field_catalog)
 	lan_lobby.disconnect_autoplay_requested.connect(func(enabled):
 		if _is_lan(): (session as LanSession).set_disconnect_autoplay(enabled))
 	lan_lobby.leave_requested.connect(_confirm_leave_lan)
@@ -329,6 +335,8 @@ func _build_hud() -> void:
 	opponent_waits_panels.clear();opponent_waits_cache.clear();opponent_waits_round=-1
 	var badge = UI.table_panel(hud,Rect2(625,24,350,36),false,18)
 	round_text = UI.label(badge,Rect2(0,0,350,36),"",18,UI.TABLE_TEXT); round_text.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	field_button = UI.table_button(hud,Rect2(595,69,410,39),"",_show_current_field)
+	field_button.visible = false
 	UI.table_button(hud,Rect2(1245,23,96,42),"玩法",_show_rules,false,"help")
 	UI.table_button(hud,Rect2(1351,23,96,42),"设置",_show_settings,false,"settings")
 	UI.table_button(hud,Rect2(1457,23,115,42),"房间" if _is_lan() else "暂停  II",_pause).tooltip_text="查看房间（Esc）" if _is_lan() else "暂停对局（Esc）"
@@ -372,8 +380,11 @@ func _changed(new_view: Dictionary) -> void:
 		_close_modal(); last_revision = -1
 	view = new_view
 	if current_screen != "table": return
-	if last_revision != view.revision:
+	var revision_changed=last_revision!=view.revision
+	if revision_changed:
 		selected = -1; declare_mode = ""
+		field_exchange_selection.clear()
+		if is_instance_valid(modal) and modal.get_meta("field_action",false): _close_modal()
 		_clear(inspect_layer)
 		if last_revision >= 0:
 			_sound("win" if view.phase=="settled" and not view.result.draw else ("notify" if view.event.kind in ["bao","ming","gang","angang","bugang","peng","chi"] else "tile"))
@@ -392,15 +403,21 @@ func _changed(new_view: Dictionary) -> void:
 	table.update_view(view)
 	var field = ["东","南","西","北"][((int(view.round)-1)/4)%4]
 	round_text.text = "%s风 · 第 %d 局  /  %s" % [field,view.round,"二五八将" if view.settings.jiang=="258" else "乱将"]
+	field_button.visible = not _field_id().is_empty()
+	if field_button.visible:
+		var rule = FieldRules.info(_field_id())
+		var ability = " · 已用" if view.players[0].get("field_used",false) else (" · 可用" if _field_moves().size()>0 else "")
+		field_button.text = "场地 · "+str(rule.name)+ability
+		field_button.tooltip_text = str(rule.summary)+"\n点击查看规则、能力与本局信息。"
 	head_tile.texture = tile_textures[view.gang_head] if view.gang_head>=0 else tile_textures[42]
-	head_name.text=Tiles.spoken_title(view.gang_head) if view.gang_head>=0 else "—"
+	head_name.text=Tiles.spoken_title(view.gang_head) if view.gang_head>=0 else ("盖牌" if _field_id()=="transparent" else "—")
 	for seat in range(4):
 		var p = view.players[seat]; var info = players_ui[seat]
 		info.name.text = str(p.name); info.panel.tooltip_text = str(p.name)
 		info.score.text = str(p.score)
 		info.state.text = "庄" if seat==view.dealer else ""
 		var flowers=Rules.flower_count(p.melds)
-		var state_text="明搂" if p.ming else ("已听" if p.bao else "")
+		var state_text="明搂" if p.ming else ("已听" if p.bao else ("亮手 · 未听" if p.get("revealed_hand",false) else ""))
 		info.info.text = state_text + ("  ·  " if not state_text.is_empty() and flowers>0 else "") + ("花 %d"%flowers if flowers>0 else "")
 		var active=seat==view.decision_seat and view.phase!="settled"
 		info.turn.visible=active
@@ -412,9 +429,11 @@ func _changed(new_view: Dictionary) -> void:
 	_draw_hand(); _draw_actions(); _draw_waits_panel(); _draw_opponent_waits()
 	if view.decision_seat == 0 and view.pending.any(func(a):return a.kind in ["win","gang","peng","chi","angang","bugang"]): _sound("notify")
 	if view.phase == "settled" and (not _is_lan() or new_result): _celebrate()
+	elif view.decision_seat==0 and view.phase=="gift_choice" and not is_instance_valid(modal): _show_field_picker("field_gift_pick")
+	elif revision_changed and view.event.get("seat",-1)==0 and view.event.kind in ["field_peek_wall","field_peek_waits"]: _show_current_field()
 
 func _show_cue(event: Dictionary) -> void:
-	var names={"bao":"报 听","ming":"明 搂","upgrade_ming":"明 搂","chi":"吃","peng":"碰","gang":"杠","angang":"暗 杠","bugang":"补 杠"}
+	var names={"bao":"报 听","ming":"明 搂","upgrade_ming":"明 搂","chi":"吃","peng":"碰","gang":"杠","angang":"暗 杠","bugang":"补 杠","field_transform":"变 白","field_rebirth":"新 生","field_reclaim":"撤 回","field_gift":"施 舍","field_exchange":"换 牌"}
 	if not names.has(event.kind):return
 	if is_instance_valid(action_cue):action_cue.queue_free()
 	action_cue=Control.new();hud.add_child(action_cue);action_cue.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -473,8 +492,11 @@ func _draw_hand() -> void:
 		var face=UI.texture(button,Rect2(0,0,70,108),tile_textures[p.hand[i]])
 		button.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND if legal else Control.CURSOR_ARROW
 		button.modulate=Color.WHITE
-		var ready_discard=view.pending.any(func(a): return a.kind=="bao" and a.index==i)
-		if p.drawn==i:
+		var ready_discard=view.pending.any(func(a): return a.kind in ["bao","ming"] and a.index==i)
+		if _field_id()=="transparent" and i<p.get("hand_public",[]).size():
+			var visibility="明" if p.hand_public[i] else "暗"
+			_hand_tag(Rect2(left,top-23,70,21),("新摸 · " if p.drawn==i else "")+visibility+(" · 听" if ready_discard and p.drawn!=i else ""))
+		elif p.drawn==i:
 			_hand_tag(Rect2(left,top-23,70,21),"新摸 · 听" if ready_discard else "新摸")
 		button.pressed.connect(func(): _activate_tile(i))
 		button.set_meta("hand_index",i)
@@ -492,12 +514,12 @@ func _draw_hand() -> void:
 		hand_layer.add_child(button)
 		if selected==i:
 			var line = ColorRect.new(); line.position=Vector2(left+8,top+108); line.size=Vector2(54,3); line.color=UI.TABLE_GOLD; line.mouse_filter=Control.MOUSE_FILTER_IGNORE; hand_layer.add_child(line)
-		if ready_discard and p.drawn!=i:
+		if ready_discard and p.drawn!=i and _field_id()!="transparent":
 			_hand_tag(Rect2(left+43,top-16,23,24),"听")
 	if selected>=0 and selected<p.hand.size():
 		var waiting=[]
 		for a in view.pending:
-			if a.kind=="bao" and a.index==selected: waiting=a.waits
+			if a.kind in ["bao","ming"] and a.index==selected: waiting=a.waits
 		detail_label.text = "打出 " + Tiles.title(p.hand[selected]) + (" · 听 " + "、".join(waiting.map(func(t): return Tiles.title(t))) if not waiting.is_empty() else " · 再点一次打出")
 	else: detail_label.text=""
 
@@ -566,10 +588,17 @@ func _draw_actions() -> void:
 		return
 	if view.is_empty() or view.decision_seat!=0: return
 	var actions=[]
-	if view.phase=="claim":
+	if view.phase=="exchange":
+		actions.append({"text":"选择传给下家的 3 张牌","exchange":true,"primary":true})
+	elif view.phase in ["draw_choice","gift_choice"]:
+		for move in view.pending:
+			if move.kind=="field_gift_pick": continue
+			actions.append({"text":"天使的施舍 · 三选一" if move.kind=="field_gift" else "正常摸牌","move":move,"primary":move.kind=="field_gift"})
+		if view.phase=="gift_choice": actions.append({"text":"选择一张加入手牌","field_picker":"field_gift_pick","primary":true})
+	elif view.phase=="claim":
 		for move in view.pending:
 			if move.kind == "chi": continue
-			var label={"win":"胡", "peng":"碰", "gang":"杠", "pass":"过", "chi":"吃"}.get(move.kind,move.kind)
+			var label={"win":"胡", "peng":"碰", "gang":"杠", "pass":"过", "chi":"吃", "tolerance_gang":"借牌补杠"}.get(move.kind,move.kind)
 			if move.kind != "pass": label += " " + Tiles.title(move.tile)
 			if move.kind=="chi": label="吃 "+"·".join(move.tiles.map(func(t):return Tiles.title(t)))
 			actions.append({"text":label,"move":move,"primary":move.kind!="pass"})
@@ -588,45 +617,61 @@ func _draw_actions() -> void:
 		for kind in ["bao","ming"]:
 			if view.pending.any(func(a):return a.kind==kind): actions.append({"text":("取消" if declare_mode==kind else "")+("报听" if kind=="bao" else "明搂"),"declare":kind,"primary":declare_mode!=kind})
 		if selected>=0: actions.append({"text":"打出 "+Tiles.title(view.players[0].hand[selected]),"discard":true,"primary":true})
-	var widths=[]; var total=0
+		if not _field_moves().is_empty():
+			actions.append({"text":"场地能力","field":true,"primary":true})
+			if (view.players[0].bao or view.players[0].ming) and kongs.is_empty() and selected<0:
+				for move in view.pending:
+					if move.kind=="discard": actions.append({"text":"出牌 · 暂不使用","move":move,"primary":false})
+	var widths=[]; var rows: Array=[[]];var row_widths: Array=[0]
 	for a in actions:
-		var width=clampi(a.text.length()*21+34,91,320); widths.append(width); total+=width+10
-	var x=800-total/2.0
+		var width=clampi(a.text.length()*21+34,91,320)
+		if row_widths[-1]>0 and row_widths[-1]+width+10>1180:rows.append([]);row_widths.append(0)
+		rows[-1].append(widths.size());widths.append(width);row_widths[-1]+=width+10
+	var positions: Array=[];positions.resize(actions.size())
+	for row in range(rows.size()):
+		var x=800-(row_widths[row]-10)/2.0
+		for index in rows[row]:
+			positions[index]=Vector2(x,650-(rows.size()-1-row)*62)
+			x+=widths[index]+10
 	for i in range(actions.size()):
 		var a=actions[i]
-		UI.table_button(action_layer,Rect2(x,650,widths[i],52),a.text,func():
+		UI.table_button(action_layer,Rect2(positions[i],Vector2(widths[i],52)),a.text,func():
 			_sound("click")
 			if a.has("declare"):
 				declare_mode="" if declare_mode==a.declare else a.declare
 				if selected>=0 and not declare_mode.is_empty(): _discard_selected()
 				else: _draw_actions(); _toast("选择一张标有「听」的牌打出，即可"+("报听" if a.declare=="bao" else "明搂"))
 			elif a.has("picker"): _show_move_picker(a.picker)
+			elif a.has("exchange"): _show_exchange_picker()
+			elif a.has("field_picker"): _show_field_picker(a.field_picker)
+			elif a.has("field"): _show_current_field()
 			elif a.has("discard"): _discard_selected()
 			else: session.play(a.move.id,view.revision),a.primary)
-		x+=widths[i]+10
 
 func _show_move_picker(moves: Array) -> void:
 	if moves.size() == 1:
 		session.play(moves[0].id,view.revision); return
 	var revision = view.revision
-	_popup("请选择吃牌组合" if moves[0].kind == "chi" else "请选择要杠的牌", Vector2(850,380))
+	_popup("请选择吃牌组合" if moves[0].kind == "chi" else "请选择要杠的牌", Vector2(850,574 if moves.size()>4 else 380))
 	for i in range(moves.size()):
 		var move = moves[i]
-		var x = 45 + i * 185
+		var x = 45 + (i%4) * 185
+		var y = (i/4) * 174
 		var tiles = move.get("tiles",[move.tile])
-		for j in range(tiles.size()): UI.texture(modal,Rect2(x+j*44,113,42,58),tile_textures[tiles[j]])
+		for j in range(tiles.size()): UI.texture(modal,Rect2(x+j*44,113+y,42,58),tile_textures[tiles[j]])
 		var caption = "吃这组" if move.kind == "chi" else ("暗杠 " if move.kind == "angang" else "补杠 ") + Tiles.title(move.tile)
-		UI.button(modal,Rect2(x,195,165,53),caption,func(): _close_modal(); session.play(move.id,revision),true)
-	UI.label(modal,Rect2(45,293,760,32),"请选择本次操作。关闭窗口可取消选择。" if _is_lan() else "牌局已暂停，选定后继续。关闭窗口可取消选择。",18,UI.MUTED)
+		UI.button(modal,Rect2(x,195+y,165,53),caption,func(): _close_modal(); session.play(move.id,revision),true)
+	UI.label(modal,Rect2(45,487 if moves.size()>4 else 293,760,32),"请选择本次操作。关闭窗口可取消选择。" if _is_lan() else "牌局已暂停，选定后继续。关闭窗口可取消选择。",18,UI.MUTED)
 
 func _visible_remaining(tile: int) -> int:
 	var visible = view.players[0].hand.count(tile)
 	for p in view.players:
 		visible += p.discards.count(tile)
 		for meld in p.melds: visible += meld.tiles.count(tile)
-		if p.seat != 0 and (p.ming or view.phase=="settled") and not p.hand.is_empty(): visible += p.hand.count(tile)
+		if p.seat != 0 and not p.hand.is_empty(): visible += p.hand.count(tile)
 	if view.gang_head == tile: visible += 1
-	return maxi(0,4-visible)
+	var totals: Array = view.get("field",{}).get("tile_totals",[])
+	return maxi(0,(int(totals[tile]) if tile>=0 and tile<totals.size() else 4)-visible)
 
 func _inspect_tile(tile: int, left: float, top: float) -> void:
 	_clear(inspect_layer)
@@ -636,7 +681,7 @@ func _inspect_tile(tile: int, left: float, top: float) -> void:
 		if tile%9 < 8: neighbors.append(tile+1)
 	var waits: Array = []
 	for move in view.pending:
-		if move.kind=="bao" and move.tile==tile: waits=move.waits; break
+		if move.kind in ["bao","ming"] and move.tile==tile: waits=move.waits; break
 	var height = 235 if not waits.is_empty() else 143
 	var panel = UI.table_panel(inspect_layer,Rect2(clampf(left-105,235,1060),maxf(180,top-height-18),300,height),false,16)
 	var inspection_style=UI.table_style(false,16);inspection_style.bg_color=Color("112f2cf5")
@@ -646,9 +691,9 @@ func _inspect_tile(tile: int, left: float, top: float) -> void:
 		var item = neighbors[i]
 		UI.texture(panel,Rect2(16+i*94,12,45,62),tile_textures[item])
 		UI.label(panel,Rect2(12+i*94,76,92,26),Tiles.spoken_title(item),16,UI.TABLE_GOLD if item==tile else UI.TABLE_TEXT)
-		UI.label(panel,Rect2(12+i*94,106,92,24),"未见 %d 张" % _visible_remaining(item),13,UI.TABLE_MUTED)
+		UI.label(panel,Rect2(12+i*94,106,92,24),_remaining_prefix()+" %d 张" % _visible_remaining(item),13,UI.TABLE_MUTED)
 	if not waits.is_empty():
-		UI.label(panel,Rect2(12,139,276,25),"打出后可报听 · 听口",15,UI.TABLE_GOLD)
+		UI.label(panel,Rect2(12,139,276,25),"打出后可明搂 · 听口" if view.players[0].get("revealed_hand",false) else "打出后可报听 · 听口",15,UI.TABLE_GOLD)
 		for i in range(mini(7,waits.size())): UI.texture(panel,Rect2(12+i*39,173,35,47),tile_textures[waits[i]])
 
 func _scroll_body() -> Control:
@@ -669,12 +714,12 @@ func _show_waits() -> void:
 	var rows: Array = []
 	var seen: Array = []
 	for move in view.pending:
-		if move.kind != "bao" or move.tile in seen: continue
+		if move.kind not in ["bao","ming"] or move.tile in seen: continue
 		seen.append(move.tile); rows.append({"discard":move.tile,"waits":move.waits})
 	if rows.is_empty():
 		var base = p.hand.duplicate()
 		if base.size()%3 == 2 and p.drawn >= 0 and p.drawn<base.size(): base.remove_at(p.drawn)
-		var waits = Rules.waits(base,p.melds,view.settings.jiang=="luan")
+		var waits = Rules.waits(base,p.melds,view.settings.jiang=="luan",_field_id())
 		if not waits.is_empty(): rows.append({"discard":-1,"waits":waits})
 	var y = 0.0
 	for row in rows:
@@ -690,24 +735,31 @@ func _show_waits() -> void:
 			elif base.size()%3==2 and p.drawn>=0: base.remove_at(p.drawn)
 			var score=_wait_score(base,tile)
 			UI.label(body,Rect2(x-3,ty+59,62,22),"%d 番" % score.get("multiplier",1),15,UI.GOLD)
-			UI.label(body,Rect2(x-3,ty+81,62,22),"%d 张" % _visible_remaining(tile),15,UI.MUTED)
+			UI.label(body,Rect2(x-3,ty+81,62,22),("≤" if _field_id()=="diamond_finger" else "")+"%d 张" % _visible_remaining(tile),15,UI.MUTED)
 		y += maxf(112,ceil(row.waits.size()/12.0)*103+15)
 	if rows.is_empty():
 		UI.label(body,Rect2(0,25,950,90),"当前没有听口。选择「牌效提示」可查看出牌建议。",23,UI.MUTED)
 		y=130
-	UI.label(body,Rect2(0,y+12,950,55),"番数按当前手牌自摸预估。余张按自己的手牌、公开牌和杠头计算。\n未见的牌也可能在其他玩家手中。点击窗口外可收起。",16,UI.MUTED)
+	UI.label(body,Rect2(0,y+12,950,55),"番数按当前手牌自摸预估。余张按自己的手牌、公开牌和杠头计算。\n"+_remaining_note()+" 点击窗口外可收起。",16,UI.MUTED)
 	body.custom_minimum_size.y = y + 95
 
 func _wait_score(base: Array, tile: int) -> Dictionary:
 	var p=view.players[0]
-	return Rules.evaluate(base+[tile],p.melds,{"self_draw":true,"bao":true,"ming":p.ming,"luan":view.settings.jiang=="luan"})
+	var bonus: Array = []
+	if _field_id()=="single_wait": bonus.append("听单张")
+	if _field_id()=="chosen" and tile in view.get("field",{}).get("chosen_tiles",[]): bonus.append("天选")
+	if _field_id()=="chosen_head":
+		var head = int(p.get("last_draw_head",-1))
+		if head<0: head=int(view.gang_head)
+		if tile==head: bonus.append("天选 2")
+	return Rules.evaluate(base+[tile],p.melds,{"self_draw":true,"bao":true,"ming":p.ming or p.get("revealed_hand",false),"luan":view.settings.jiang=="luan","field_id":_field_id(),"field_bonus":bonus})
 
 func _locked_waits() -> Array:
 	var p=view.players[0]
 	var base=p.hand.duplicate()
 	if base.size()%3==2 and p.drawn>=0 and p.drawn<base.size():base.remove_at(p.drawn)
 	var entries: Array=[]
-	for tile in Rules.waits(base,p.melds,view.settings.jiang=="luan"):
+	for tile in Rules.waits(base,p.melds,view.settings.jiang=="luan",_field_id()):
 		entries.append({"tile":tile,"remaining":_visible_remaining(tile),"fan":_wait_score(base,tile).get("multiplier",1)})
 	return entries
 
@@ -719,9 +771,9 @@ func _opponent_waits(seat: int) -> Array:
 	if not p.ming or p.hand.is_empty():return []
 	var base=p.hand.duplicate()
 	if base.size()%3==2 and p.drawn>=0 and p.drawn<base.size():base.remove_at(p.drawn)
-	var signature=var_to_str([base,p.melds,view.settings.jiang])
+	var signature=var_to_str([base,p.melds,view.settings.jiang,_field_id()])
 	if not opponent_waits_cache.has(seat) or opponent_waits_cache[seat].signature!=signature:
-		opponent_waits_cache[seat]={"signature":signature,"tiles":Rules.waits(base,p.melds,view.settings.jiang=="luan")}
+		opponent_waits_cache[seat]={"signature":signature,"tiles":Rules.waits(base,p.melds,view.settings.jiang=="luan",_field_id())}
 	var entries: Array=[]
 	for tile in opponent_waits_cache[seat].tiles:
 		entries.append({"tile":tile,"remaining":_visible_remaining(tile)})
@@ -768,7 +820,7 @@ func _draw_opponent_waits() -> void:
 			var face=UI.texture(body,Rect2(0,y+2,34,48),tile_textures[entry.tile])
 			face.set_meta("wait_tile",entry.tile)
 			UI.label(body,Rect2(42,y,width-80,26),Tiles.spoken_title(entry.tile),20,UI.TABLE_TEXT)
-			UI.label(body,Rect2(42,y+27,width-80,23),"未见%d张"%entry.remaining,17,UI.TABLE_MUTED)
+			UI.label(body,Rect2(42,y+27,width-80,23),_remaining_prefix()+"%d张"%entry.remaining,17,UI.TABLE_MUTED)
 			if entry.remaining==0:face.modulate.a=0.45
 		if entries.is_empty():UI.label(body,Rect2(0,3,width-38,48),"听口更新中",17,UI.TABLE_MUTED)
 		scroll.set_deferred("scroll_vertical",scroll_position)
@@ -799,7 +851,7 @@ func _draw_waits_panel() -> void:
 		var face=UI.texture(body,Rect2(0,y+3,31,44),tile_textures[entry.tile])
 		face.set_meta("wait_tile",entry.tile)
 		UI.label(body,Rect2(41,y,115,25),Tiles.spoken_title(entry.tile),18,UI.TABLE_TEXT)
-		UI.label(body,Rect2(41,y+25,67,23),"未见%d张"%entry.remaining,16,UI.TABLE_MUTED)
+		UI.label(body,Rect2(41,y+25,67,23),_remaining_prefix()+"%d张"%entry.remaining,16,UI.TABLE_MUTED)
 		UI.label(body,Rect2(108,y+25,50,23),"%d番"%entry.fan,16,UI.TABLE_GOLD)
 		if entry.remaining==0:face.modulate.a=0.45
 	if entries.is_empty():UI.label(body,Rect2(0,0,158,48),"听口更新中",16,UI.TABLE_MUTED)
@@ -827,6 +879,9 @@ func _show_public_tiles() -> void:
 			x += meld.tiles.size()*32+18
 			if x > 760: x=0; y+=80
 		y += 92
+		if p.seat!=0 and not p.hand.is_empty():
+			UI.label(body,Rect2(0,y,950,30),p.name+" · 公开手牌"+("（暗牌保留牌背）" if p.hand.has(-1) else ""),20,UI.GOLD);y+=38
+			y=_field_tile_row(body,p.hand,y)
 	body.custom_minimum_size.y = y
 
 func _hint(move: Dictionary) -> void:
@@ -874,13 +929,169 @@ func _pause() -> void:
 	UI.button(modal,Rect2(44,212,552,57),"继续对局",_close_modal,true)
 	UI.button(modal,Rect2(44,286,552,51),"保存并返回大厅",_show_lobby)
 
+func _field_id() -> String:
+	return str(view.get("field",{}).get("id",""))
+
+func _field_moves() -> Array:
+	return view.get("pending",[]).filter(func(move): return str(move.kind).begins_with("field_") and move.kind not in ["field_exchange","field_gift_pick"])
+
+func _remaining_note() -> String:
+	return "未见余张为数量上限：变白前的牌种保密，未见牌也可能在别人手中。" if _field_id()=="diamond_finger" else "未见的牌也可能在其他玩家手中。"
+
+func _remaining_prefix() -> String:
+	return "至多" if _field_id()=="diamond_finger" else "未见"
+
+func _field_scroll(height: float = 566) -> Control:
+	var scroll = ScrollContainer.new(); scroll.position=Vector2(40,112); scroll.size=Vector2(modal.size.x-80,height)
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED; modal.add_child(scroll)
+	var body=Control.new(); body.custom_minimum_size=Vector2(modal.size.x-106,height); scroll.add_child(body)
+	return body
+
+func _show_field_catalog() -> void:
+	_popup("场地规则",Vector2(1080,784),true)
+	UI.label(modal,Rect2(42,81,996,28),"独立增强选项 · 开启后，每局随机生效一种；关闭即按正常玩法进行。",18,UI.MUTED)
+	var body=_field_scroll(623)
+	for i in range(FieldRules.IDS.size()):
+		var id=str(FieldRules.IDS[i]); var rule=FieldRules.info(id)
+		var x=(i%2)*492; var y=(i/2)*161
+		var card=UI.button(body,Rect2(x,y,470,147),"",func(): _show_field_detail(id,false))
+		UI.label(card,Rect2(20,12,427,34),str(rule.name),24,UI.GOLD,true)
+		var summary=UI.label(card,Rect2(20,48,427,57),str(rule.summary),18,UI.TEXT)
+		summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		UI.label(card,Rect2(20,111,427,24),"每人每局一次 · 查看详情 →" if rule.get("active",false) else "整局生效 · 查看详情 →",15,UI.MUTED)
+	body.custom_minimum_size.y=ceil(FieldRules.IDS.size()/2.0)*161
+
+func _show_current_field() -> void:
+	if not _field_id().is_empty(): _show_field_detail(_field_id(),true)
+
+func _show_field_detail(id: String, current: bool) -> void:
+	var rule=FieldRules.info(id)
+	_popup(str(rule.name),Vector2(1040,766),true)
+	modal.set_meta("field_action",current)
+	var subtitle="规则说明 · 开启场地后随机抽取"
+	if current:subtitle="本局场地 · 每位玩家拥有独立次数" if rule.get("active",false) else "本局场地 · 全体玩家共同遵守"
+	UI.label(modal,Rect2(42,81,956,28),subtitle,18,UI.GOLD)
+	var body=_field_scroll(598)
+	var description=UI.label(body,Rect2(0,0,934,148),str(rule.description),22,UI.TEXT)
+	description.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	var y=164.0
+	if current:
+		var p: Dictionary=view.players[0]
+		if rule.get("active",false):
+			UI.label(body,Rect2(0,y,934,35),"你的本局次数：已使用" if p.get("field_used",false) else "你的本局次数：剩余 1 次",22,UI.GOLD,true); y+=49
+		var chosen: Array=view.get("field",{}).get("chosen_tiles",[])
+		if not chosen.is_empty():
+			UI.label(body,Rect2(0,y,934,31),"本局天选牌",21,UI.GOLD); y+=39
+			y=_field_tile_row(body,chosen,y)
+		if id=="chosen_head":
+			UI.label(body,Rect2(0,y,934,31),"当前公开杠头",21,UI.GOLD); y+=39
+			y=_field_tile_row(body,[view.gang_head] if view.gang_head>=0 else [],y)
+		var private_info: Dictionary=p.get("field_private",{})
+		if private_info.has("peek_wall"):
+			UI.label(body,Rect2(0,y,934,31),"你的占星记录 · 从左至右为当时的牌头顺序",21,UI.GOLD); y+=39
+			y=_field_tile_row(body,private_info.peek_wall,y)
+			UI.label(body,Rect2(0,y,934,31),"仅你可见。记录不会随着摸牌更新。",17,UI.MUTED); y+=43
+		if private_info.has("peek_target"):
+			var target=int(private_info.peek_target)
+			var who=str(view.players[target].name) if target>=0 and target<4 else "目标玩家"
+			UI.label(body,Rect2(0,y,934,31),"你的占星记录 · "+who+"当时的听口",21,UI.GOLD); y+=39
+			if private_info.get("peek_waits",[]).is_empty():
+				UI.label(body,Rect2(0,y,934,40),"当时没有听口。",21,UI.TEXT); y+=49
+			else: y=_field_tile_row(body,private_info.peek_waits,y)
+			UI.label(body,Rect2(0,y,934,51),"仅你可见。若你给此玩家点炮，对方本次胡牌另加一番。",17,UI.MUTED); y+=63
+		var kinds: Array=[]
+		for move in _field_moves():
+			if move.kind not in kinds: kinds.append(move.kind)
+		for kind in kinds:
+			var label={"field_transform":"选择一张手牌，变为白板","field_rebirth":"撤销报听，亮手继续","field_reclaim":"选择一组副露撤回","field_peek_wall":"查看接下来的四张牌","field_peek_waits":"选择一位玩家占星","field_gift":"使用天使的施舍"}.get(kind,"使用场地能力")
+			UI.button(body,Rect2(0,y,934,55),label,func():
+				if kind in ["field_transform","field_reclaim","field_peek_waits"]: _show_field_picker(kind)
+				else:
+					var moves=_field_moves().filter(func(move):return move.kind==kind)
+					if not moves.is_empty(): _submit_field(moves[0],view.revision),true)
+			y+=68
+		if view.phase=="exchange" and view.decision_seat==0:
+			UI.button(body,Rect2(0,y,934,55),"选择要传给下家的三张牌",_show_exchange_picker,true);y+=68
+		if kinds.is_empty() and rule.get("active",false) and not p.get("field_used",false):
+			UI.label(body,Rect2(0,y,934,62),"符合使用条件时，牌桌会出现「场地能力」。\n你的次数会保留到本局结束，不使用也可以正常出牌。",19,UI.MUTED); y+=80
+	else:
+		UI.label(body,Rect2(0,y,934,64),"场地叠加在地方玩法上；普通吃牌仍受「允许吃牌」控制。\n所有“一局一次”均按每位玩家分别计算；加一番即本次分数翻倍。",19,UI.MUTED); y+=84
+	UI.button(body,Rect2(0,y,934,51),"查看全部场地规则",_show_field_catalog);y+=69
+	body.custom_minimum_size.y=maxf(598,y)
+
+func _field_tile_row(parent: Node, tiles: Array, y: float) -> float:
+	for i in range(tiles.size()):
+		var tile=int(tiles[i]); var x=(i%12)*77;var top=y+(i/12)*110
+		UI.texture(parent,Rect2(x,top,56,77),tile_textures[tile if tile>=0 else 42])
+		UI.label(parent,Rect2(x-4,top+77,76,26),Tiles.spoken_title(tile),15,UI.MUTED)
+	return y+ceil(tiles.size()/12.0)*110+6
+
+func _submit_field(move: Dictionary, revision: int) -> void:
+	_close_modal()
+	if not session.play(str(move.id),revision): _toast("牌局已更新，请重新选择本次操作。"); return
+
+func _show_field_picker(kind: String) -> void:
+	var moves: Array=view.get("pending",[]).filter(func(move):return move.kind==kind)
+	if moves.is_empty(): _toast("当前没有可用的操作。"); return
+	var revision=int(view.revision)
+	var titles={"field_transform":"选择要变成白板的手牌","field_reclaim":"选择要撤回的副露","field_peek_waits":"选择占星的目标","field_gift_pick":"天使的施舍 · 取一张"}
+	_popup(titles.get(kind,"选择场地能力"),Vector2(1040,756),true)
+	modal.set_meta("field_action",true)
+	UI.label(modal,Rect2(42,83,956,27),"点击下方确认按钮后生效。关闭窗口可继续考虑。",18,UI.MUTED)
+	var body=_field_scroll(593)
+	for i in range(moves.size()):
+		var move: Dictionary=moves[i]
+		var x=(i%4)*237;var y=(i/4)*183
+		var tiles: Array=move.get("tiles",[move.get("tile",-1)])
+		if kind=="field_peek_waits":
+			var target=int(move.target)
+			UI.portrait(body,Vector2(x+70,y+10),64,(target+int(view.get("local_seat",0)))%4)
+			UI.label(body,Rect2(x,y+80,217,30),str(view.players[target].name),20,UI.GOLD).horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		else:
+			var tile_width=mini(52,int(194/maxi(1,tiles.size())))
+			for j in range(tiles.size()): UI.texture(body,Rect2(x+12+j*(tile_width+3),y+7,tile_width,78),tile_textures[int(tiles[j]) if int(tiles[j])>=0 else 42])
+			var caption="撤回这组牌" if kind=="field_reclaim" else Tiles.spoken_title(int(move.get("tile",-1)))
+			UI.label(body,Rect2(x+12,y+88,202,29),caption,18,UI.GOLD)
+		var confirm={"field_transform":"确认变白板","field_reclaim":"确认撤回","field_peek_waits":"查看其听口","field_gift_pick":"取这张牌"}.get(kind,"确认")
+		UI.button(body,Rect2(x,y+123,217,47),confirm,func():_submit_field(move,revision),true)
+	body.custom_minimum_size.y=maxf(593,ceil(moves.size()/4.0)*183)
+
+func _show_exchange_picker(reset_selection: bool = true) -> void:
+	if view.get("phase","")!="exchange" or view.decision_seat!=0:return
+	if reset_selection: field_exchange_selection.clear()
+	var revision=int(view.revision)
+	_popup("换牌 · 传给下家",Vector2(1040,705))
+	modal.set_meta("field_action",true)
+	var hand: Array=view.players[0].hand
+	var required=mini(3,hand.filter(func(tile):return tile>=0 and tile<27).size())
+	UI.label(modal,Rect2(42,92,956,70),"先选三张，再确认传牌。已选 %d / 3\n本手须选 %d 张万、筒或条；只有数牌不足三张时，才可用字牌补足。"%[field_exchange_selection.size(),required],20,UI.MUTED)
+	for i in range(hand.size()):
+		var x=43+(i%7)*137;var y=186+(i/7)*164
+		var picked=i in field_exchange_selection
+		var button=UI.button(modal,Rect2(x,y,128,147),"",func():
+			if i in field_exchange_selection:field_exchange_selection.erase(i)
+			elif field_exchange_selection.size()<3:field_exchange_selection.append(i)
+			_show_exchange_picker(false),picked)
+		UI.texture(button,Rect2(31,8,66,93),tile_textures[int(hand[i])])
+		var caption=UI.label(button,Rect2(0,109,128,27),("已选 · " if picked else "")+Tiles.title(int(hand[i])),17,Color("342e21") if picked else UI.TEXT)
+		caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	var chosen_tiles: Array=field_exchange_selection.map(func(index):return hand[index]);chosen_tiles.sort()
+	var choices: Array=view.pending.filter(func(move):
+		if move.kind!="field_exchange":return false
+		var proposed: Array=move.get("tiles",[]).duplicate();proposed.sort()
+		return proposed==chosen_tiles)
+	var confirm=UI.button(modal,Rect2(43,578,954,58),"确认传给 "+str(view.players[1].name),func():
+		if not choices.is_empty():_submit_field(choices[0],revision),true)
+	confirm.disabled=choices.is_empty()
+
 func _show_rules() -> void:
 	_popup("本桌玩法",Vector2(934,756))
-	var text=RichTextLabel.new(); text.position=Vector2(42,100); text.size=Vector2(850,602)
+	var text=RichTextLabel.new(); text.position=Vector2(42,100); text.size=Vector2(850,532)
 	text.add_theme_font_override("normal_font",UI.font()); text.add_theme_font_size_override("normal_font_size",21)
 	text.add_theme_color_override("default_color",UI.TEXT); text.bbcode_enabled=true
 	text.text="[color=#dec18b]开局与行牌[/color]\n144 张牌，含春夏秋冬、梅兰竹菊八花。庄家 14 张，闲家 13 张；起手补花。每局轮庄，初始 2000 分，底分 10。\n\n[color=#dec18b]报听、明搂[/color]\n普通胡牌必须先报听或明搂。选择能听牌的弃牌，同时完成声明。报听后锁手，非胡的新摸牌会自动打出，不能吃碰；可胡或可合法杠牌时保留选择。摸到第四张且杠前后听口不变时，可暗杠或补杠。明搂亮开手牌，只能自摸，赢输均按规则翻倍；报听后可在自己回合升级明搂。\n\n[color=#dec18b]胡牌与响应[/color]\n二五八将：普通牌型须以数牌 2、5、8 作将；乱将允许任意将。十三幺、十三不靠、风一色、将一色及八花有原规则豁免。优先胡，再碰杠，最后下家吃。单响截胡，前家放弃后下一位仍可胡。过胡、过碰限制持续到本人再次摸到普通牌。\n\n[color=#dec18b]补花与杠头[/color]\n杠头公开。正常摸牌从牌头拿，补花取杠头前一张；开杠才摸走杠头，再翻下一张。只剩杠头时不能普通摸牌。八花齐集立即花胡。\n\n[color=#dec18b]计分[/color]\n基本单位＝花分 × 番型倍数 × 10。基础 1 花；每张花牌 1 花；字刻 1 花；数牌明杠 1、暗杠 2 花；字牌明杠 2、暗杠 3 花。杠分并入胡牌结算，不即时收取。\n自摸由其余三家各付一份；普通点炮由出牌者付一份；抢杠胡由被抢者付三份。明搂的输家付款另翻倍。\n\n[color=#dec18b]番型[/color]\n平胡 1；七对／碰碰胡 2；豪华七对 4；风一色／将一色 6；双豪华七对 8；十三不靠 12；十三幺／超豪华七对 16。附加：清一色 4／混一色 2、一条龙 4、大吊车 2、门清 2（指定特殊牌型除外）、持花 2、海底 2、明搂 2。天胡固定 30、地胡固定 25，不加花分。\n\n以上按原项目山东玩法迁移；完整细节以随项目保存的规则基线与牌例测试为准。"
 	modal.add_child(text)
+	UI.button(modal,Rect2(42,659,850,52),"查看本局场地 · "+str(FieldRules.info(_field_id()).name) if current_screen=="table" and not _field_id().is_empty() else "场地规则 · 可选增强玩法",_show_current_field if current_screen=="table" and not _field_id().is_empty() else _show_field_catalog)
 
 func _show_settings() -> void:
 	var desktop = desktop_window.supported

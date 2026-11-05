@@ -5,7 +5,7 @@ extends Node
 signal rooms_changed(rooms: Array)
 
 const DISCOVERY_PORT = 32142
-const PROTOCOL = 1
+const PROTOCOL = 2
 const MAGIC = "qingyu-lan"
 const MAX_PACKET = 2048
 const ROOM_TTL_MS = 6500
@@ -138,9 +138,11 @@ static func _validate_room(data: Variant, address: String) -> Dictionary:
 	if not data.get("started") is bool or not data.get("settings") is Dictionary: return {}
 	var settings = data.settings
 	if settings.get("jiang") not in ["258", "luan"] or not settings.get("chi") is bool or settings.get("ai") not in ["classic", "efficiency"]: return {}
+	if not settings.get("field_rules", false) is bool: return {}
 	return {"id": data.id, "name": data.name.strip_edges(), "address": address, "port": int(data.port),
 		"players": int(data.players), "started": data.started, "version": PROTOCOL,
-		"settings": {"jiang": settings.jiang, "chi": settings.chi, "ai": settings.ai, "rounds": 0}}
+		"settings": {"jiang": settings.jiang, "chi": settings.chi, "ai": settings.ai, "rounds": 0,
+			"field_rules": settings.get("field_rules", false)}}
 
 func _exit_tree() -> void:
 	if socket != null: socket.close()

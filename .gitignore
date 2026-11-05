@@ -24,6 +24,8 @@ artifacts/
 /assets/textures/room_floor.png
 /assets/textures/room_floor.png.import
 # Downloaded Godot/export templates, scratch files and repeatable test outputs.
+# Field-rule build logs and headless multi-process package probes also use tmp/;
+# retain source tests and verification notes, and clean only the current run.
 tmp/
 *.log
 # Exported release archives and device install packages are delivery artifacts.

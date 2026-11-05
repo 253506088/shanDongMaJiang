@@ -337,7 +337,9 @@ func update_view(view: Dictionary) -> void:
 		if p.seat!=0:
 			var standing=p.hand.is_empty()
 			for i in range(p.hand_count):
-				_piece("h%d-%d"%[p.seat,i],-1 if standing else p.hand[i],TableLayout.hand(p.seat,i,p.hand_count,p.drawn,standing),angle,false,"standing" if standing else "face")
+				var tile=-1 if standing or i>=p.hand.size() else int(p.hand[i])
+				var pose="standing" if standing else ("back" if tile<0 else "face")
+				_piece("h%d-%d"%[p.seat,i],tile,TableLayout.hand(p.seat,i,p.hand_count,p.drawn,standing),angle,false,pose)
 		var offset=0.0;var flowers=0
 		for m in range(p.melds.size()):
 			var meld=p.melds[m]

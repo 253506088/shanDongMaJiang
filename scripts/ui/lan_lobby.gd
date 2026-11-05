@@ -7,6 +7,7 @@ signal join_requested(address: String, player_name: String, port: int)
 signal ready_requested(ready: bool)
 signal start_requested
 signal settings_requested(settings: Dictionary)
+signal field_catalog_requested
 signal disconnect_autoplay_requested(enabled: bool)
 signal leave_requested
 
@@ -39,6 +40,7 @@ func _base(title: String, subtitle: String) -> void:
 	UI.panel(self, Rect2(0,0,1600,900), Color("081f1be9"), Color.TRANSPARENT, 0)
 	UI.label(self, Rect2(104,55,1180,70), title, 44, UI.TEXT, true)
 	UI.label(self, Rect2(106,140,1330,35), subtitle, 20, UI.MUTED)
+	UI.button(self, Rect2(1148,68,184,52), "场地规则", func(): field_catalog_requested.emit())
 	UI.button(self, Rect2(1348,68,148,52), "返回大厅" if _browser else "离开房间", func():
 		if _browser: back_requested.emit()
 		else: leave_requested.emit())
@@ -49,14 +51,14 @@ func show_browser(settings: Dictionary, player_name: String = "牌友", host_add
 	nickname = player_name; address = host_address
 	_browser = true; _busy = false
 	_base("附近同桌", "连接同一 Wi-Fi 或房主的手机热点，安卓与 Windows 可以一起落座。")
-	var create_panel = UI.table_panel(self, Rect2(104,215,438,562))
+	var create_panel = UI.table_panel(self, Rect2(104,215,438,590))
 	UI.label(create_panel, Rect2(27,19,378,38), "我的座位", 26, UI.GOLD, true)
 	UI.label(create_panel, Rect2(27,76,378,28), "昵称", 18, UI.MUTED)
 	name_input = _line_edit(create_panel, Rect2(27,114,384,54), "给牌友看的名字", nickname, 12)
 	name_input.text_changed.connect(func(value): nickname = value)
 	UI.label(create_panel, Rect2(27,204,378,35), "本桌约定", 25, UI.TEXT, true)
 	_draw_settings(create_panel, Vector2(27,256), true)
-	create_button = UI.button(create_panel, Rect2(27,455,384,61), "创建房间", func():
+	create_button = UI.button(create_panel, Rect2(27,495,384,61), "创建房间", func():
 		host_requested.emit(configuration.duplicate(true), _player_name()), true)
 	UI.label(self, Rect2(586,205,670,42), "发现的房间", 27, UI.TEXT, true)
 	UI.label(self, Rect2(1280,214,200,30), "自动刷新", 17, UI.MUTED)
@@ -118,7 +120,7 @@ func _update_room_list() -> void:
 		var caption = UI.label(row,Rect2(22,12,607,36),str(found.get("name","牌友的房间")),24,UI.TEXT,true)
 		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var settings = found.get("settings",{})
-		var summary = "%d / 4 真人 · %s · %s" % [int(found.get("players",1)),"二五八将" if settings.get("jiang","258")=="258" else "乱将","允许吃" if settings.get("chi",true) else "不允许吃"]
+		var summary = "%d / 4 真人 · %s · %s · %s" % [int(found.get("players",1)),"二五八将" if settings.get("jiang","258")=="258" else "乱将","允许吃" if settings.get("chi",true) else "不允许吃","场地随机" if settings.get("field_rules",false) else "正常玩法"]
 		UI.label(row,Rect2(22,59,637,29),summary,18,UI.MUTED)
 		var started = found.get("started",false)
 		var full = int(found.get("players",0)) >= 4
@@ -143,12 +145,12 @@ func set_status(message: String) -> void:
 	if is_instance_valid(status_label): status_label.text = message
 
 func _draw_settings(parent: Node, offset: Vector2, editable: bool) -> void:
-	for row in range(3):
-		var key = ["jiang","chi","ai"][row]
-		var labels = [["二五八将","乱将"],["允许吃牌","不允许吃"],["牌效 AI","经典 AI"]][row]
-		var values = [["258","luan"],[true,false],["efficiency","classic"]][row]
+	for row in range(4):
+		var key = ["jiang","chi","ai","field_rules"][row]
+		var labels = [["二五八将","乱将"],["允许吃牌","不允许吃"],["牌效 AI","经典 AI"],["场地：关闭","场地：每局随机"]][row]
+		var values = [["258","luan"],[true,false],["efficiency","classic"],[false,true]][row]
 		if not editable:
-			var selected = 0 if configuration.get(key)==values[0] else 1
+			var selected = 0 if configuration.get(key,false)==values[0] else 1
 			UI.label(parent,Rect2(offset+Vector2(0,row*56),Vector2(384,44)),labels[selected],23,UI.GOLD)
 			continue
 		for option in range(2):
@@ -157,7 +159,7 @@ func _draw_settings(parent: Node, offset: Vector2, editable: bool) -> void:
 				if _busy: return
 				configuration[key] = value
 				if _browser: show_browser(configuration,nickname,address)
-				else: settings_requested.emit(configuration.duplicate(true)),configuration.get(key)==value)
+				else: settings_requested.emit(configuration.duplicate(true)),configuration.get(key,false)==value)
 			button.disabled = not editable
 			_rule_buttons.append(button)
 
