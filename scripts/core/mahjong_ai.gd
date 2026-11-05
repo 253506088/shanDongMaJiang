@@ -181,6 +181,24 @@ func _visible_tiles(view: Dictionary, seat: int) -> Array:
 	if view.gang_head >= 0: visible.append(view.gang_head)
 	return visible
 
+func _should_use_gift(view: Dictionary, seat: int) -> bool:
+	if not view.pending.any(func(move): return move.kind == "field_gift"): return false
+	var player: Dictionary = view.players[seat]
+	var drawn = int(player.get("drawn", -1))
+	if player.bao or player.ming or drawn < 0 or drawn >= player.hand.size(): return false
+	var luan = view.settings.jiang == "luan"
+	# Keep an already useful draw. The normal authoritative win action is
+	# selected even earlier; this also protects an undeclared complete shape.
+	if Rules.winning(player.hand, player.melds, luan, "angels_gift"): return false
+	if view.pending.any(func(move): return move.kind in ["angang", "bugang"]): return false
+	var before: Array = player.hand.duplicate(); before.remove_at(drawn)
+	if shanten(player.hand, player.melds, luan) < shanten(before, player.melds, luan): return false
+	var usefulness = utility(player.hand[drawn], player.hand, luan)
+	if usefulness >= 55: return false
+	# An isolated draw is a good moment to spend the one use; near the end of
+	# the wall, accept a less isolated draw rather than carry the ability unused.
+	return usefulness < 40 or view.wall_count <= 16
+
 func _field_choice(view: Dictionary, seat: int, visible: Array) -> Dictionary:
 	var moves: Array = view.pending
 	var p: Dictionary = view.players[seat]
@@ -216,6 +234,9 @@ func _field_choice(view: Dictionary, seat: int, visible: Array) -> Dictionary:
 			if value > best_value: selected = move; best_value = value
 		return selected
 	if view.phase != "turn": return {}
+	if field_id == "angels_gift" and _should_use_gift(view, seat):
+		for move in moves:
+			if move.kind == "field_gift": return move
 	for move in moves:
 		if move.kind == "field_peek_wall": return move
 	var peeks = moves.filter(func(move): return move.kind == "field_peek_waits")

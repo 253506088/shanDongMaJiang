@@ -17,6 +17,7 @@ func run() -> void:
 	for id in FieldRules.IDS:
 		var item = FieldRules.info(id)
 		check(item.id == id and not item.description.is_empty(), "player description: " + id)
+	_test_configuration()
 	_test_sequences()
 	_test_wildcards()
 	_test_wildcard_random_oracle()
@@ -24,6 +25,34 @@ func run() -> void:
 	_benchmark_wildcards()
 	print("FIELD RULES: %d checks, %d failures, %.2fs" % [checks, failures.size(), (Time.get_ticks_msec()-started)/1000.0])
 	quit(0 if failures.is_empty() else 1)
+
+func _test_configuration() -> void:
+	var defaults = FieldRules.normalize({})
+	check(not defaults.field_rules and defaults.field_selection == "random", "new settings default to disabled with random selection")
+	check(FieldRules.selection({"field_rules":true}) == "random", "legacy enabled settings keep per-round random behavior")
+	check(FieldRules.summary({}) == "场地：关闭", "disabled summary")
+	check(FieldRules.summary({"field_rules":true}) == "场地：每局随机", "legacy random summary")
+	for id in FieldRules.IDS:
+		var source = {"field_rules":true,"field_selection":id,"jiang":"luan","extra":{"value":1}}
+		var normalized = FieldRules.normalize(source)
+		check(normalized.field_rules and normalized.field_selection == id, "selected field survives normalization: " + id)
+		check(normalized.jiang == "luan" and normalized.extra.value == 1, "normalization preserves independent options: " + id)
+		normalized.extra.value = 2
+		check(source.extra.value == 1, "normalization does not alias caller nested settings: " + id)
+		check(FieldRules.summary(source) == "场地：%s（指定）" % FieldRules.info(id).name, "named selection summary: " + id)
+		source.field_rules = false
+		check(FieldRules.selection(source) == id and FieldRules.normalize(source).field_selection == id, "disabled toggle retains chosen field: " + id)
+		check(FieldRules.summary(source) == "场地：关闭", "disabled selection does not claim the rule is active: " + id)
+	for invalid in [null,true,false,0,1,1.5,[],{},"","WILDCARD"," wildcard ","not_a_field"]:
+		var malformed = {"field_rules":true,"field_selection":invalid}
+		check(FieldRules.selection(malformed) == "random", "invalid selection uses random: " + str(invalid))
+		check(FieldRules.normalize(malformed).field_selection == "random", "invalid selection normalization: " + str(invalid))
+		check(FieldRules.summary(malformed) == "场地：每局随机", "invalid enabled selection summary: " + str(invalid))
+	for invalid in [null,0,1,"true",[],{}]:
+		var malformed = {"field_rules":invalid,"field_selection":"wildcard"}
+		check(not FieldRules.normalize(malformed).field_rules, "invalid enablement cannot activate a field: " + str(invalid))
+		check(FieldRules.summary(malformed) == "场地：关闭", "invalid enablement summary stays closed: " + str(invalid))
+	check(FieldRules.selection({"field_selection":"random"}) == "random", "explicit random option remains selectable")
 
 func _test_sequences() -> void:
 	for suit in range(3):

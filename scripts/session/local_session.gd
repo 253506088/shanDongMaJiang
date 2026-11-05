@@ -72,7 +72,7 @@ func _start_worker(hint: bool = false) -> void:
 static func keeps_human_choice(move: Dictionary) -> bool:
 	# A once-per-round ability remains the owner's decision. Discarding the
 	# drawn tile skips it for this turn; using it restores automatic play.
-	return move.kind in ["win", "angang", "bugang", "field_rebirth", "field_transform", "field_reclaim", "field_peek_wall", "field_peek_waits"]
+	return move.kind in ["win", "angang", "bugang", "field_rebirth", "field_transform", "field_reclaim", "field_peek_wall", "field_peek_waits", "field_gift"]
 
 func locked_discard_action() -> Dictionary:
 	# Lotus's local locked turns show the new tile briefly, then discard it.

@@ -12,6 +12,19 @@ func labels(node: Node) -> Array:
 	for child in node.get_children():result.append_array(labels(child))
 	return result
 
+func tagged(node: Node, key: String, value: Variant) -> Node:
+	if node.is_queued_for_deletion():return null
+	if node.has_meta(key) and node.get_meta(key)==value:return node
+	for child in node.get_children():
+		var result=tagged(child,key,value)
+		if result!=null:return result
+	return null
+
+func choose_hand(index: int) -> void:
+	var card=tagged(app.modal.get_node("CompleteHand"),"field_hand_index",index)
+	expect(card is Button,"every physical hand copy has a separate selectable control")
+	if card is Button:card.pressed.emit();await pause_frames(2)
+
 func fixture(id: String) -> GameEngine:
 	app._close_modal()
 	var engine=GameEngine.new()
@@ -74,6 +87,112 @@ func _project_tile(key: String) -> Rect2:
 	for corner in range(1,8):rect=rect.expand(app.table.camera.unproject_position(bounds.get_endpoint(corner)))
 	return rect
 
+func _verify_exchange_context() -> void:
+	var engine=fixture("exchange")
+	engine.state.players[0].hand=[0,0,0,0,1,2,3,4,5,6,7,8,9,27]
+	engine.state.players[0].melds=[];engine._exchange_options()
+	app.last_revision=-1;app._changed(engine.view(0));await pause_frames(2)
+	app._show_current_field()
+	find_button(app.modal,"选择要传给下家的三张牌").pressed.emit();await pause_frames(2)
+	expect(engine.state.revision==0 and app.modal.has_node("CompleteHand"),"every exchange entry opens selection instead of sending the first legal packet")
+	var row=app.modal.get_node("CompleteHand")
+	expect(row.get_child_count()==14 and row.get_meta("tile_count")==14,"all fourteen physical tiles are visible together")
+	expect(row.get_children().filter(func(card):return card.get_meta("tile")==0).size()==4,"four identical faces remain four separate controls")
+	var honor=tagged(row,"field_hand_index",13)
+	expect(honor.disabled and not honor.tooltip_text.is_empty(),"honor remains visible but explains why it cannot be exchanged when enough suited tiles exist")
+	honor.pressed.emit();await pause_frames(2)
+	expect(app.field_exchange_selection.is_empty(),"disabled honor cannot enter the exchange selection even through a duplicate activation")
+	for index in [0,1,2]:await choose_hand(index)
+	expect(app.modal.get_node("SelectedExchange").get_child_count()==3,"three identical selected copies remain three visible tiles")
+	expect(app.modal.get_node("KeptExchange").get_meta("tile_count")==11,"selection shows all eleven retained tiles")
+	await choose_hand(1);await choose_hand(3)
+	expect(app.field_exchange_selection==[0,2,3],"same-face physical copies can be independently replaced in the selection")
+	expect(not find_button(app.modal,"确认传给 "+app.view.players[1].name).disabled,"equivalent duplicate indices match an authoritative packet by multiset")
+	app._close_modal();app._show_exchange_picker();await pause_frames(2)
+	expect(app.field_exchange_selection==[0,2,3] and engine.state.revision==0,"closing and reopening preserves the exchange draft without consuming the action")
+	find_button(app.modal,"确认传给 "+app.view.players[1].name).pressed.emit();await pause_frames(2)
+	expect(engine.state.revision==1,"confirmed duplicate packet submits exactly once")
+	engine=fixture("exchange")
+	engine.state.players[0].hand=[0,1,27,27,27,27,28,28,28,28,29,29,29,29]
+	engine.state.players[0].melds=[];engine._exchange_options()
+	app.last_revision=-1;app._changed(engine.view(0));app._show_exchange_picker();await pause_frames(2)
+	expect(not tagged(app.modal.get_node("CompleteHand"),"field_hand_index",2).disabled,"honors remain selectable when fewer than three suited tiles exist")
+	for index in [0,1,2]:await choose_hand(index)
+	expect(not find_button(app.modal,"确认传给 "+app.view.players[1].name).disabled,"two suited tiles plus an honor produce a confirmable legal packet")
+	app._close_modal()
+
+func _verify_gift_context() -> void:
+	var engine=fixture("angels_gift")
+	var player: Dictionary=engine.state.players[0]
+	player.hand=[0,1,2,3,4,5,9,10,11,18,19,20,22];player.melds=[];player.drawn=-1
+	engine.state.wall=[8,8,8,9,10,11,12,13];engine.state.wall_slots=range(8);engine.state.gang_head=13
+	engine.state.first_discard=false;engine._draw(0)
+	app.last_revision=-1;app._changed(engine.view(0));await pause_frames(2)
+	expect(engine.state.phase=="turn" and player.hand.size()==14 and player.hand[player.drawn]==8,"first gift tile is already normally drawn and visible in the hand")
+	var skill=find_button(app.root,"天使的施舍 · 三选一")
+	expect(skill!=null,"after normal draw the ability has a direct named action")
+	if skill:skill.pressed.emit();await pause_frames(2)
+	expect(engine.state.phase=="gift_choice" and player.hand.size()==13,"using gift opens its three choices with the base hand retained")
+	expect(app.modal.has_node("CompleteHand") and app.modal.get_node("CompleteHand").get_meta("tile_count")==13,"gift choice shows all thirteen base hand tiles")
+	expect(labels(app.modal).has("本次摸牌"),"the originally drawn physical tile is identified")
+	for index in range(3):
+		expect(tagged(app.modal,"field_choice_index",index)!=null,"identical gift candidate %d stays separately selectable"%index)
+	expect(find_button(app.modal,"确认加入手牌").disabled,"gift does not preselect or silently accept any candidate")
+	var revision=int(engine.state.revision)
+	tagged(app.modal,"field_choice_index",2).pressed.emit();await pause_frames(2)
+	expect(engine.state.revision==revision and app.modal.get_node("ResultHand").get_meta("tile_count")==14,"choosing a candidate previews the whole hand without submitting yet")
+	app._close_modal();app._changed(engine.view(0));await pause_frames(2)
+	expect(not is_instance_valid(app.modal),"a repeated gift snapshot respects a deliberately closed picker")
+	find_button(app.root,"天使的施舍 · 继续选牌").pressed.emit();await pause_frames(2)
+	expect(app.field_picker_selection==2 and engine.state.revision==revision,"gift selection can be reopened without spending another use")
+	find_button(app.modal,"确认加入手牌").pressed.emit();await pause_frames(2)
+	expect(engine.state.phase=="turn" and player.hand.size()==14 and player.field_used,"only confirmation places the selected candidate into the hand")
+	expect(not app.view.pending.any(func(action):return action.kind=="field_gift"),"used gift cannot be offered a second time")
+	# A legacy v2 choice did not begin from a normal draw; never mislabel it.
+	var legacy=app.view.duplicate(true);legacy.version=2;legacy.phase="gift_choice";legacy.decision_seat=0
+	legacy.pending=[{"kind":"field_gift_pick","id":"0","index":0,"tile":1},{"kind":"field_gift_pick","id":"1","index":1,"tile":2},{"kind":"field_gift_pick","id":"2","index":2,"tile":3}]
+	legacy.players[0].field_private={"gift_tiles":[1,2,3]};app.view=legacy
+	app._show_field_picker("field_gift_pick",true);await pause_frames(2)
+	expect(not labels(app.modal).has("本次摸牌"),"legacy candidates are displayed without a fabricated original draw")
+	app._close_modal();app._show_current_field();await pause_frames(2)
+	expect(labels(app.modal).any(func(value):return str(value).contains("本局为旧版存档") and str(value).contains("下一局")),"legacy gift explanation matches its preserved flow and says when the new flow starts")
+	app._close_modal()
+
+func _verify_reclaim_context() -> void:
+	var engine=fixture("reclaim")
+	var player: Dictionary=engine.state.players[0]
+	player.hand=[0,1,2,3,4,5,9,10,11,22,22]
+	player.melds=[{"type":"peng","tile":18,"tiles":[18,18,18],"from":1}]
+	player.drawn=10;engine._turn_options()
+	app.last_revision=-1;app._changed(engine.view(0));await pause_frames(2)
+	find_button(app.root,"上架 · 撤回副露").pressed.emit();await pause_frames(2)
+	expect(app.modal.get_node("CompleteHand").get_meta("tile_count")==11,"reclaim keeps the full eleven-tile hand visible beside the exposed group")
+	expect(find_button(app.modal,"确认撤回").disabled and engine.state.revision==0,"opening reclaim spends nothing and requires a selection")
+	tagged(app.modal,"field_choice_index",0).pressed.emit();await pause_frames(2)
+	expect(app.modal.get_node("ResultHand").get_meta("tile_count")==14,"reclaim previews all fourteen tiles before changing melds")
+	app._close_modal();app._show_field_picker("field_reclaim");await pause_frames(2)
+	expect(app.field_picker_selection==0 and not player.field_used,"reclaim draft remains available after closing without using the ability")
+	find_button(app.modal,"确认撤回").pressed.emit();await pause_frames(2)
+	expect(player.hand.size()==14 and player.melds.is_empty() and player.field_used,"confirmed reclaim moves the complete exposed group exactly once")
+
+func _verify_gift_flower_preview() -> void:
+	var engine=fixture("angels_gift")
+	var player: Dictionary=engine.state.players[0]
+	player.hand=[0,1,2,3,4,5,9,10,11,18,19,20,22];player.melds=[];player.drawn=-1
+	engine.state.wall=[8,34,2,9,10,11,12,13];engine.state.wall_slots=range(8);engine.state.gang_head=13
+	engine.state.first_discard=false;engine._draw(0)
+	app.last_revision=-1;app._changed(engine.view(0));await pause_frames(2)
+	find_button(app.root,"天使的施舍 · 三选一").pressed.emit();await pause_frames(2)
+	tagged(app.modal,"field_choice_index",1).pressed.emit();await pause_frames(2)
+	var result=app.modal.get_node("ResultHand")
+	expect(result.get_child(result.get_child_count()-1).get_meta("tile")==-1,"flower choice previews an unknown replacement card back instead of a flower in the hand")
+	expect(result.get_children().all(func(card):return card.get_meta("tile")<34),"flower candidate is never presented as a retained hand tile")
+	expect(labels(app.modal).any(func(value):return str(value).contains("所选花牌将亮出") and str(value).contains("补牌尚未知")),"flower preview explains public flower placement and the unknown replacement draw")
+	var confirm=find_button(app.modal,"确认补花并补牌")
+	expect(confirm!=null and not confirm.disabled,"flower confirmation names the actual replacement operation")
+	if confirm:confirm.pressed.emit();await pause_frames(2)
+	expect(player.melds.any(func(meld):return meld.type=="flower" and meld.tile==34) and player.hand.size()==14 and player.hand.all(func(tile):return tile<34),"confirmed flower is exposed and an ordinary replacement restores the hand")
+
 func run() -> void:
 	if DisplayServer.get_name()!="headless":printerr("Field UI checks require --headless");quit(1);return
 	create_timer(100).timeout.connect(func():printerr("FIELD_UI watchdog timeout");await finish(1))
@@ -84,6 +203,14 @@ func run() -> void:
 	expect(not app.config.field_rules,"field enhancement defaults off")
 	find_button(app.root,"每局随机").pressed.emit();await pause_frames(2)
 	expect(app.config.field_rules and app.config.jiang=="258","field toggle preserves regional rule settings")
+	app._show_field_selector(app.config,func(settings):app.config=settings;app._show_lobby())
+	tagged(app.modal,"field_selection","angels_gift").pressed.emit();await pause_frames(2)
+	expect(app.config.field_rules and app.config.field_selection=="angels_gift","specific field selection is saved independently of the regional rules")
+	expect(find_button(app.root,"指定 · 天使的施舍")!=null,"lobby names the selected field")
+	find_button(app.root,"不开启").pressed.emit();await pause_frames(2)
+	expect(not app.config.field_rules and app.config.field_selection=="angels_gift","turning enhancement off preserves the remembered specific selection")
+	find_button(app.root,"每局随机").pressed.emit();await pause_frames(2)
+	expect(app.config.field_rules and app.config.field_selection=="random","random remains available after choosing a specific field")
 	app._show_field_catalog();await pause_frames(2)
 	for id in FieldRules.IDS:
 		expect(labels(app.modal).has(FieldRules.info(id).name),"catalog includes "+id)
@@ -91,20 +218,31 @@ func run() -> void:
 	expect(labels(app.modal).any(func(value):return str(value).contains("每人每局")),"catalog explains per-player per-round limit")
 	app._close_modal();app._show_lan_browser();await pause_frames(2)
 	expect(find_button(app.lan_lobby,"场地：每局随机")!=null,"LAN creation exposes the same independent modifier")
+	app.lan_lobby.nickname="同桌测试";app.lan_lobby.address="192.168.1.7"
+	find_button(app.lan_lobby,"场地：每局随机").pressed.emit();await pause_frames(2)
+	tagged(app.modal,"field_selection","rebirth").pressed.emit();await pause_frames(2)
+	expect(app.lan_lobby.configuration.field_selection=="rebirth" and app.lan_lobby.configuration.field_rules,"LAN creator can specify a field through the shared selector")
+	expect(app.lan_lobby.nickname=="同桌测试" and app.lan_lobby.address=="192.168.1.7","field selection preserves nickname and join address")
 	var room={"settings":{"jiang":"luan","chi":true,"ai":"efficiency","field_rules":true},"seats":[],"started":false}
 	app.lan_lobby.show_room(room,false,1)
 	expect(labels(app.lan_lobby).has("场地：每局随机") and find_button(app.lan_lobby,"场地：每局随机")==null,"guest sees field setting without host-only controls")
+	room.settings.field_selection="angels_gift";app.lan_lobby.show_room(room,false,1)
+	expect(labels(app.lan_lobby).has("场地：天使的施舍（指定）"),"guest sees the full specified field name")
 	app.discovery.stop();app._build_hud()
 	fixture("");await pause_frames(2)
 	expect(not app.field_button.visible,"normal table has no field badge")
 	await _verify_field_badge_clearance()
 	var engine=fixture("diamond_finger");await pause_frames(2)
 	expect(app.field_button.visible and app.field_button.text.contains("大力金刚指"),"table identifies active field")
-	expect(find_button(app.root,"场地能力")!=null,"legal field skill has a table action")
+	expect(find_button(app.root,"大力金刚指 · 变白板")!=null,"legal field skill has a direct named table action")
 	app._show_current_field();await pause_frames(2)
 	expect(find_button(app.modal,"选择一张手牌，变为白板")!=null,"skill panel explains transformation before selection")
 	app._show_field_picker("field_transform");await pause_frames(2)
 	var old_revision=int(engine.state.revision)
+	expect(find_button(app.modal,"确认变白板").disabled,"transformation requires selecting a hand tile before confirmation")
+	var transform: Dictionary=engine.state.pending.filter(func(action):return action.kind=="field_transform")[0]
+	await choose_hand(int(transform.index))
+	expect(app.modal.get_node("ResultHand").get_meta("tile_count")==engine.state.players[0].hand.size(),"transformation previews the complete resulting hand")
 	find_button(app.modal,"确认变白板").pressed.emit();await pause_frames(2)
 	expect(engine.state.revision==old_revision+1 and engine.state.players[0].field_used,"explicit tile confirmation submits transformation once")
 	app._show_current_field()
@@ -137,6 +275,10 @@ func run() -> void:
 	expect(not exchange.disabled,"engine-approved exchange becomes confirmable")
 	exchange.pressed.emit();await pause_frames(2)
 	expect(engine.state.revision==1,"exchange confirmation passes through authoritative action")
+	await _verify_exchange_context()
+	await _verify_gift_context()
+	await _verify_reclaim_context()
+	await _verify_gift_flower_preview()
 	engine=fixture("transparent");await pause_frames(2)
 	var mixed=engine.view(0)
 	mixed.players[1].hand=[-1,0,1,2];mixed.players[1].hand_count=4;mixed.players[1].drawn=-1

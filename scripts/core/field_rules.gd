@@ -14,7 +14,7 @@ const CATALOG = {
 	"wildcard": ["癞子", "红中可在胡牌组合中代替任意普通牌。", "手中的红中是癞子，判断胡牌和听牌时可代替任意一种万、筒、条或字牌，也可以当红中使用。二五八将等基础条件仍按替代后的牌型判断。吃、碰、杠必须使用实际同种牌，不能用癞子冒充。", false],
 	"astrology_wall": ["占星Ⅰ", "私下查看牌山接下来四张牌，每人每局一次。", "每人每局可在自己的出牌回合查看一次牌山前端接下来的四张牌；不足四张时显示剩余可查看的牌。只有自己知道结果。这是查看时刻的顺序，后续摸牌、补花或其他能力可能改变实际取得的牌。", true],
 	"astrology_waits": ["占星Ⅱ", "查看一位听牌玩家的听口，向其点炮额外加一番。", "每人每局可在自己的出牌回合，选择一位已经听牌的其他玩家，私下查看对方当时的全部听口。若你随后向这位玩家点炮，该次胡牌额外加一番。只有使用者知道查询结果。", true],
-	"angels_gift": ["天使的施舍", "摸牌时三选一，每人每局一次。", "每人每局有一次机会：轮到自己普通摸牌时，私下查看牌山开出的三张候选牌，选一张加入手牌，其余两张放回牌山。候选和选择只对自己可见。已经报听或明搂时不能使用；补花、杠后补牌不使用此能力。", true],
+	"angels_gift": ["天使的施舍", "正常摸牌后，可追加两张再三选一，每人每局一次。", "每次先正常摸一张；在这次出牌前，可主动追加两张，与本次新摸牌三选一。未选的两张按候选原顺序放回牌山前端，只有自己看得到候选和选择。每人每局限用一次，不使用时照常出牌。报听、明搂后禁用；开局、吃碰后及杠后补牌不适用，普通摸花后补到的牌仍可作为首张候选。选牌时可查看完整手牌和副露。发动即消耗次数，不能取消；可先收起选牌界面，随后继续选择。", true],
 	"no_honors": ["无字天书", "移除全部字牌，补入二十八张随机数牌。", "本局移除东、南、西、北、中、发、白共二十八张字牌，随机补入二十八张万、筒、条；花色和数字独立随机，允许重复。花牌保留，牌总数不变。同种牌可能超过四张；已有杠再获得同种牌时可续杠并再取一次杠头补牌。", false],
 	"single_wait": ["听单张", "只准听一种牌，胡牌额外加一番。", "只有听口恰好为一种牌时，才可报听或明搂；听两种及以上牌时不能声明听牌。“一种”指牌面种类，不是剩余张数，也不限定为单钓将。本局符合规则的胡牌额外加一番。", false],
 	"exchange": ["换牌", "开局每人选三张牌，交给自己的下家。", "开局补花后、首次出牌前，每人从手牌中选三张交给下家，并同时接收上家交来的三张。必须优先选择万、筒、条；仅当数牌不足三张时，才可用字牌补足。各家完成选择后统一交换，不能先看收牌再选送牌。", true],
@@ -34,7 +34,19 @@ static func all() -> Array:
 static func normalize(settings: Dictionary) -> Dictionary:
 	var result = settings.duplicate(true)
 	result.field_rules = settings.get("field_rules", false) is bool and settings.get("field_rules", false)
+	result.field_selection = selection(settings)
 	return result
+
+static func selection(settings: Dictionary) -> String:
+	# Selection and enablement are separate: switching the modifier off keeps
+	# the chosen rule ready for the next time it is enabled. Old saves lack it.
+	var chosen = settings.get("field_selection", "random")
+	return chosen if chosen is String and (chosen == "random" or chosen in IDS) else "random"
+
+static func summary(settings: Dictionary) -> String:
+	if not (settings.get("field_rules", false) is bool and settings.get("field_rules", false)): return "场地：关闭"
+	var chosen = selection(settings)
+	return "场地：每局随机" if chosen == "random" else "场地：%s（指定）" % info(chosen).name
 
 static func sequences(field_id: String = "") -> Array:
 	var result: Array = []

@@ -55,7 +55,7 @@ func _test_opening() -> void:
 	check(seen.size() == 16, "random draw can select all 16 fields")
 	for id in FieldRules.IDS:
 		engine = game(id)
-		check(engine.state.field.id == id and engine.snapshot().version == 2, "field opening " + id)
+		check(engine.state.field.id == id and engine.snapshot().version == 3, "field opening " + id)
 		replay(engine, "opening " + id)
 		if id == "no_honors":
 			var counts = Tiles.counts(engine.opening.wall)
@@ -108,13 +108,13 @@ func _test_actions() -> void:
 	engine = game("angels_gift"); p = engine.state.players[1]
 	engine.state.wall = [1,2,3,8]; engine.state.wall_slots = [0,1,2,3]; engine.state.gang_head = 8
 	var size_before = p.hand.size()
-	engine._draw(1); check(engine.state.phase=="draw_choice", "gift is offered before normal draw")
+	engine._draw(1); check(engine.state.phase=="turn" and p.hand.size()==size_before+1 and p.hand.back()==1, "ordinary gift turn draws first without a prompt")
 	check(move(engine,"field_gift"), "gift use")
 	check(engine.state.phase=="gift_choice" and p.field_private.gift_tiles==[1,2,3], "gift shows top three")
 	check(move(engine,"field_gift_pick",{"index":1}), "pick middle of three")
 	check(p.hand.size()==size_before+1 and p.hand.back()==2 and engine.state.wall==[1,3,8], "unchosen gift tiles preserve original wall order")
 	p.bao=true; p.field_used=false; engine.state.wall=[0,1,2,3,8]; engine.state.wall_slots=[0,1,2,3,4]
-	engine._draw(1); check(engine.state.phase!="draw_choice", "gift unavailable while declared")
+	engine._draw(1); check(not engine.state.pending.any(func(action):return action.kind=="field_gift"), "gift unavailable while declared")
 
 	engine=game("astrology_waits"); p=engine.state.players[0]
 	var target=engine.state.players[1]
@@ -195,6 +195,7 @@ func _test_simulations() -> void:
 			for player in engine.state.players:
 				total+=player.hand.size()+player.discards.size()
 				for meld in player.melds:total+=meld.tiles.size()
+				if engine.state.version>=3 and engine.state.phase=="gift_choice": total+=player.field_private.get("gift_tiles",[]).size()
 			check(total==144,"field actions conserve tile count "+id)
 			if steps in [3,25]:replay(engine,id+" step "+str(steps))
 			steps+=1

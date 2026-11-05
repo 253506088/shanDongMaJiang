@@ -7,7 +7,7 @@ signal room_changed(room: Dictionary)
 signal connection_closed(reason: String)
 
 const GAME_PORT = 32141
-const PROTOCOL = 2
+const PROTOCOL = 3
 const APP_ID = "qingyu-shandong-lan"
 const MAX_PACKET = 65536
 const HEARTBEAT_SECONDS = 2.0
@@ -63,9 +63,15 @@ func _new_token() -> String:
 	return Crypto.new().generate_random_bytes(24).hex_encode()
 
 func _settings(value: Dictionary) -> Dictionary:
+	var field = FieldRules.normalize(value)
 	return {"jiang": "luan" if value.get("jiang") == "luan" else "258", "chi": value.get("chi", true) == true,
 		"ai": "classic" if value.get("ai") == "classic" else "efficiency", "rounds": 0, "takeover": false,
-		"field_rules": value.get("field_rules", false) is bool and value.get("field_rules", false)}
+		"field_rules": field.field_rules, "field_selection": field.field_selection}
+
+static func _valid_field_settings(settings: Dictionary) -> bool:
+	if not settings.get("field_rules", false) is bool: return false
+	var selection = settings.get("field_selection", "random")
+	return selection is String and (selection == "random" or selection in FieldRules.IDS)
 
 func host_room(settings: Dictionary, player_name: String = "房主", port: int = GAME_PORT) -> Error:
 	leave_room()
@@ -353,13 +359,16 @@ func _receive_client(message: Dictionary) -> void:
 func _valid_room(value: Variant) -> bool:
 	if not value is Dictionary: return false
 	if not value.get("id") is String or not value.get("settings") is Dictionary or not value.get("seats") is Array: return false
+	if not _valid_field_settings(value.settings): return false
 	if value.seats.size() != 4 or not value.get("started") is bool: return false
 	for seat in value.seats:
 		if not seat is Dictionary or not seat.get("name") is String: return false
 	return true
 
 func _valid_view(value: Dictionary) -> bool:
-	if value.has("wall") or value.has("journal") or value.has("claim_queue"): return false
+	for private_key in ["wall", "journal", "claim_queue", "wall_hidden", "exchange_picks", "gift_slots"]:
+		if value.has(private_key): return false
+	if not value.get("settings") is Dictionary or not _valid_field_settings(value.settings): return false
 	if value.get("phase") not in ["turn", "claim", "settled", "draw_choice", "gift_choice", "exchange"] or not value.get("revision") is int or not value.get("round") is int: return false
 	if not value.get("players") is Array or value.players.size() != 4 or not value.get("pending") is Array: return false
 	for player in value.players:

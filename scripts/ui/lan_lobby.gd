@@ -8,6 +8,7 @@ signal ready_requested(ready: bool)
 signal start_requested
 signal settings_requested(settings: Dictionary)
 signal field_catalog_requested
+signal field_selection_requested(settings: Dictionary)
 signal disconnect_autoplay_requested(enabled: bool)
 signal leave_requested
 
@@ -120,8 +121,8 @@ func _update_room_list() -> void:
 		var caption = UI.label(row,Rect2(22,12,607,36),str(found.get("name","牌友的房间")),24,UI.TEXT,true)
 		caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var settings = found.get("settings",{})
-		var summary = "%d / 4 真人 · %s · %s · %s" % [int(found.get("players",1)),"二五八将" if settings.get("jiang","258")=="258" else "乱将","允许吃" if settings.get("chi",true) else "不允许吃","场地随机" if settings.get("field_rules",false) else "正常玩法"]
-		UI.label(row,Rect2(22,59,637,29),summary,18,UI.MUTED)
+		var summary = "%d / 4 真人 · %s · %s · %s" % [int(found.get("players",1)),"二五八将" if settings.get("jiang","258")=="258" else "乱将","允许吃" if settings.get("chi",true) else "不允许吃",FieldRules.summary(settings)]
+		UI.label(row,Rect2(22,57,637,45),summary,17,UI.MUTED).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		var started = found.get("started",false)
 		var full = int(found.get("players",0)) >= 4
 		var enter = UI.button(row,Rect2(691,29,164,53),"正在对局" if started else ("房间已满" if full else "加入"),func():
@@ -145,10 +146,10 @@ func set_status(message: String) -> void:
 	if is_instance_valid(status_label): status_label.text = message
 
 func _draw_settings(parent: Node, offset: Vector2, editable: bool) -> void:
-	for row in range(4):
-		var key = ["jiang","chi","ai","field_rules"][row]
-		var labels = [["二五八将","乱将"],["允许吃牌","不允许吃"],["牌效 AI","经典 AI"],["场地：关闭","场地：每局随机"]][row]
-		var values = [["258","luan"],[true,false],["efficiency","classic"],[false,true]][row]
+	for row in range(3):
+		var key = ["jiang","chi","ai"][row]
+		var labels = [["二五八将","乱将"],["允许吃牌","不允许吃"],["牌效 AI","经典 AI"]][row]
+		var values = [["258","luan"],[true,false],["efficiency","classic"]][row]
 		if not editable:
 			var selected = 0 if configuration.get(key,false)==values[0] else 1
 			UI.label(parent,Rect2(offset+Vector2(0,row*56),Vector2(384,44)),labels[selected],23,UI.GOLD)
@@ -162,6 +163,14 @@ func _draw_settings(parent: Node, offset: Vector2, editable: bool) -> void:
 				else: settings_requested.emit(configuration.duplicate(true)),configuration.get(key,false)==value)
 			button.disabled = not editable
 			_rule_buttons.append(button)
+	var field_rect=Rect2(offset+Vector2(0,168),Vector2(384,44))
+	if editable:
+		var button=UI.button(parent,field_rect,FieldRules.summary(configuration),func():
+			if not _busy:field_selection_requested.emit(configuration.duplicate(true)),configuration.get("field_rules",false))
+		button.add_theme_font_size_override("font_size",17)
+		button.tooltip_text="关闭、每局随机或指定一种场地规则"
+		_rule_buttons.append(button)
+	else:UI.label(parent,field_rect,FieldRules.summary(configuration),20,UI.GOLD)
 
 func show_room(room: Dictionary, host: bool, local_seat: int) -> void:
 	_browser = false; _busy = false; _room = room.duplicate(true); _host = host; _seat = local_seat
