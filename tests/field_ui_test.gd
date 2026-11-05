@@ -193,6 +193,120 @@ func _verify_gift_flower_preview() -> void:
 	if confirm:confirm.pressed.emit();await pause_frames(2)
 	expect(player.melds.any(func(meld):return meld.type=="flower" and meld.tile==34) and player.hand.size()==14 and player.hand.all(func(tile):return tile<34),"confirmed flower is exposed and an ordinary replacement restores the hand")
 
+func _has_texture(node: Node, texture: Texture2D) -> bool:
+	if node is TextureRect and node.texture==texture:return true
+	for child in node.get_children():
+		if _has_texture(child,texture):return true
+	return false
+
+func _no_honors_totals(extras: Dictionary) -> Array:
+	var totals=Tiles.counts(Tiles.wall())
+	for tile in range(27,34):totals[tile]=0
+	for tile in extras:totals[tile]+=int(extras[tile])
+	return totals
+
+func _verify_no_honors_additions() -> void:
+	var engine=fixture("no_honors")
+	var public_view=engine.view(0)
+	# Deliberately different from the host's actual random wall. This public
+	# packet is the only source a guest is allowed to use for deck composition.
+	public_view.field.tile_totals=_no_honors_totals({0:3,8:1,9:2,10:4,17:2,18:5,26:11})
+	app.last_revision=-1;app._changed(public_view);await pause_frames(2)
+	var expected=[{"tile":0,"added":3,"total":7},{"tile":8,"added":1,"total":5},{"tile":9,"added":2,"total":6},{"tile":10,"added":4,"total":8},{"tile":17,"added":2,"total":6},{"tile":18,"added":5,"total":9},{"tile":26,"added":11,"total":15}]
+	expect(not public_view.has("wall") and public_view.players.slice(1).all(func(player):return player.hand.is_empty()),"added-tile fixture is a redacted player packet without the wall or other players' concealed hands")
+	expect(app._no_honors_additions()==expected,"additional counts come from the public starting totals, across all three suits and repeated additions")
+	engine.state.wall.fill(26)
+	engine.state.players[1].hand.fill(26)
+	expect(app._no_honors_additions()==expected,"changing private host information cannot alter the public added-tile list")
+	expect(app.field_button.text.contains("无字天书") and app.field_button.text.replace(" ","").contains("新增28张"),"existing field entry advertises the current added-tile summary")
+	app.field_button.pressed.emit();await pause_frames(2)
+	var group=app.modal.find_child("NoHonorsAdditions",true,false)
+	expect(group!=null,"current no-honors detail contains an explicit added-tile list")
+	if group!=null:
+		var text=labels(group)
+		expect(text.any(func(value):return str(value).replace(" ","").contains("本局新增28张") and str(value).contains("7") and str(value).contains("种牌")),"summary gives the total additions and number of affected tile kinds")
+		expect(text.any(func(value):return str(value).contains("4") and (str(value).contains("原") or str(value).contains("通常"))),"list explains the ordinary four-copy baseline")
+		expect(text.any(func(value):return str(value).contains("剩余") or str(value).contains("余张")),"list distinguishes the starting composition from currently remaining tiles")
+		for suit in [["万牌",4],["筒牌",8],["条牌",16]]:
+			expect(text.any(func(value):return str(value).contains(suit[0]) and str(value).replace(" ","").contains("新增%d张"%suit[1])),"suit heading summarizes its own extra copies: "+str(suit[0]))
+		for row in expected:
+			var card=tagged(group,"extra_tile",row.tile)
+			expect(card!=null,"only-added card exists for "+Tiles.title(row.tile))
+			if card==null:continue
+			expect(int(card.get_meta("extra_count"))==row.added and int(card.get_meta("tile_total"))==row.total,"tile card exposes the exact addition and starting total for "+Tiles.title(row.tile))
+			var card_text=labels(card)
+			expect(card_text.any(func(value):return str(value).contains("增加") and str(value).contains(str(row.added))),"visible added-count wording matches "+Tiles.title(row.tile))
+			expect(card_text.any(func(value):return str(value).contains("本局") and str(value).contains(str(row.total))),"visible total-count wording matches "+Tiles.title(row.tile))
+			expect(_has_texture(card,app.tile_textures[row.tile]),"tile card uses the corresponding existing tile face for "+Tiles.title(row.tile))
+		for tile in [1,2,7,11,16,19,25,27,33]:
+			expect(tagged(group,"extra_tile",tile)==null,"unchanged or removed tiles are not listed as additions: "+Tiles.title(tile))
+		var scroll=group.get_parent().get_parent() as ScrollContainer
+		scroll.scroll_vertical=100000;await pause_frames(2)
+		var last_note: Label=null
+		for child in group.get_children():
+			if child is Label and child.text.contains("未列出的数牌"):last_note=child
+		expect(last_note!=null and scroll.get_global_rect().encloses(last_note.get_global_rect()),"the final deck-count explanation can be scrolled fully into view")
+		var all_rules=find_button(app.modal,"查看全部场地规则")
+		expect(all_rules!=null and scroll.get_global_rect().encloses(all_rules.get_global_rect()),"scroll content includes the complete final navigation button below the additions")
+	var reading=app.modal
+	var advanced=public_view.duplicate(true);advanced.revision+=1
+	app._changed(advanced);await pause_frames(2)
+	expect(is_instance_valid(reading) and app.modal==reading,"read-only additions remain open when the table receives another turn")
+	expect(app._no_honors_additions()==expected,"draw revisions do not subtract from the opening additions")
+	# A library entry explains the design but must never claim this table's
+	# random packet belongs to a future or merely browsed game.
+	app._show_field_detail("no_honors",false);await pause_frames(2)
+	expect(app.modal.find_child("NoHonorsAdditions",true,false)==null,"browsing the rule catalog does not mix in the current round's added tiles")
+	app._close_modal()
+	# Keep all three opponents' complete exposed racks while verifying the
+	# longer real badge text, not just its old generic rule-name variation.
+	var exposed=public_view.duplicate(true);exposed.revision=10
+	for seat in range(1,4):
+		exposed.players[seat].hand=[0,1,2,3,4,5,9,10,11,18,19,20,22,22]
+		exposed.players[seat].hand_count=14;exposed.players[seat].melds=[]
+		exposed.players[seat].ming=true;exposed.players[seat].bao=true;exposed.players[seat].drawn=13
+	app._changed(exposed);await pause_frames(2)
+	var viewport=app.scene_surface.scene_viewport
+	var original_size=viewport.size
+	for pixels in [Vector2i(960,540),Vector2i(1600,900),Vector2i(1920,1080)]:
+		viewport.size=pixels;await pause_frames(2)
+		var bounds=app.field_button.get_global_rect()
+		expect(not app.field_button.text.contains("\n") and bounds.end.y<=70 and bounds.end.x<app.round_text.get_parent().get_global_rect().position.x,"added-tile badge stays on one line in the existing toolbar at %s"%pixels)
+		var safe=bounds.grow(11);var clear=true
+		for key in app.table.pieces:
+			if safe.intersects(_project_tile(key)):clear=false;break
+		expect(clear,"added-tile entry and shadow clear every projected exposed hand, meld and wall at %s"%pixels)
+		var hud_clear=true
+		for control in app.hud.get_children():
+			if not control is Control or control==app.field_button or not control.visible:continue
+			if safe.intersects(control.get_global_rect()):hud_clear=false;break
+		expect(hud_clear,"added-tile entry does not overlap existing round or side information at %s"%pixels)
+	viewport.size=original_size
+	var next=public_view.duplicate(true);next.round+=1;next.revision=0
+	next.field.tile_totals=_no_honors_totals({2:28})
+	app._changed(next);app.field_button.pressed.emit();await pause_frames(2)
+	expect(app._no_honors_additions()==[{"tile":2,"added":28,"total":32}],"a later round replaces the prior distribution instead of accumulating or caching it")
+	group=app.modal.find_child("NoHonorsAdditions",true,false)
+	expect(group!=null and tagged(group,"extra_tile",2)!=null and tagged(group,"extra_tile",0)==null,"reopened detail shows only the new round's actual added tile")
+	if group!=null:
+		var largest=tagged(group,"extra_tile",2) as Control
+		var contained=largest!=null
+		if largest!=null:
+			for child in largest.get_children():
+				if child is Label and not Rect2(Vector2.ZERO,largest.size).encloses(child.get_rect()):contained=false
+		expect(contained,"the largest legal addition of 28 and total of 32 fit within the card without clipped labels")
+	app._close_modal()
+	var missing=next.duplicate(true);missing.revision+=1;missing.field.erase("tile_totals")
+	app._changed(missing);app.field_button.pressed.emit();await pause_frames(2)
+	expect(app._no_honors_additions().is_empty(),"missing public totals do not trigger reconstruction from hidden hands or the host wall")
+	expect(tagged(app.modal,"extra_tile",2)==null and tagged(app.modal,"extra_tile",26)==null,"missing totals do not preserve guessed or stale added-tile cards")
+	expect(not labels(app.modal).any(func(value):return str(value).replace(" ","").begins_with("本局新增28张")),"missing data is not presented as a measured current-round summary")
+	app._close_modal()
+	var normal=next.duplicate(true);normal.revision+=2;normal.field.id="ouroboros"
+	app._changed(normal);app._show_current_field();await pause_frames(2)
+	expect(app._no_honors_additions().is_empty() and app.modal.find_child("NoHonorsAdditions",true,false)==null,"other active fields never reuse a no-honors list")
+	app._close_modal()
+
 func run() -> void:
 	if DisplayServer.get_name()!="headless":printerr("Field UI checks require --headless");quit(1);return
 	create_timer(100).timeout.connect(func():printerr("FIELD_UI watchdog timeout");await finish(1))
@@ -279,6 +393,7 @@ func run() -> void:
 	await _verify_gift_context()
 	await _verify_reclaim_context()
 	await _verify_gift_flower_preview()
+	await _verify_no_honors_additions()
 	engine=fixture("transparent");await pause_frames(2)
 	var mixed=engine.view(0)
 	mixed.players[1].hand=[-1,0,1,2];mixed.players[1].hand_count=4;mixed.players[1].drawn=-1

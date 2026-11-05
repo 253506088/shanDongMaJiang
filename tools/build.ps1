@@ -15,7 +15,9 @@ if ($Target -eq 'macos') {
     New-Item -ItemType Directory -Force -Path $templateDir | Out-Null
     Copy-Item -LiteralPath $macTemplate -Destination (Join-Path $templateDir 'macos.zip')
 }
-& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --editor --import --quit
+# --import owns the editor's completion and shutdown. Leave time for its
+# asynchronous work before exit instead of combining it with an early --quit.
+& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --import --frame-delay 800
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Target -eq 'android') {
     # apksigner writes a second APK in the Java temporary directory. Keep that

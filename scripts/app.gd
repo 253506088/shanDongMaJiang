@@ -421,6 +421,11 @@ func _changed(new_view: Dictionary) -> void:
 		var ability = " · 已用" if view.players[0].get("field_used",false) else (" · 可用" if _field_moves().size()>0 else "")
 		field_button.text = "场地 · "+str(rule.name)+ability
 		field_button.tooltip_text = str(rule.summary)+"\n点击查看规则、能力与本局信息。"
+		if _field_id()=="no_honors":
+			var additions=_no_honors_additions()
+			var extra=additions.reduce(func(total,entry):return total+entry.added,0)
+			field_button.text="无字天书 · 新增%d张"%extra if not additions.is_empty() else "无字天书 · 新增牌清单"
+			field_button.tooltip_text="点击查看本局增加了哪些牌、每种增加多少张，以及本局各牌总数。"
 	head_tile.texture = tile_textures[view.gang_head] if view.gang_head>=0 else tile_textures[42]
 	head_name.text=Tiles.spoken_title(view.gang_head) if view.gang_head>=0 else ("盖牌" if _field_id()=="transparent" else "—")
 	for seat in range(4):
@@ -1011,7 +1016,9 @@ func _show_current_field() -> void:
 func _show_field_detail(id: String, current: bool) -> void:
 	var rule=FieldRules.info(id)
 	_popup(str(rule.name),Vector2(1040,766),true)
-	modal.set_meta("field_action",current)
+	# Opening composition is read-only for the whole round. Keep its list open
+	# while a LAN table continues taking turns; a new round still closes it.
+	modal.set_meta("field_action",current and id!="no_honors")
 	var subtitle="规则说明 · 可指定，也可每局随机"
 	if current:subtitle="本局场地 · 每位玩家拥有独立次数" if rule.get("active",false) else "本局场地 · 全体玩家共同遵守"
 	UI.label(modal,Rect2(42,81,956,28),subtitle,18,UI.GOLD)
@@ -1024,6 +1031,7 @@ func _show_field_detail(id: String, current: bool) -> void:
 	var y=164.0
 	if current:
 		var p: Dictionary=view.players[0]
+		if id=="no_honors": y=_draw_no_honors_additions(body,y)
 		if rule.get("active",false):
 			UI.label(body,Rect2(0,y,934,35),"你的本局次数：已使用" if p.get("field_used",false) else "你的本局次数：剩余 1 次",22,UI.GOLD,true); y+=49
 		var chosen: Array=view.get("field",{}).get("chosen_tiles",[])
@@ -1063,6 +1071,49 @@ func _show_field_detail(id: String, current: bool) -> void:
 		UI.label(body,Rect2(0,y,934,64),"场地叠加在地方玩法上；普通吃牌仍受「允许吃牌」控制。\n所有“一局一次”均按每位玩家分别计算；加一番即本次分数翻倍。",19,UI.MUTED); y+=84
 	UI.button(body,Rect2(0,y,934,51),"查看全部场地规则",_show_field_catalog);y+=69
 	body.custom_minimum_size.y=maxf(598,y)
+
+func _no_honors_additions() -> Array:
+	# Counts are the public opening composition, not the remaining wall or
+	# anyone's private hand. They remain stable through draws and saved games.
+	if _field_id()!="no_honors":return []
+	var totals: Array=view.get("field",{}).get("tile_totals",[])
+	if totals.size()<27:return []
+	var entries: Array=[]
+	for tile in range(27):
+		var total=int(totals[tile])
+		if total>4:entries.append({"tile":tile,"added":total-4,"total":total})
+	return entries
+
+func _draw_no_honors_additions(parent: Node, y: float) -> float:
+	var section=Control.new();section.name="NoHonorsAdditions"
+	section.position=Vector2(0,y);parent.add_child(section)
+	var entries=_no_honors_additions()
+	if entries.is_empty():
+		UI.label(section,Rect2(0,0,934,50),"本局新增牌明细暂不可用。",22,UI.MUTED)
+		section.size=Vector2(934,62)
+		return y+78
+	var extra=entries.reduce(func(total,entry):return total+entry.added,0)
+	UI.label(section,Rect2(0,0,934,37),"本局新增 %d 张 · %d 种牌"%[extra,entries.size()],26,UI.GOLD,true)
+	UI.label(section,Rect2(0,44,934,32),"原本每种数牌4张，以下为额外补入的牌；不是剩余牌数。",18,UI.MUTED)
+	var top=91.0
+	for suit in range(3):
+		var group=entries.filter(func(entry):return int(entry.tile)/9==suit)
+		if group.is_empty():continue
+		var amount=group.reduce(func(total,entry):return total+entry.added,0)
+		UI.label(section,Rect2(0,top,934,30),["万牌","筒牌","条牌"][suit]+" · 新增 %d 张"%amount,21,UI.GOLD,true)
+		top+=38
+		for i in range(group.size()):
+			var entry: Dictionary=group[i]
+			var card=UI.table_panel(section,Rect2((i%3)*312,top+(i/3)*114,298,102))
+			card.set_meta("extra_tile",entry.tile);card.set_meta("extra_count",entry.added);card.set_meta("tile_total",entry.total)
+			UI.texture(card,Rect2(12,10,60,82),tile_textures[entry.tile])
+			UI.label(card,Rect2(90,4,192,28),Tiles.spoken_title(entry.tile),19,UI.TEXT)
+			UI.label(card,Rect2(90,34,192,34),"增加 %d 张"%entry.added,24,UI.GOLD,true)
+			UI.label(card,Rect2(90,70,192,26),"本局共 %d 张"%entry.total,18,UI.MUTED)
+		top+=ceil(group.size()/3.0)*114+12
+	UI.label(section,Rect2(0,top,934,40),"未列出的数牌仍为4张，明细不会随摸牌或出牌减少。",18,UI.MUTED)
+	section.size=Vector2(934,top+48)
+	return y+section.size.y+20
 
 func _field_tile_row(parent: Node, tiles: Array, y: float) -> float:
 	for i in range(tiles.size()):

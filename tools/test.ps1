@@ -1,7 +1,8 @@
 param([string]$Godot = $env:GODOT_BIN)
 $ErrorActionPreference = 'Stop'
 $projectDir = Split-Path $PSScriptRoot -Parent
-& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --editor --import --quit
+# Let the importer complete its asynchronous editor work before shutdown.
+& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --import --frame-delay 800
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/test_runner.gd
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
