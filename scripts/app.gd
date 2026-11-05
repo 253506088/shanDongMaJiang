@@ -1,6 +1,7 @@
 extends Node
 const DoudizhuMode = preload("res://scripts/doudizhu/mode.gd")
 var doudizhu: Control
+var doudizhu_voice = "male"
 var session: LocalSession
 var table: Table3D
 var canvas: CanvasLayer
@@ -23,6 +24,7 @@ var scene_surface: SceneSurface
 var display_button: Button
 # Render/input checks must neither read nor overwrite a player's preferences.
 var qa_mode = "--qa" in OS.get_cmdline_user_args()
+var preferences_path = "user://preferences.json"
 var players_ui: Array = []
 var round_text: Label
 var head_tile: TextureRect
@@ -195,9 +197,11 @@ func _open_doudizhu() -> void:
 	modal = null; lobby = null; hud = null; toast_label = null
 	doudizhu = DoudizhuMode.new()
 	doudizhu.muted = muted
+	doudizhu.voice_profile = doudizhu_voice
 	doudizhu.qa_mode = qa_mode
 	doudizhu.exit_requested.connect(_show_lobby)
 	doudizhu.mute_changed.connect(func(value): muted = value; _save_preferences())
+	doudizhu.voice_profile_changed.connect(func(value): doudizhu_voice = value; _save_preferences())
 	root.add_child(doudizhu)
 
 func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callable) -> void:
@@ -1338,7 +1342,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.5.0"))+"\n山东麻将单机 / 附近同桌 · 独立单机斗地主\n\n麻将规则、牌面和语音参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克为程序绘制；斗地主语音由开放模型生成。\nKokoro / sherpa-onnx：Apache-2.0，详见开源许可。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n山东麻将单机 / 附近同桌 · 独立单机斗地主\n\n麻将规则、牌面和语音参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 
@@ -1445,14 +1449,15 @@ func _notification(what: int) -> void:
 
 func _save_preferences() -> void:
 	if qa_mode:return
-	var file=FileAccess.open("user://preferences.json",FileAccess.WRITE)
-	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen()}))
+	var file=FileAccess.open(preferences_path,FileAccess.WRITE)
+	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"doudizhu_voice":doudizhu_voice}))
 
 func _load_preferences() -> void:
 	if qa_mode:return
-	if not FileAccess.file_exists("user://preferences.json"):return
-	var prefs=JSON.parse_string(FileAccess.get_file_as_string("user://preferences.json"))
+	if not FileAccess.file_exists(preferences_path):return
+	var prefs=JSON.parse_string(FileAccess.get_file_as_string(preferences_path))
 	if not prefs is Dictionary:return
 	config.merge(prefs.get("config",{}),true); muted=prefs.get("muted",false);low_quality=prefs.get("low_quality",false)
+	doudizhu_voice = "female" if prefs.get("doudizhu_voice", "male") == "female" else "male"
 	session.speed=clampf(prefs.get("speed",1.0),0.75,1.5) if prefs.get("pace_version",0)==2 else 1.0;table.quality(low_quality)
 	desktop_window.set_fullscreen(prefs.get("fullscreen",false) == true)

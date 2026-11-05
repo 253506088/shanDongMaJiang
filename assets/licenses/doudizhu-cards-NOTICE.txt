@@ -1,0 +1,32 @@
+Traditional Dou Dizhu playing-card artwork
+
+SVG-cards by David Bellot and Huub de Beer
+Copyright (C) 2005 David Bellot
+Copyright (C) 2016, 2017 Huub de Beer
+https://github.com/htdebeer/SVG-cards
+Pinned revision: 6d88bf9c594997b82bc5668ab0877a4e9b717665
+
+The upstream repository distributes this artwork under GNU LGPL 2.1.
+Its complete unmodified license is included as doudizhu-cards-LGPL-2.1.txt.
+The original SVG source, including its original license header, is included
+verbatim as doudizhu-cards-source.svg.txt. Remove the final .txt suffix to
+edit it in an SVG editor. The suffix prevents an unnecessary Godot import.
+The original upstream usage and attribution text is also included as
+doudizhu-cards-upstream-README.md.
+
+The game uses the upstream 2x PNG renderings of the 54 faces and teal back.
+Project modifications (2026-11-05): warm off-white RGB multiplication by
+#f6f1e7, preserving alpha; grayscale conversion of the small joker so its
+illustration is distinct from the large joker. The card renderer overlays
+Chinese small/big joker labels using the already bundled Noto Sans SC font
+(SIL OFL 1.1). Traditional pip arrangement and double-headed court artwork
+are preserved. The modified card images retain their upstream LGPL terms.
+
+tools/import_doudizhu_cards.py is the reproducible downloader/processor.
+doudizhu-cards-manifest.json records every upstream URL, source SHA-256,
+processed file SHA-256, dimensions and change. Runtime images are in
+assets/doudizhu/cards/. The exact LGPL source and license ship with them;
+the game needs no external website or installed system font to draw cards.
+
+This attribution concerns the playing-card artwork. The game's independent
+rules, UI implementation, audio and other assets have their own provenance.

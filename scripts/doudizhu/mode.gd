@@ -5,10 +5,12 @@ const TableScript = preload("res://scripts/doudizhu/ui/table.gd")
 const VoiceScript = preload("res://scripts/doudizhu/audio/voice.gd")
 signal exit_requested
 signal mute_changed(enabled: bool)
+signal voice_profile_changed(profile: String)
 var session: DdzSession
 var table: Control
 var voice: AudioStreamPlayer
 var muted = false
+var voice_profile = "male"
 var qa_mode = false
 var notice_label: Label
 var notice_time = 0.0
@@ -19,10 +21,13 @@ func _ready() -> void:
 	session = SessionScript.new()
 	add_child(session)
 	voice = VoiceScript.new()
+	voice.profile = "female" if voice_profile == "female" else "male"
 	add_child(voice)
 	table = TableScript.new()
 	add_child(table)
 	table.set_muted(muted)
+	table.set_voice_profile(voice_profile)
+	table.voice_profile_requested.connect(set_voice_profile)
 	table.action_requested.connect(func(action):
 		if not session.submit(action): table.action_rejected("这次操作已失效，请按当前牌面重新选择。"))
 	table.hint_requested.connect(session.request_hint)
@@ -45,6 +50,14 @@ func _ready() -> void:
 func _changed(view: Dictionary) -> void:
 	table.set_view(view)
 	session.hold_presentation(voice.announce(view, muted))
+
+func set_voice_profile(value: String) -> void:
+	var chosen = "female" if value == "female" else "male"
+	if chosen == voice_profile: return
+	voice_profile = chosen
+	voice.set_profile(chosen)
+	table.set_voice_profile(chosen)
+	voice_profile_changed.emit(chosen)
 
 func _next_round() -> void:
 	voice.stop_all()

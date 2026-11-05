@@ -6,3 +6,7 @@
 # Preserve the original legal text, including upstream whitespace.
 assets/fonts/OFL-*.txt -whitespace
 assets/licenses.txt -whitespace
+# These three vendored files are hash-verified, unmodified upstream bytes.
+assets/licenses/doudizhu-cards-source.svg.txt -text -whitespace
+assets/licenses/doudizhu-cards-LGPL-2.1.txt -text -whitespace
+assets/licenses/doudizhu-cards-upstream-README.md -text -whitespace

@@ -4,11 +4,17 @@
 
 ## 斗地主与离线中文报牌（2026-11-05）
 
-`scripts/doudizhu/` 的规则实现、AI、牌桌与矢量扑克牌由本项目独立编写。玩法核对 [Pagat — Dou Dizhu](https://www.pagat.com/climbing/doudizhu.html) 等公开资料，未复制网页正文或第三方斗地主源码。采用的规则变体与资料差异见 `docs/doudizhu-rules.md`。
+`scripts/doudizhu/` 的规则实现、AI和牌桌由本项目独立编写。玩法核对 [Pagat — Dou Dizhu](https://www.pagat.com/climbing/doudizhu.html) 等公开资料，未复制网页正文或第三方斗地主源码。采用的规则变体与资料差异见 `docs/doudizhu-rules.md`。0.6.0的传统牌面美术来源单列如下。
 
-`assets/doudizhu/audio/` 的60段中文报牌为开放模型生成音频，并非从商业游戏提取的录音。模型为 [hexgrad/Kokoro-82M-v1.1-zh](https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh)，固定revision `01e7505bd6a7a2ac4975463114c3a7650a9f7218`；采用Apache-2.0的 [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) 1.12.40 CPU转换模型离线生成，音色zm_010。仅分发24kHz PCM WAV，不分发模型与生成环境，运行时不联网。
+`assets/doudizhu/audio/` 的中文报牌为开放模型生成音频，并非从商业游戏提取的录音。模型为 [hexgrad/Kokoro-82M-v1.1-zh](https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh)，固定revision `01e7505bd6a7a2ac4975463114c3a7650a9f7218`；采用Apache-2.0的 [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) 1.12.40 CPU转换模型离线生成。0.6.0按用户试听后的要求保留男声zm_010和女声zf_001，各60段，使用简短报牌；根目录为男声，`female/`为女声。仅分发24kHz PCM WAV，不分发模型与生成环境，运行时不联网。
 
 完整Apache-2.0许可、来源声明、上游模型卡与逐文件SHA-256清单分别保存在 `assets/licenses/doudizhu-Apache-2.0.txt`、`doudizhu-voice-NOTICE.txt`、`doudizhu-Kokoro-model-card.md` 和 `doudizhu-voice-manifest.json`。剪静音、音量处理及可复核生成脚本为 `tools/import_doudizhu_audio.py`；调查和准确授权边界见 `docs/doudizhu-sources.md`。游戏内「关于 → 查看开源许可」同时收录来源和许可正文。
+
+## 传统扑克牌面（0.6.0）
+
+采用 [SVG-cards](https://github.com/htdebeer/SVG-cards)，Copyright (C) 2005 David Bellot，Copyright (C) 2016, 2017 Huub de Beer，GNU LGPL 2.1。固定提交 `6d88bf9c594997b82bc5668ab0877a4e9b717665`，使用上游2倍PNG的54张牌与青绿色牌背；仅做暖白乘色、小王灰度与两王中文角标，标准点阵和双头人物保留。修改后的图片仍按原LGPL条款提供，此素材许可不扩展为对本项目游戏代码的授权。
+
+完整LGPL、署名、原始SVG及其原始许可头、上游README和逐图SHA-256清单保存在 `assets/licenses/doudizhu-cards-*`，同时随游戏包分发。`doudizhu-cards-source.svg.txt` 是原始SVG的原字节副本，去掉末尾`.txt`可编辑；`tools/import_doudizhu_cards.py` 提供确定性的下载／处理／校验方法。具体来源和修改见 `docs/doudizhu-card-art.md`。
 
 ## 山东麻将规则和 AI 的移植
 

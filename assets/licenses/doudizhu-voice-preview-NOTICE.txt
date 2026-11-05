@@ -1,0 +1,29 @@
+Dou Dizhu audition previews (2026-11-05)
+
+Files under assets/doudizhu/voice-previews retain the audition/selection record.
+The user selected the brief male and female styles for two complete runtime
+profiles; the preview files themselves are excluded from Godot by .gdignore.
+
+current-male.wav concatenates seven existing generated clips from this project.
+brief-female.wav and brief-male.wav are newly synthesized short Chinese calls
+using the already available Kokoro-82M-v1.1-zh model and sherpa-onnx runtime.
+No new third-party recording is represented as a human voice recording here.
+
+Model: hexgrad/Kokoro-82M-v1.1-zh, Apache License 2.0
+Revision: 01e7505bd6a7a2ac4975463114c3a7650a9f7218
+https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh
+Runtime: sherpa-onnx 1.12.40 (Apache License 2.0), CPU
+https://github.com/k2-fsa/sherpa-onnx
+Full license: assets/licenses/doudizhu-Apache-2.0.txt
+Model attribution: assets/licenses/doudizhu-voice-NOTICE.txt
+
+Audio is mono PCM16 WAV, 24 kHz. The two new takes use speaker IDs 3 (zf_001)
+and 59 (zm_010), speed 1.0. Phrase wording/punctuation differs; there is no
+post-production pitch shifting or time-stretching. The samples are trimmed,
+peak-normalized and endpoint-faded, with 0.4 second gaps between phrases.
+Exact text, segment timing and resulting SHA-256 are recorded in
+doudizhu-voice-preview-manifest.json.
+
+These samples have passed format, non-silence and hash checks. The user selected
+the two brief styles after listening; that is not a claim that all 120 resulting
+runtime clips have individually undergone a human listening review.

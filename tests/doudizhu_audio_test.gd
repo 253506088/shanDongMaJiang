@@ -28,6 +28,10 @@ func run() -> void:
 	var voice = VoiceScript.new()
 	root.add_child(voice)
 	_test_assets(voice)
+	voice.set_profile("female")
+	_test_assets(voice)
+	voice.set_profile("male")
+	_test_profile_switch(voice)
 	_test_mapping(voice)
 	_test_queue(voice)
 	voice.stop_all()
@@ -75,6 +79,25 @@ func _test_mapping(voice) -> void:
 	check(voice.clip_keys(_view(1, 1, _play("single", 3), "playing", "spring")) == ["single_3"], "spring is voiced only after the round finishes")
 	check(voice.clip_keys(_view(1, 1, {"type": "deal", "seat": 0})).is_empty(), "silent opening does not invent a spoken action")
 	check(voice.clip_keys({}).is_empty(), "empty view has no announcement")
+
+func _test_profile_switch(voice) -> void:
+	var event = _view(81, 3, _play("single", 3))
+	var male_stream = voice.clips["single_3"]
+	voice.announce(event, false)
+	voice.announce(_view(81, 4, _play("pair", 4)), false)
+	var last_key = voice.last_key
+	voice.set_profile("female")
+	check(voice.profile == "female" and voice.clips.size() == 60, "female profile has a complete catalog")
+	check(voice.clips["single_3"] != male_stream, "female uses a distinct recording")
+	check(not voice.playing and voice.queue.is_empty(), "switching voice stops the old speaker and queue")
+	check(voice.last_key == last_key and voice.announce(_view(81, 4, _play("pair", 4)), false) == 0, "voice switch does not replay a stale action")
+	voice.announce(_view(81, 5, _play("single", 3)), false)
+	var female_stream = voice.stream
+	voice.set_profile("female")
+	check(voice.playing and voice.stream == female_stream, "reapplying same voice does not interrupt speech")
+	voice.set_profile("male")
+	check(voice.profile == "male" and voice.clips["single_3"] == male_stream, "male can be restored")
+	voice.stop_all()
 
 func _test_queue(voice) -> void:
 	# Predictable silent waveforms test timing and queue ownership independently

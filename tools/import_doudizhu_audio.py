@@ -1,4 +1,4 @@
-"""Generate the bundled offline Dou Dizhu voice from an Apache-2.0 Kokoro model.
+"""Generate both offline Dou Dizhu voices from an Apache-2.0 Kokoro model.
 
 Development only. Nothing here is invoked by the game or included in packages.
 Install sherpa-onnx==1.12.40 and numpy in an isolated directory, then run:
@@ -34,7 +34,10 @@ ARCHIVE_SHA = "259c9c8bc906d6078e4e0570421885dabb68b539c2f970fcbb890a58eeaf3e9c"
 ARCHIVE_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/" + ARCHIVE_NAME
 MODEL_REPO = "hexgrad/Kokoro-82M-v1.1-zh"
 MODEL_REVISION = "01e7505bd6a7a2ac4975463114c3a7650a9f7218"
-SPEAKER = 59  # zm_010, verified against the model's id2speaker metadata.
+PROFILES = {
+    "male": {"voice": "zm_010", "speaker_id": 59, "directory": ""},
+    "female": {"voice": "zf_001", "speaker_id": 3, "directory": "female"},
+}
 SPEED = 1.0
 
 
@@ -42,7 +45,7 @@ def phrases() -> dict[str, str]:
     ranks = {3: "三", 4: "四", 5: "五", 6: "六", 7: "七", 8: "八", 9: "九",
              10: "十", 11: "勾", 12: "圈", 13: "凯", 14: "尖", 15: "二",
              16: "小王", 17: "大王"}
-    result = {f"single_{rank}": ("一张" + text if rank <= 15 else text) for rank, text in ranks.items()}
+    result = {f"single_{rank}": text for rank, text in ranks.items()}
     result.update({f"pair_{rank}": "对" + text for rank, text in ranks.items() if rank <= 15})
     result.update({f"triple_{rank}": "三个" + text for rank, text in ranks.items() if rank <= 15})
     result.update({
@@ -54,6 +57,17 @@ def phrases() -> dict[str, str]:
         "spring": "春天", "counter_spring": "反春天",
     })
     return result
+
+
+def synthesis_text(key: str, text: str) -> str:
+    # Match the two short-call samples selected by the user. Punctuation is
+    # part of synthesis, not a post-production speed or pitch manipulation.
+    emphatic = key.startswith(("single_", "pair_", "triple_")) or key in {
+        "bomb", "rocket", "bid_1", "bid_2", "bid_3", "spring", "counter_spring",
+    }
+    # Named compound shapes retain a neutral, concise delivery.
+    if key in {"triple_single", "triple_pair", "pair_chain"}: emphatic = False
+    return text + ("！" if emphatic else "。")
 
 
 def sha256(path: Path) -> str:
@@ -126,7 +140,7 @@ def generate(model_root: Path) -> None:
     kokoro = sherpa_onnx.OfflineTtsKokoroModelConfig(
         model=str(model_root / "model.int8.onnx"), voices=str(model_root / "voices.bin"),
         tokens=str(model_root / "tokens.txt"),
-        lexicon=",".join(str(model_root / name) for name in ["lexicon-us-en.txt", "lexicon-zh.txt"]),
+        lexicon=str(model_root / "lexicon-zh.txt"),
         # Follow the upstream Chinese lexicon workflow. No language override
         # is needed; card terms are mapped by the supplied Mandarin lexicon.
         data_dir=str(model_root / "espeak-ng-data"), lang="",
@@ -137,39 +151,44 @@ def generate(model_root: Path) -> None:
     tts = sherpa_onnx.OfflineTts(config)
     OUTPUT.mkdir(parents=True, exist_ok=True)
     entries = []
-    for key, text in phrases().items():
-        audio = tts.generate(text + "。", sid=SPEAKER, speed=SPEED)
-        samples = np.asarray(audio.samples, dtype=np.float64)
-        rate = audio.sample_rate
-        non_silent = np.flatnonzero(np.abs(samples) > 0.003)
-        if len(non_silent) == 0: raise RuntimeError(f"Silent speech: {key}")
-        samples = samples[max(0, non_silent[0] - int(rate * 0.05)):min(len(samples), non_silent[-1] + int(rate * 0.12))]
-        peak = float(np.max(np.abs(samples)))
-        samples *= min(4.0, (10 ** (-2 / 20)) / peak)
-        fade = min(int(rate * 0.005), len(samples) // 2)
-        samples[:fade] *= np.linspace(0, 1, fade)
-        samples[-fade:] *= np.linspace(1, 0, fade)
-        pcm = np.clip(np.rint(samples * 32767), -32768, 32767).astype("<i2")
-        if not 0.15 <= len(pcm) / rate <= 8: raise RuntimeError(f"Unexpected duration: {key}")
-        path = OUTPUT / (key + ".wav")
-        with wave.open(str(path), "wb") as output:
-            output.setnchannels(1); output.setsampwidth(2); output.setframerate(rate)
-            output.writeframes(pcm.tobytes())
-        entries.append({"key": key, "text": text, "synthesis_text": text + "。", "path": path.relative_to(ROOT).as_posix(),
-                        "sha256": sha256(path), "bytes": path.stat().st_size, "duration_seconds": round(len(pcm) / rate, 6)})
-        print(f"Generated {key}: {text} ({len(pcm) / rate:.2f}s)", flush=True)
+    for profile, settings in PROFILES.items():
+        directory = OUTPUT / settings["directory"]
+        directory.mkdir(parents=True, exist_ok=True)
+        for key, text in phrases().items():
+            spoken = synthesis_text(key, text)
+            audio = tts.generate(spoken, sid=settings["speaker_id"], speed=SPEED)
+            samples = np.asarray(audio.samples, dtype=np.float64)
+            rate = audio.sample_rate
+            non_silent = np.flatnonzero(np.abs(samples) > 0.003)
+            if len(non_silent) == 0: raise RuntimeError(f"Silent speech: {profile}/{key}")
+            samples = samples[max(0, non_silent[0] - int(rate * 0.05)):min(len(samples), non_silent[-1] + int(rate * 0.12))]
+            peak = float(np.max(np.abs(samples)))
+            samples *= min(4.0, (10 ** (-2 / 20)) / peak)
+            fade = min(int(rate * 0.005), len(samples) // 2)
+            samples[:fade] *= np.linspace(0, 1, fade)
+            samples[-fade:] *= np.linspace(1, 0, fade)
+            pcm = np.clip(np.rint(samples * 32767), -32768, 32767).astype("<i2")
+            if not 0.15 <= len(pcm) / rate <= 8: raise RuntimeError(f"Unexpected duration: {profile}/{key}")
+            path = directory / (key + ".wav")
+            with wave.open(str(path), "wb") as output:
+                output.setnchannels(1); output.setsampwidth(2); output.setframerate(rate)
+                output.writeframes(pcm.tobytes())
+            entries.append({"profile": profile, "key": key, "text": text, "synthesis_text": spoken,
+                            "path": path.relative_to(ROOT).as_posix(), "sha256": sha256(path),
+                            "bytes": path.stat().st_size, "duration_seconds": round(len(pcm) / rate, 6)})
+            print(f"Generated {profile}/{key}: {spoken} ({len(pcm) / rate:.2f}s)", flush=True)
     metadata = {
-        "format_version": 1, "generated_date": "2026-11-05", "method": "offline open-model speech synthesis",
+        "format_version": 2, "generated_date": "2026-11-05", "method": "offline open-model speech synthesis",
         "model": {"id": MODEL_REPO, "revision": MODEL_REVISION, "license": "Apache-2.0",
                   "model_card": f"https://huggingface.co/{MODEL_REPO}/blob/{MODEL_REVISION}/README.md",
                   "onnx_archive": ARCHIVE_URL, "archive_sha256": ARCHIVE_SHA,
                   "onnx_sha256": sha256(model_root / "model.int8.onnx"), "voices_sha256": sha256(model_root / "voices.bin")},
         "generation": {"runtime": "sherpa-onnx", "runtime_version": sherpa_onnx.__version__, "provider": "cpu",
-                       "num_threads": 2, "voice": "zm_010", "speaker_id": SPEAKER, "speed": SPEED,
+                       "num_threads": 2, "profiles": PROFILES, "speed": SPEED,
                        "phonemizer": "Kokoro Chinese lexicon; lang empty (not eSpeak Mandarin IPA); espeak data_dir required by sherpa-onnx 1.12.40 for English fallback only",
                        "format": "mono PCM16 WAV", "sample_rate": 24000,
                        "processing": "trim <0.003 leading/trailing silence retaining 50ms/120ms; normalize peak to -2dBFS (max gain 4); 5ms fades"},
-        "notes": "Generated speech, not a redistributed recording pack. J/Q/K/A use Chinese card names 勾/圈/凯/尖. The game ships WAV only; no model, synthesizer, network or system voice dependency.",
+        "notes": "Both short-call male/female profiles were selected by the user after preview. Generated speech, not a human recording pack. J/Q/K/A use 勾/圈/凯/尖. The game ships WAV only; no model, synthesizer, network or system voice dependency.",
         "clips": entries,
     }
     LICENSES.mkdir(parents=True, exist_ok=True)
@@ -178,11 +197,18 @@ def generate(model_root: Path) -> None:
 
 def verify() -> None:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    expected = set(phrases())
-    if {clip["key"] for clip in manifest["clips"]} != expected: raise RuntimeError("Voice catalog mismatch")
+    expected = {(profile, key) for profile in PROFILES for key in phrases()}
+    entries = manifest["clips"]
+    if manifest.get("format_version") != 2 or len(entries) != len(expected): raise RuntimeError("Voice manifest version/count mismatch")
+    if {(clip["profile"], clip["key"]) for clip in entries} != expected: raise RuntimeError("Voice catalog mismatch")
+    if manifest["generation"].get("profiles") != PROFILES or manifest["generation"].get("speed") != SPEED:
+        raise RuntimeError("Voice profile parameters mismatch")
     for clip in manifest["clips"]:
         path = ROOT / clip["path"]
+        expected_path = OUTPUT / PROFILES[clip["profile"]]["directory"] / (clip["key"] + ".wav")
+        if path != expected_path: raise RuntimeError(f"Voice profile path mismatch: {path}")
         if sha256(path) != clip["sha256"]: raise RuntimeError(f"WAV checksum mismatch: {path}")
+        if path.stat().st_size != clip["bytes"]: raise RuntimeError(f"WAV size mismatch: {path}")
         with wave.open(str(path), "rb") as stream:
             if (stream.getnchannels(), stream.getsampwidth(), stream.getframerate()) != (1, 2, 24000):
                 raise RuntimeError(f"WAV format mismatch: {path}")
@@ -195,7 +221,8 @@ def verify() -> None:
                 raise RuntimeError(f"Silent or nearly silent WAV: {path}")
             if max(abs(value) for value in samples) >= 32767: raise RuntimeError(f"Clipped WAV: {path}")
             if clip["text"] != phrases()[clip["key"]]: raise RuntimeError(f"Phrase catalog mismatch: {path}")
-    print(f"Verified {len(expected)} offline voice clips; SHA-256, PCM formats, durations, phrases and signal levels match.")
+            if clip["synthesis_text"] != synthesis_text(clip["key"], clip["text"]): raise RuntimeError(f"Synthesis wording mismatch: {path}")
+    print(f"Verified {len(expected)} offline voice clips (60 male + 60 female); SHA-256, PCM formats, durations, phrases and signal levels match.")
 
 
 def main() -> None:

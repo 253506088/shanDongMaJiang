@@ -1,6 +1,6 @@
 Dou Dizhu offline speech — provenance notice
 
-The WAV clips in assets/doudizhu/audio were generated for this project from
+The 120 WAV clips in assets/doudizhu/audio were generated for this project from
 the project's short Chinese card/action phrases. They are synthesized audio,
 not a repackaged commercial-game recording library or a human recording pack.
 
@@ -12,7 +12,11 @@ The model card credits LongMaoData for permissively provided Chinese data.
 A copy of the upstream model card is doudizhu-Kokoro-model-card.md.
 
 Offline inference: sherpa-onnx 1.12.40, CPU, Kokoro v1.1 int8 ONNX conversion.
-Voice: zm_010 (speaker ID 59); speed: 1.0; mono 24 kHz PCM16 WAV.
+Profiles: male = zm_010 (speaker ID 59), female = zf_001 (speaker ID 3).
+Each profile contains all 60 card/action calls. Speed: 1.0; mono 24 kHz PCM16 WAV.
+The user selected both short-call previews for configurable in-game playback.
+Male WAVs keep the original audio/ paths; female WAVs are in audio/female/.
+Ordinary single cards now announce the rank directly instead of "one card".
 https://github.com/k2-fsa/sherpa-onnx
 Copyright (c) 2023-2025 Xiaomi Corporation and sherpa-onnx contributors.
 Apache License 2.0; full text is included as doudizhu-Apache-2.0.txt.

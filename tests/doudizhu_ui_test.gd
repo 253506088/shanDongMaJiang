@@ -12,6 +12,7 @@ var pause_events: Array = []
 var hints: int = 0
 var nexts: int = 0
 var exits: int = 0
+var voice_choices: Array = []
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -32,7 +33,7 @@ func fixture(phase: String = "playing", revision: int = 10) -> Dictionary:
 		"highest_bid": 3, "bids": [3, -1, -1], "bid_starter": 0,
 		"target": {}, "target_seat": -1, "passes": 0, "last_actions": [{}, {}, {}],
 		"event": {"type": "landlord", "seat": 0}, "multiplier": 1, "bomb_count": 0,
-		"result": {}, "play_counts": [0, 0, 0]}
+		"result": {}, "play_counts": [0, 0, 0], "played_cards": []}
 
 func click(control: Control) -> void:
 	check(is_instance_valid(control), "input target exists")
@@ -74,6 +75,135 @@ func touch_at(at: Vector2) -> void:
 		root.push_input(mouse, true)
 		await frames()
 
+func mouse_button(at: Vector2, pressed: bool) -> void:
+	var event = InputEventMouseButton.new()
+	event.position = at; event.button_index = MOUSE_BUTTON_LEFT; event.pressed = pressed
+	event.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
+	root.push_input(event, true)
+	await frames()
+
+func mouse_motion(at: Vector2, held: bool = true) -> void:
+	var event = InputEventMouseMotion.new()
+	event.position = at
+	event.button_mask = MOUSE_BUTTON_MASK_LEFT if held else 0
+	root.push_input(event, true)
+	await frames()
+
+func selected_are(ids: Array) -> bool:
+	return table.selected_cards.size() == ids.size() and ids.all(func(id): return id in table.selected_cards)
+
+func test_drag_selection(base: Dictionary) -> void:
+	var positions: Array[Vector2] = []
+	var ids: Array = []
+	for card in table.hand_cards.slice(0, 5):
+		positions.append(card.global_position + Vector2(20, 84))
+		ids.append(card.card_id)
+	await mouse_motion(positions[0], false)
+	await mouse_button(positions[0], true)
+	check(selected_are([ids[0]]) and table._drag_active, "held press selects starting card immediately")
+	await mouse_motion(positions[4])
+	check(selected_are(ids), "fast sweep crosses all intermediate physical card strips")
+	await mouse_button(positions[4], false)
+	check(selected_are(ids) and not table._drag_active and actions.is_empty(), "release neither toggles start twice nor plays cards")
+	# One sweep mixes selection and deselection, independent of the first card.
+	table.set_hint([ids[1], ids[3]])
+	await mouse_button(positions[0], true)
+	await mouse_motion(positions[4])
+	check(selected_are([ids[0], ids[2], ids[4]]), "sweep toggles each card's previous selection state")
+	await mouse_motion(positions[0])
+	check(selected_are([ids[0], ids[2], ids[4]]), "backtracking in one gesture never toggles visited cards twice")
+	await mouse_motion(Vector2(positions[0].x, 490))
+	await mouse_motion(positions[0])
+	check(selected_are([ids[0], ids[2], ids[4]]), "leaving hand and returning preserves visited state")
+	await capture("ddz-drag-mixed")
+	await mouse_button(positions[0], false)
+	await mouse_button(positions[0], true)
+	await mouse_button(positions[0], false)
+	check(selected_are([ids[2], ids[4]]), "a new gesture may toggle a previously visited card again")
+	# The exposed overlap belongs only to the card drawn in front.
+	table._clear_selection()
+	var overlapping = table.hand_cards[1].global_position + Vector2(5, 84)
+	await mouse_button(overlapping, true)
+	await mouse_button(overlapping, false)
+	check(selected_are([ids[1]]), "overlapping press selects only the visible foreground card")
+	# Newly lifted cards retain their original hit footprint until release.
+	table._clear_selection()
+	var bottom = Vector2(positions[0].x, TableScript.HAND_Y + 160)
+	await mouse_button(bottom, true)
+	check(not table.hand_cards[0].get_global_rect().has_point(bottom), "fixture pointer is below the newly raised card")
+	await mouse_motion(bottom + Vector2(2, 0))
+	await mouse_motion(Vector2(positions[1].x, bottom.y))
+	await mouse_button(Vector2(positions[1].x, bottom.y), false)
+	check(selected_are([ids[0], ids[1]]), "lifting under a low pointer does not redirect or lose a sweep")
+	table.set_hint([ids[0]])
+	var raised_top = table.hand_cards[0].global_position + Vector2(20, 8)
+	await mouse_button(raised_top, true)
+	await mouse_motion(raised_top + Vector2(3, 0))
+	await mouse_button(raised_top + Vector2(3, 0), false)
+	check(table.selected_cards.is_empty(), "lowering a previously selected card cannot make it toggle twice")
+	# Blank-table starts first clear the old choice, then may sweep into cards.
+	table.set_hint([ids[4]])
+	var blank = Vector2(table.hand_cards[0].global_position.x - 15, positions[0].y)
+	await mouse_button(blank, true)
+	check(table.selected_cards.is_empty(), "blank press clears previous selection before a sweep")
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(selected_are(ids.slice(0, 3)), "dragging from blank table into the hand selects crossed cards")
+	table._clear_selection()
+	await mouse_button(table.hint_button.get_global_rect().get_center(), true)
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(table.selected_cards.is_empty() and hints == 0, "dragging away from an action button never becomes a card sweep")
+	# Pointer cancellation paths must not leave a held gesture armed.
+	await mouse_button(positions[0], true)
+	await mouse_motion(positions[2], false)
+	check(not table._drag_active and selected_are([ids[0]]), "unheld motion cancels a release missed outside the viewport")
+	await mouse_motion(positions[4], true)
+	check(selected_are([ids[0]]), "a cancelled gesture cannot restart from motion alone")
+	await mouse_button(positions[4], false)
+	table._clear_selection()
+	await mouse_button(positions[0], true)
+	root.focus_exited.emit()
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(not table._drag_active and selected_are([ids[0]]), "window focus loss cancels sweep without changing its completed toggles")
+	table._clear_selection()
+	await mouse_button(positions[0], true)
+	root.mouse_exited.emit()
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(not table._drag_active and selected_are([ids[0]]), "viewport exit cancels mouse capture")
+	table._clear_selection()
+	await mouse_button(positions[0], true)
+	table.pause_menu()
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(not table._drag_active and selected_are([ids[0]]), "pause cancels a held sweep and blocks the rest of its input")
+	table.pause_menu()
+	table._clear_selection()
+	await mouse_button(positions[0], true)
+	table.set_hint([ids[4]])
+	check(selected_are([ids[0]]), "late hint cannot replace an active manual sweep")
+	var next_view = base.duplicate(true); next_view.revision += 1
+	table.set_view(next_view)
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(table.selected_cards.is_empty() and not table._drag_active, "new revision cancels a sweep and stale motion cannot select")
+	await mouse_button(positions[0], true)
+	next_view.round_id = 2
+	table.set_view(next_view)
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(table.selected_cards.is_empty() and not table._drag_active, "new round identity cancels even when revision and phase match")
+	next_view.turn = 1; next_view.revision += 1
+	table.set_view(next_view)
+	await mouse_button(positions[0], true)
+	await mouse_motion(positions[2])
+	await mouse_button(positions[2], false)
+	check(table.selected_cards.is_empty() and not table._drag_active and actions.is_empty(), "opponent turn rejects real drag input and never submits")
+	table.set_view(base)
+	await frames()
+
 func find_card(id: int):
 	for card in table.hand_cards:
 		if card.card_id == id: return card
@@ -100,6 +230,7 @@ func run() -> void:
 	table.hint_requested.connect(func(): hints += 1)
 	table.next_requested.connect(func(): nexts += 1)
 	table.exit_requested.connect(func(): exits += 1)
+	table.voice_profile_requested.connect(func(profile): voice_choices.append(profile); table.set_voice_profile(profile))
 	table.set_muted(true)
 	var state = fixture()
 	table.set_view(state)
@@ -109,6 +240,13 @@ func run() -> void:
 	check(table.pass_button.disabled, "leader cannot pass")
 	check(table.play_button.disabled, "empty selection cannot play")
 	check(table.hand_cards[0].global_position.x > 190 and table.hand_cards.back().get_global_rect().end.x < 1550, "twenty cards fit the table and self portrait")
+	check(is_instance_valid(table.recorder) and table.recorder.counts.size() == 15 and table.recorder.total == 34, "counter shows all ranks outside the twenty-card hand")
+	check(table.recorder.get_rect().end.y <= 296 and table.recorder.get_rect().position.x >= 296, "counter fits between bottom cards and target without player HUD overlap")
+	var remembered = table.recorder.counts.duplicate()
+	await click(table.recorder_button)
+	check(not table.recorder_expanded and not is_instance_valid(table.recorder), "counter can be collapsed")
+	await click(table.recorder_button)
+	check(table.recorder_expanded and table.recorder.counts == remembered, "reopening counter does not forget public history")
 	await capture("ddz-full-hand")
 	await click(find_card(0))
 	check(table.selected_cards == [0] and actions.is_empty(), "single click selects without playing")
@@ -116,6 +254,12 @@ func run() -> void:
 	check(not table.play_button.disabled, "valid single can be played")
 	await click(find_card(1))
 	check(table.selected_cards.size() == 2 and not table.play_button.disabled, "identical ranks remain separately selectable")
+	await click(table.voice_profile_button)
+	check(voice_choices == ["female"] and table.voice_profile_button.text == "女声报牌", "voice button selects female")
+	check(table.selected_cards.size() == 2 and actions.is_empty(), "voice switch preserves selection without submitting a play")
+	await capture("ddz-female-voice")
+	await click(table.voice_profile_button)
+	check(voice_choices == ["female", "male"] and table.voice_profile_button.text == "男声报牌", "voice button can select male again")
 	await click(find_card(0))
 	check(table.selected_cards == [1], "click selected card deselects only that physical card")
 	await click(table.clear_button)
@@ -128,6 +272,7 @@ func run() -> void:
 	check(table.selected_cards == [49], "touching selected card removes only that card")
 	await touch_at(Vector2(800, 494))
 	check(table.selected_cards.is_empty(), "blank touch clears selected cards")
+	await test_drag_selection(state)
 	table.set_hint([52, 53])
 	check(table.selected_cards.size() == 2 and actions.is_empty(), "hint selects the rocket without submitting")
 	check(not table.play_button.disabled, "rocket is playable")
@@ -169,6 +314,8 @@ func run() -> void:
 	state.target = Rules.classify([0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 20, 24, 28, 32])
 	state.target_seat = 1
 	state.last_actions[1] = {"type": "play", "cards": state.target.cards, "combo": state.target}
+	state.played_cards = state.target.cards.duplicate()
+	state.hand = range(54).filter(func(card): return card not in state.played_cards).slice(0, 20)
 	table.set_view(state)
 	check(table.target_cards.size() == 16, "long target displays every physical card")
 	for card in table.target_cards:
@@ -194,6 +341,8 @@ func run() -> void:
 	state = fixture("finished", 30)
 	state.turn = -1; state.multiplier = 8; state.bomb_count = 2
 	state.hand = []; state.hand_counts = [0, 5, 4]
+	state.played_cards = range(43)
+	state.played_cards.append_array([52, 53])
 	state.target = Rules.classify([52, 53]); state.target_seat = 0
 	state.last_actions[0] = {"type": "play", "cards": [52, 53], "combo": state.target}
 	state.result = {"winner": 0, "landlord_won": true, "base": 3, "multiplier": 8, "spring": "spring", "scores": [48, -24, -24]}

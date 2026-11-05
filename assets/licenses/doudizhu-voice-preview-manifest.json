@@ -1,0 +1,168 @@
+{
+  "date": "2026-11-05",
+  "purpose": "User selected the brief male and female preview styles for configurable in-game profiles; this file retains the audition artifacts.",
+  "model": "hexgrad/Kokoro-82M-v1.1-zh",
+  "model_revision": "01e7505bd6a7a2ac4975463114c3a7650a9f7218",
+  "runtime": "sherpa-onnx 1.12.40",
+  "license": "Apache-2.0; see assets/licenses/doudizhu-Apache-2.0.txt",
+  "sample_rate": 24000,
+  "gap_seconds": 0.4,
+  "files": [
+    {
+      "path": "assets/doudizhu/voice-previews/current-male.wav",
+      "description": "现有男声原句，比较基线",
+      "speaker_id": null,
+      "speed": 1.0,
+      "bytes": 364856,
+      "sha256": "359393ad4fb147970878c6e339b5526a5ad09beebea218e3e6c642a8a151345a",
+      "segments": [
+        {
+          "key": "single_3",
+          "phrase": "一张三",
+          "start_seconds": 0.0,
+          "duration_seconds": 0.942
+        },
+        {
+          "key": "pair_14",
+          "phrase": "对尖",
+          "start_seconds": 1.342,
+          "duration_seconds": 0.582
+        },
+        {
+          "key": "straight",
+          "phrase": "顺子",
+          "start_seconds": 2.324,
+          "duration_seconds": 0.665
+        },
+        {
+          "key": "pass",
+          "phrase": "不要",
+          "start_seconds": 3.389,
+          "duration_seconds": 0.59
+        },
+        {
+          "key": "bomb",
+          "phrase": "炸弹",
+          "start_seconds": 4.379,
+          "duration_seconds": 0.653
+        },
+        {
+          "key": "rocket",
+          "phrase": "王炸",
+          "start_seconds": 5.432,
+          "duration_seconds": 0.669
+        },
+        {
+          "key": "bid_3",
+          "phrase": "三分",
+          "start_seconds": 6.5,
+          "duration_seconds": 0.7
+        }
+      ]
+    },
+    {
+      "path": "assets/doudizhu/voice-previews/brief-female.wav",
+      "description": "zf_001女声，简短报牌",
+      "speaker_id": 3,
+      "speed": 1.0,
+      "bytes": 348514,
+      "sha256": "27d81ba3b42bafee9fcf720242b1b3f3c89dfccfdcd35a0b1f6474151605dc67",
+      "segments": [
+        {
+          "key": "single_3",
+          "phrase": "三！",
+          "start_seconds": 0.0,
+          "duration_seconds": 0.631
+        },
+        {
+          "key": "pair_14",
+          "phrase": "对尖！",
+          "start_seconds": 1.031,
+          "duration_seconds": 0.637
+        },
+        {
+          "key": "straight",
+          "phrase": "顺子。",
+          "start_seconds": 2.067,
+          "duration_seconds": 0.694
+        },
+        {
+          "key": "pass",
+          "phrase": "不要。",
+          "start_seconds": 3.161,
+          "duration_seconds": 0.488
+        },
+        {
+          "key": "bomb",
+          "phrase": "炸弹！",
+          "start_seconds": 4.049,
+          "duration_seconds": 0.697
+        },
+        {
+          "key": "rocket",
+          "phrase": "王炸！",
+          "start_seconds": 5.146,
+          "duration_seconds": 0.619
+        },
+        {
+          "key": "bid_3",
+          "phrase": "三分！",
+          "start_seconds": 6.165,
+          "duration_seconds": 0.695
+        }
+      ]
+    },
+    {
+      "path": "assets/doudizhu/voice-previews/brief-male.wav",
+      "description": "zm_010男声，简短报牌",
+      "speaker_id": 59,
+      "speed": 1.0,
+      "bytes": 340308,
+      "sha256": "14fcbd1b5e90a6ad32c67351246affb18b2ab1bb491def32c5f70159749bcca3",
+      "segments": [
+        {
+          "key": "single_3",
+          "phrase": "三！",
+          "start_seconds": 0.0,
+          "duration_seconds": 0.44
+        },
+        {
+          "key": "pair_14",
+          "phrase": "对尖！",
+          "start_seconds": 0.84,
+          "duration_seconds": 0.619
+        },
+        {
+          "key": "straight",
+          "phrase": "顺子。",
+          "start_seconds": 1.859,
+          "duration_seconds": 0.665
+        },
+        {
+          "key": "pass",
+          "phrase": "不要。",
+          "start_seconds": 2.924,
+          "duration_seconds": 0.552
+        },
+        {
+          "key": "bomb",
+          "phrase": "炸弹！",
+          "start_seconds": 3.877,
+          "duration_seconds": 0.646
+        },
+        {
+          "key": "rocket",
+          "phrase": "王炸！",
+          "start_seconds": 4.923,
+          "duration_seconds": 0.648
+        },
+        {
+          "key": "bid_3",
+          "phrase": "三分！",
+          "start_seconds": 5.971,
+          "duration_seconds": 0.718
+        }
+      ]
+    }
+  ]
+}

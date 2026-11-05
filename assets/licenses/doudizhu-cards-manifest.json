@@ -1,0 +1,801 @@
+{
+  "format_version": 1,
+  "imported_date": "2026-11-05",
+  "repository": "https://github.com/htdebeer/SVG-cards",
+  "commit": "6d88bf9c594997b82bc5668ab0877a4e9b717665",
+  "upstream_deck": "SVG-cards 4.0.2 / David Bellot and Huub de Beer",
+  "license": "LGPL-2.1 (upstream repository license; SVG header preserved unchanged)",
+  "copyright": [
+    "Copyright (C) 2005 David Bellot",
+    "Copyright (C) 2016, 2017 Huub de Beer"
+  ],
+  "source_svg": {
+    "url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/svg-cards.svg",
+    "path": "assets/licenses/doudizhu-cards-source.svg.txt",
+    "sha256": "1649cce8d929fed787851d581b0bd3b864e490b4205af0b5dea5b9e88d721bbb"
+  },
+  "license_file": {
+    "url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/LICENSE",
+    "path": "assets/licenses/doudizhu-cards-LGPL-2.1.txt",
+    "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+  },
+  "upstream_readme": {
+    "url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/README.md",
+    "path": "assets/licenses/doudizhu-cards-upstream-README.md",
+    "sha256": "010e1a4c29eb848196806862f22a890440f69076413d047a2e69bb923f9f6d2e"
+  },
+  "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Chinese small/big joker labels are a runtime Noto overlay in card.gd. PNG indices are rasterized, not runtime system-font text.",
+  "cards": [
+    {
+      "key": "00",
+      "card_id": 0,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_3.png",
+      "source_sha256": "f8f4b415b5b9750fe5cf6de356586312fd5a14e8f61b210aff430bbaa206f539",
+      "path": "assets/doudizhu/cards/00.png",
+      "sha256": "0af179d3f45ec1c186163b7bd2133bddac966e16d721a2f3d62035d08e4d4c02",
+      "bytes": 12787,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "01",
+      "card_id": 1,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_3.png",
+      "source_sha256": "d374502449312621580b34fd28a8c70d4cc9aa89ae024b335d6f8c7a57f813c3",
+      "path": "assets/doudizhu/cards/01.png",
+      "sha256": "06b12f90f4b1e6a184be9c6bbd73c71543f38961e83aab208c7cb4c4579981c9",
+      "bytes": 12529,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "02",
+      "card_id": 2,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_3.png",
+      "source_sha256": "07ddf7ee8b37ff787a313591dfce7ec68fd2f2f4c7b45c4862f0761116b56f24",
+      "path": "assets/doudizhu/cards/02.png",
+      "sha256": "fa7959e9dd6b0a38aab69e56f61f73e302b8cba1e09c3d5f1c7614b7a4cfbab3",
+      "bytes": 14905,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "03",
+      "card_id": 3,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_3.png",
+      "source_sha256": "e8c03141ccfd2114a65ef4a5dd7696551eb7295cc4ac4be78e434ab7f06db268",
+      "path": "assets/doudizhu/cards/03.png",
+      "sha256": "96378399cbf068eccd1c84cf645534adb4ad66253fc176280a129e7e4055a20a",
+      "bytes": 11599,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "04",
+      "card_id": 4,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_4.png",
+      "source_sha256": "28d8f3370db7610146e1deafc2059fad1f327cd9ac86744c058dd269a014b13e",
+      "path": "assets/doudizhu/cards/04.png",
+      "sha256": "fe7661986077ba5382cfb902108a64fa56ec398d6ebe2442e0981147a4ac0769",
+      "bytes": 12744,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "05",
+      "card_id": 5,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_4.png",
+      "source_sha256": "aa33f399f500088e86f6c6a7af8663237c4ac2577daa67cb36919d506ded10ea",
+      "path": "assets/doudizhu/cards/05.png",
+      "sha256": "e8a1c411dbcfeef6d92883a3241f2883cd5e6c1744aaeda314fff296ee0ff6b5",
+      "bytes": 12554,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "06",
+      "card_id": 6,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_4.png",
+      "source_sha256": "589cc39b988e748c6589140fdc1b0cea6b9d19842ce623b7d85cd0c612ef4822",
+      "path": "assets/doudizhu/cards/06.png",
+      "sha256": "7b92627273c2987f8a72285d6eba4c1117a2f9096d559093db62b0c02c2f03a7",
+      "bytes": 15320,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "07",
+      "card_id": 7,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_4.png",
+      "source_sha256": "ee51a3cf146ea9f0dbb23fbf6adc6cc1a8615ce6b16842028b517192a57358ed",
+      "path": "assets/doudizhu/cards/07.png",
+      "sha256": "df73b925cabd1285f820178105ddb47b203370d5bc7cdc8b9abc91bab41c958c",
+      "bytes": 11317,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "08",
+      "card_id": 8,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_5.png",
+      "source_sha256": "0d7583c17e1bac14097974c9315d6d8a005f06926fe8eab805c749405ba84e1a",
+      "path": "assets/doudizhu/cards/08.png",
+      "sha256": "57f7a2c1e87c9d2bef601c6932cfb7e67a7a39351b93bf4e2eac201ae9922026",
+      "bytes": 15295,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "09",
+      "card_id": 9,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_5.png",
+      "source_sha256": "26624bbb02c28fe7ee5d304eb20c45f613decef3c00b53313da470fe7f58b432",
+      "path": "assets/doudizhu/cards/09.png",
+      "sha256": "378cda7a5d88837b1489d044894d16d6e1f6af177ec1b12a82cd893df7692b4f",
+      "bytes": 15044,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "10",
+      "card_id": 10,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_5.png",
+      "source_sha256": "f19c59443fe622573d953ec1da4a4458f8e2cd93a41c4b4fd8a12849b65570fc",
+      "path": "assets/doudizhu/cards/10.png",
+      "sha256": "c1ee563cbf927255c9f14391539e2d25698a4b5700d247db4a0c0849dfd4e950",
+      "bytes": 18452,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "11",
+      "card_id": 11,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_5.png",
+      "source_sha256": "5c905f60602aeaf134c2617bf2632b13547288db850abc88538ee8c77669c7ff",
+      "path": "assets/doudizhu/cards/11.png",
+      "sha256": "7c7e61e64a3f19380a09c2ede870fb1a8ce1e8d815f4531654f26edd08cabd6c",
+      "bytes": 13665,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "12",
+      "card_id": 12,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_6.png",
+      "source_sha256": "421616dd330358b09cddab73e2ca01631495e77b1cf7eb299bc476a69ef1dbcf",
+      "path": "assets/doudizhu/cards/12.png",
+      "sha256": "fec4d04eb1647b2d7098b95865e2ddf7093052168601000735ddf7902a1a2271",
+      "bytes": 17961,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "13",
+      "card_id": 13,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_6.png",
+      "source_sha256": "737258a4045905afcfcb651f7c6c6718cf26aaa4da072d4e5bced85197d01a31",
+      "path": "assets/doudizhu/cards/13.png",
+      "sha256": "a840b7e7811d89e2c4d98a581e33e27e8319a1ad2bec421e0c913ad0ea35f4fc",
+      "bytes": 17824,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "14",
+      "card_id": 14,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_6.png",
+      "source_sha256": "4124264c2bbd680640d7874a91e5c89bce9160ce0998e35477cbe245cb2f2ab5",
+      "path": "assets/doudizhu/cards/14.png",
+      "sha256": "0d77ba683681b8d2b15f1e800287be1e077f4ed7ddf5a8fa8a3f75a74e541ead",
+      "bytes": 21749,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "15",
+      "card_id": 15,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_6.png",
+      "source_sha256": "36727ad18e0e89796019cf51fcaa6825e5a7982caf81cdffd7e6102b74256fe3",
+      "path": "assets/doudizhu/cards/15.png",
+      "sha256": "2a0dfef5a70f12747efdcbee8739b9c8df08ed01430c6c815946475f3395ef0f",
+      "bytes": 16106,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "16",
+      "card_id": 16,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_7.png",
+      "source_sha256": "d4f4596d36bde6e9d4a13a8717e29758b4f334a63fa31f50ddb555b46be66b5b",
+      "path": "assets/doudizhu/cards/16.png",
+      "sha256": "8fe40694db60315848ab3fc0053b94e628558a7814912926bac135c451bcef40",
+      "bytes": 18004,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "17",
+      "card_id": 17,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_7.png",
+      "source_sha256": "15569e586667670febee310b1571d78197494e74ce355a0ed4a26c60af87250f",
+      "path": "assets/doudizhu/cards/17.png",
+      "sha256": "37e5d191db564b7311806051ef4c8ad018a223cf4960fa4a809dc1a8f2248439",
+      "bytes": 17684,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "18",
+      "card_id": 18,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_7.png",
+      "source_sha256": "2d30a6d869b86e20a7448ec93f216e56be5b3092283e94ea1fe563592408097b",
+      "path": "assets/doudizhu/cards/18.png",
+      "sha256": "a499f0989ec37d67fe0850aaf6004995f918b5bff54ea4b64b83dbcc8dd665b8",
+      "bytes": 22369,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "19",
+      "card_id": 19,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_7.png",
+      "source_sha256": "1b14f708a03f739f67b54961fc9f07bc6af7d90c98c63d7634b56a393196a68b",
+      "path": "assets/doudizhu/cards/19.png",
+      "sha256": "6fc8d9c72354dbf57898adbf2bf0b366e5504f56d7f3177d079ee805e41ecae8",
+      "bytes": 15921,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "20",
+      "card_id": 20,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_8.png",
+      "source_sha256": "36fd23220e19bc2363b735be903c8e42f14bae06c898e4b8799e240cfb323880",
+      "path": "assets/doudizhu/cards/20.png",
+      "sha256": "9015ef8a7d7646e68907b8de36f7910d48ec3065454856f289431e8502a13987",
+      "bytes": 22135,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "21",
+      "card_id": 21,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_8.png",
+      "source_sha256": "900e8308a914a2f9876802971aada30e1cf9c30c4a18465398715edb56deae1d",
+      "path": "assets/doudizhu/cards/21.png",
+      "sha256": "21a9b7b127ba509793fa59b1a6326aa47a40b7816ef28d2a6a1928f9364f6aaa",
+      "bytes": 21324,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "22",
+      "card_id": 22,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_8.png",
+      "source_sha256": "20800d3bc9ee33dbb36839d5b55b00a625024a9821b0398999c6ce15461d8a81",
+      "path": "assets/doudizhu/cards/22.png",
+      "sha256": "da117eefea2f546f0c82dd35fa97c125892030f70a2365283d62566fc77bf451",
+      "bytes": 26505,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "23",
+      "card_id": 23,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_8.png",
+      "source_sha256": "ee10182449ad00b1324e8a1051a2bef04962476b5025ed0f0c98f0ffb1767e36",
+      "path": "assets/doudizhu/cards/23.png",
+      "sha256": "a36d5b4e9f209ebfe29b3711e0332362e7eb3da00a5383b011c13c5e32817134",
+      "bytes": 19365,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "24",
+      "card_id": 24,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_9.png",
+      "source_sha256": "10978f8164d7790ead612f873c0e185651096b66a4125fbd1e3e4c01ef0e5b71",
+      "path": "assets/doudizhu/cards/24.png",
+      "sha256": "0c5cf9941667ed860e7b1ef017fd4fc3fae90ad45567ae86126230a18faef0aa",
+      "bytes": 23442,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "25",
+      "card_id": 25,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_9.png",
+      "source_sha256": "dbc3edea5636fba77be813785103acc4b38d8111553cc3bb63f72ffc1b15d7db",
+      "path": "assets/doudizhu/cards/25.png",
+      "sha256": "565e077806ef76c567f38321fab35374f039e23e84e0f253dc0d0b291c2a725f",
+      "bytes": 22849,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "26",
+      "card_id": 26,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_9.png",
+      "source_sha256": "d9d2c52d6e9f1707654c440db42c7f7b1665f9d51f0c2549a5801ad0701b5a3e",
+      "path": "assets/doudizhu/cards/26.png",
+      "sha256": "e2b53b0d43d6c640775c30b72ad6adf9ed696b2d40673bae509f80a304b455ad",
+      "bytes": 28451,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "27",
+      "card_id": 27,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_9.png",
+      "source_sha256": "e71969e84ce9e6f68455ee12fd96720389fc6667e0c50f5d2ffb6b9441fcc38d",
+      "path": "assets/doudizhu/cards/27.png",
+      "sha256": "d8ddb9a9d6ea9f10b1ab5cbc57ba0124cde42ae3ddc2386d316f1ff271a85a18",
+      "bytes": 20562,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "28",
+      "card_id": 28,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_10.png",
+      "source_sha256": "33319e66587a02269bd051ecd4ea168881949b4d096cb81663835a4b0540252f",
+      "path": "assets/doudizhu/cards/28.png",
+      "sha256": "28d92fe9cbfb62f5acad713fa2e3fcfd7085bf47156baa21f4739d32a6e0ce4c",
+      "bytes": 24889,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "29",
+      "card_id": 29,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_10.png",
+      "source_sha256": "49c02fcb09555ec2bd1ce760d3871a5a7a6679a281d8d959a05d632232d51798",
+      "path": "assets/doudizhu/cards/29.png",
+      "sha256": "e9843ac8b10f0ff2086d95775acabcab7dfe8c62894a4ac71aa32d3c9cbab8eb",
+      "bytes": 24218,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "30",
+      "card_id": 30,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_10.png",
+      "source_sha256": "22e8c5869bb1cea5c773897463d2cdd9065e3b5ee01c23c6ef0b227c9c06a765",
+      "path": "assets/doudizhu/cards/30.png",
+      "sha256": "db9b0b95881212c10b2797450759aad68a8f5eebd8aaad000ad2820eae259646",
+      "bytes": 30664,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "31",
+      "card_id": 31,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_10.png",
+      "source_sha256": "eee1624f5aae8a6676c5681d8443c3648e1f90ef73dd157f97ad23a24cf46b80",
+      "path": "assets/doudizhu/cards/31.png",
+      "sha256": "e035a6f4f16fd0e9f865fbfa9c72af5b54dad5bf100fcbd79e26c4b83c9ce071",
+      "bytes": 21742,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "32",
+      "card_id": 32,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_jack.png",
+      "source_sha256": "f616c00afc4b5841e57ea9169a34c53a9afb99db65d7a03bd97ef913f1d04fb9",
+      "path": "assets/doudizhu/cards/32.png",
+      "sha256": "0378da66134c430d51488649c908541adfa16a231c4f9f13bd747dbbbc28e5d2",
+      "bytes": 140911,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "33",
+      "card_id": 33,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_jack.png",
+      "source_sha256": "f2541ff0e9190936ab01ca572edc89d0e99391247733fb48cb3b99db3de574cf",
+      "path": "assets/doudizhu/cards/33.png",
+      "sha256": "8a68281e283820390e5092840ae67dfa78b39e9058b586034fa084c9273ce98d",
+      "bytes": 120154,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "34",
+      "card_id": 34,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_jack.png",
+      "source_sha256": "30c869f6e4b1af6dcf5fbff18471e03cc1261b6be22e255c63b16bfbbf1b4c18",
+      "path": "assets/doudizhu/cards/34.png",
+      "sha256": "8f56a3d9df493bca4b6b4831d43739614c8d20c2b9176b2e30eaa4251123b743",
+      "bytes": 137424,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "35",
+      "card_id": 35,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_jack.png",
+      "source_sha256": "d828842f5379c414d87d49bca02c0e558612b25a7b9219bd920bf89fad4dbccc",
+      "path": "assets/doudizhu/cards/35.png",
+      "sha256": "fdd97863af47fd0ff5abbacef6d3079ab59793bab38d4f3333378cca85425fa1",
+      "bytes": 116184,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "36",
+      "card_id": 36,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_queen.png",
+      "source_sha256": "7ce21bbe5b47e29aa868f997c3c64ab8c40d095839195dea592897627be51cdc",
+      "path": "assets/doudizhu/cards/36.png",
+      "sha256": "e6b83497b4fa3681ab11e3c2847cd8998600567adb261fb091dcce723c27e580",
+      "bytes": 130268,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "37",
+      "card_id": 37,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_queen.png",
+      "source_sha256": "85b4447031bfdebc8ee653ca41a8791e435ee0db79e9cdc1d521d7d2b9419ea8",
+      "path": "assets/doudizhu/cards/37.png",
+      "sha256": "c37ba0b8ffb1fad20978d19f01bec43dd41054cedc1f04c85a4c3ad3e45cce9b",
+      "bytes": 138070,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "38",
+      "card_id": 38,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_queen.png",
+      "source_sha256": "d651e9f68a00f5f86ef808b0aec2c973695b1dcf9dfa57d28fcd4ac7c5d56ddf",
+      "path": "assets/doudizhu/cards/38.png",
+      "sha256": "eaee0439940892b44827e9b46a651cb473bb50442361cbe47c86920c0a8eb4b3",
+      "bytes": 130942,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "39",
+      "card_id": 39,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_queen.png",
+      "source_sha256": "8bbc371976a20a3b387d918e5be6cf5f7285de056b8e1ab0fef0254bfe07ccc2",
+      "path": "assets/doudizhu/cards/39.png",
+      "sha256": "aade959196ab42f1fed2c3f5128099542b38d265d5f20e79eedf20dd4f45a6b4",
+      "bytes": 129479,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "40",
+      "card_id": 40,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_king.png",
+      "source_sha256": "07d28e2dad9b537eb96dac703df2a62fcccf37a3ca1b8f7c7e7363c50d58996d",
+      "path": "assets/doudizhu/cards/40.png",
+      "sha256": "f25ec5ab5ae7f0579a3ff9e326194dc1fd062cd1d86ca3e8a4a6f20d8ec8d3a0",
+      "bytes": 133097,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "41",
+      "card_id": 41,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_king.png",
+      "source_sha256": "eae5d53955fea76754c6fff6103f8baab9c12a61f701898b42d427ed84659642",
+      "path": "assets/doudizhu/cards/41.png",
+      "sha256": "1d83b3ea0a1b78cd0da66d99962caef3f269ba6c47f6ce7ca6c2add51b926c1a",
+      "bytes": 123902,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "42",
+      "card_id": 42,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_king.png",
+      "source_sha256": "30382a8c7dd4fff86994f20ca9aaeebcfb91eebab066a5a9d4fd88134538bd4c",
+      "path": "assets/doudizhu/cards/42.png",
+      "sha256": "59fd25397c6bd214e445547416ef37b267164875e9e774cc683c31d90936017c",
+      "bytes": 144112,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "43",
+      "card_id": 43,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_king.png",
+      "source_sha256": "0cff1126cb9d68d11afdb095f00f0da073516a7542a6a8db85099d3a40c24f50",
+      "path": "assets/doudizhu/cards/43.png",
+      "sha256": "4873c6a6762115fe344926d31c13f671f186db0b8ee3de892121cff73a6dfd9e",
+      "bytes": 128734,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "44",
+      "card_id": 44,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_1.png",
+      "source_sha256": "6362cb24d66af1d202affe62fc3176b8a01a94831dfa6d7b3bc82a8fce5dd475",
+      "path": "assets/doudizhu/cards/44.png",
+      "sha256": "e2a2808174351aaecd3a4b2e083c357df94a11d2d0a0aea7f0aaea2a821c836a",
+      "bytes": 8467,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "45",
+      "card_id": 45,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_1.png",
+      "source_sha256": "5b47365c17bcbd7d1a41c7b75636675deaf705d2aca2330cd599a7ed73e2876c",
+      "path": "assets/doudizhu/cards/45.png",
+      "sha256": "46addddeea2ec01cf695f1792479bcf2237005c02b59eccf511fd169167d0204",
+      "bytes": 8444,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "46",
+      "card_id": 46,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_1.png",
+      "source_sha256": "3e485058d625c282357de30e5ba6ae5011579444ad77eae41314008dc857f26c",
+      "path": "assets/doudizhu/cards/46.png",
+      "sha256": "3253d584ce6c80439a8a9e61cfbce2b9a0cd7e03466a53266827e5a5e54fede0",
+      "bytes": 31359,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "47",
+      "card_id": 47,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_1.png",
+      "source_sha256": "8d8e9d35b5fec9042c9535bf634282dfc3dd427c6ab4dd2f49cab1cff94a513c",
+      "path": "assets/doudizhu/cards/47.png",
+      "sha256": "35ff9fe84f4bd1cb477c638dd3abdd3cad6cabe0703f92852bf13faa19d7eeea",
+      "bytes": 8066,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "48",
+      "card_id": 48,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/spade_2.png",
+      "source_sha256": "b68f405459717fe7f53e7c0b8a7cfe396aa6066b5a7b3f56c687db57632a4d24",
+      "path": "assets/doudizhu/cards/48.png",
+      "sha256": "4e3d0caed04d07027df9118438d35952baf0b5442dab5b93beaf5d325047f726",
+      "bytes": 10438,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "49",
+      "card_id": 49,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/heart_2.png",
+      "source_sha256": "ffc000dd3c994e6a2d76931a922e82b0096e857959512a37d299dde46ba5f92b",
+      "path": "assets/doudizhu/cards/49.png",
+      "sha256": "564eed0896d77d9beead21af5072715651cef6e792b1aedbaf008a68e36edd75",
+      "bytes": 10217,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "50",
+      "card_id": 50,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/club_2.png",
+      "source_sha256": "28c57729ffae21de77e386034cca4e95bca20ca5718b4fa09805b8719cea7f08",
+      "path": "assets/doudizhu/cards/50.png",
+      "sha256": "27ce677dcc0de686f38f3209eca7971ab6b94e928b70f79eb1c4d834eed58c1a",
+      "bytes": 12015,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "51",
+      "card_id": 51,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/diamond_2.png",
+      "source_sha256": "60ae49844e3e17f34f057f347ad36daf0e3fed238a25d342d7eb9ab62a8c8f2b",
+      "path": "assets/doudizhu/cards/51.png",
+      "sha256": "9894dbdd322c13601c8471ea3685e373a3f7f9aec454be2446b43b4ba9580a6d",
+      "bytes": 9476,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "52",
+      "card_id": 52,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/joker_black.png",
+      "source_sha256": "4c6e42330b2e5677982ad3b2d6aef50ec60faeb2b4684725ccc6c5c38853a28c",
+      "path": "assets/doudizhu/cards/52.png",
+      "sha256": "9436c6a2c1c7bdb98dcad011e7faafb83b1c3a3c2893da6b4785ed02f58683b8",
+      "bytes": 55541,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged",
+        "Small joker illustration desaturated to distinguish it from the large joker"
+      ]
+    },
+    {
+      "key": "53",
+      "card_id": 53,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/joker_red.png",
+      "source_sha256": "921ede64fa5e16f492e6a49bf60eba7ee328aefe1220358196610c12d248f423",
+      "path": "assets/doudizhu/cards/53.png",
+      "sha256": "77c320ceeb0daaea8afbedd90a5f3eeab8ff14be6c5467ca888e773517de6052",
+      "bytes": 56648,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    },
+    {
+      "key": "back",
+      "card_id": null,
+      "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/back-teal.png",
+      "source_sha256": "f6841517c2853cfa3cb4c53cadc872be72b9bde22c936d6583132b05c35baa17",
+      "path": "assets/doudizhu/cards/back.png",
+      "sha256": "30dbe1053ebbe3ac14bb97d7accd3b6f172c7d38929c53e9d3510ed66c7d8e54",
+      "bytes": 119805,
+      "width": 338,
+      "height": 489,
+      "modifications": [
+        "RGB multiplication by #f6f1e7; alpha unchanged"
+      ]
+    }
+  ]
+}

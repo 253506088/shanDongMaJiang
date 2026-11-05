@@ -6,16 +6,18 @@ const Kit = preload("res://scripts/ui/ui_kit.gd")
 const Cards = preload("res://scripts/doudizhu/core/cards.gd")
 const Rules = preload("res://scripts/doudizhu/core/rules.gd")
 const CardFace = preload("res://scripts/doudizhu/ui/card.gd")
+const RecorderStrip = preload("res://scripts/doudizhu/ui/recorder.gd")
 signal action_requested(action: Dictionary)
 signal hint_requested
 signal next_requested
 signal exit_requested
 signal pause_changed(paused: bool)
 signal mute_requested
+signal voice_profile_requested(profile: String)
 
 const NAMES = ["我", "听松", "观澜"]
 const HAND_Y = 695.0
-const TARGET_RECT = Rect2(418, 306, 764, 178)
+const TARGET_RECT = Rect2(418, 338, 764, 144)
 var view: Dictionary = {}
 var selected_cards: Array = []
 var hand_cards: Array = []
@@ -41,6 +43,15 @@ var _rules_return: String = ""
 var _submitted_revision: int = -1
 var _notice: String = ""
 var _result_hidden: bool = false
+var recorder_expanded = true
+var recorder: Control
+var recorder_button: Button
+var voice_profile = "male"
+var voice_profile_button: Button
+var _drag_active = false
+var _drag_last = Vector2.ZERO
+var _drag_visited: Dictionary = {}
+var _drag_regions: Array = []
 
 func _ready() -> void:
 	name = "DoudizhuTable"
@@ -51,6 +62,8 @@ func _ready() -> void:
 	hand_layer = _layer()
 	action_layer = _layer()
 	modal_layer = _layer()
+	get_window().focus_exited.connect(_cancel_drag)
+	get_window().mouse_exited.connect(_cancel_drag)
 	_built = true
 	_render()
 
@@ -97,8 +110,10 @@ func _build_background() -> void:
 func set_view(next_view: Dictionary) -> void:
 	var previous_revision = int(view.get("revision", -1))
 	var previous_phase = str(view.get("phase", ""))
+	var identity_changed = next_view.get("round_id", -1) != view.get("round_id", -1) or next_view.get("deal", -1) != view.get("deal", -1)
 	view = next_view.duplicate(true)
-	if int(view.get("revision", -1)) != previous_revision or str(view.get("phase", "")) != previous_phase:
+	if identity_changed or int(view.get("revision", -1)) != previous_revision or str(view.get("phase", "")) != previous_phase:
+		_cancel_drag()
 		selected_cards.clear()
 		_submitted_revision = -1
 		_notice = ""
@@ -111,8 +126,14 @@ func set_muted(value: bool) -> void:
 	muted = value
 	if is_instance_valid(mute_button): mute_button.text = "声音关" if muted else "声音开"
 
+func set_voice_profile(value: String) -> void:
+	voice_profile = "female" if value == "female" else "male"
+	if is_instance_valid(voice_profile_button): voice_profile_button.text = "女声报牌" if voice_profile == "female" else "男声报牌"
+
 func set_hint(cards: Array) -> void:
 	if not _can_act() or str(view.get("phase", "")) != "playing": return
+	# A delayed hint must not replace a hand selection currently being swept.
+	if _drag_active: return
 	selected_cards.clear()
 	for id in cards:
 		if id in view.get("hand", []) and id not in selected_cards: selected_cards.append(id)
@@ -138,6 +159,7 @@ func show_notice(message: String) -> void:
 	if _built: _refresh_selection()
 
 func _render() -> void:
+	_cancel_drag()
 	_clear(content)
 	_clear(hand_layer)
 	_clear(action_layer)
@@ -147,10 +169,15 @@ func _render() -> void:
 	play_button = null; pass_button = null; hint_button = null; clear_button = null
 	_button(content, Rect2(53, 31, 126, 51), "暂停", pause_menu)
 	_button(content, Rect2(191, 31, 126, 51), "玩法", show_rules)
+	recorder_button = _button(content, Rect2(329, 31, 154, 51), "记牌器", _toggle_recorder, recorder_expanded)
+	recorder_button.tooltip_text = "只统计你手牌之外尚未打出的牌；叫分时包含未揭底牌。"
 	_label(content, Rect2(631, 28, 338, 57), "斗 地 主", 30, Kit.ACCENT, true)
+	voice_profile_button = _button(content, Rect2(1180, 31, 193, 51), "女声报牌" if voice_profile == "female" else "男声报牌", func(): voice_profile_requested.emit("female" if voice_profile == "male" else "male"))
+	voice_profile_button.tooltip_text = "点击切换男声／女声，下次报牌使用所选声音。"
 	mute_button = _button(content, Rect2(1385, 31, 163, 51), "声音关" if muted else "声音开", func(): mute_requested.emit())
 	if view.is_empty(): return
 	_draw_bottom()
+	_draw_recorder()
 	_draw_opponent(2, true)
 	_draw_opponent(1, false)
 	_draw_target()
@@ -158,6 +185,21 @@ func _render() -> void:
 	_draw_hand()
 	_draw_actions()
 	if str(view.get("phase", "")) == "finished" and _modal_kind != "result" and not _result_hidden: _show_result()
+
+func _draw_recorder() -> void:
+	recorder = null
+	if not recorder_expanded: return
+	recorder = RecorderStrip.new()
+	recorder.position = Vector2(380, 232)
+	content.add_child(recorder)
+	recorder.set_view(view)
+	var caption = "外部余牌 · %d 张" % recorder.total if recorder.counts.size() == 15 else "外部余牌 · 暂无记录"
+	if str(view.get("phase", "")) == "bidding": caption += "（含底牌）"
+	_label(content, Rect2(384, 206, 306, 25), caption, 17, Kit.MUTED)
+
+func _toggle_recorder() -> void:
+	recorder_expanded = not recorder_expanded
+	_render()
 
 func _draw_bottom() -> void:
 	var bottom: Array = view.get("bottom", [])
@@ -218,7 +260,7 @@ func _draw_target() -> void:
 		_label(content, Rect2(418, 419, 764, 39), "可以打出任意合法牌型", 24, Kit.MUTED, true)
 	else:
 		var source = _seat_name(int(view.get("target_seat", -1)))
-		_label(content, Rect2(418, 261, 764, 38), source + " 出牌 · " + str(target.get("name", "")), 25, Kit.ACCENT, true)
+		_label(content, Rect2(418, 296, 764, 38), source + " 出牌 · " + str(target.get("name", "")), 25, Kit.ACCENT, true)
 		target_cards = _draw_group(content, target.get("cards", []), TARGET_RECT, 97, 60)
 		_label(content, Rect2(418, 486, 764, 31), "本局最后一手" if phase == "finished" else "当前要压的牌", 20, Kit.MUTED, true)
 	var turn = int(view.get("turn", -1))
@@ -265,7 +307,8 @@ func _draw_hand() -> void:
 	for id in cards:
 		var card = _card(hand_layer, int(id), Vector2(x, HAND_Y), Vector2(width, 168.4), true)
 		card.name = "Card_%d" % int(id)
-		card.pressed.connect(_toggle_card.bind(int(id)))
+		# Selection belongs to the table's pointer gesture. Connecting pressed
+		# here would toggle the starting card a second time on mouse release.
 		hand_cards.append(card)
 		x += step
 	_refresh_hand_cards()
@@ -325,7 +368,7 @@ func _refresh_selection() -> void:
 		if not combo.get("valid", false): message = "这组牌不能一起出，请调整选牌。"
 		elif not _play_is_valid(): message = str(combo.get("name", "")) + " · 压不过当前牌，请换一组。"
 		else: message = "已选 %d 张 · %s" % [selected_cards.size(), str(combo.get("name", ""))]
-	elif _can_act() and str(view.get("phase", "")) == "playing": message = "点选手牌，再按出牌"
+	elif _can_act() and str(view.get("phase", "")) == "playing": message = "点选或划选手牌，再按出牌"
 	selection_label.text = message
 
 func _toggle_card(id: int) -> void:
@@ -336,6 +379,7 @@ func _toggle_card(id: int) -> void:
 	_refresh_selection()
 
 func _clear_selection() -> void:
+	_cancel_drag()
 	selected_cards.clear()
 	_notice = ""
 	_refresh_selection()
@@ -343,6 +387,125 @@ func _clear_selection() -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and not _paused:
 		_clear_selection()
+		# Only blank table clicks reach this handler. Buttons consume their own
+		# press, so dragging away from an action button never starts a sweep.
+		if _can_act() and str(view.get("phase", "")) == "playing":
+			_begin_drag(event.position)
+		accept_event()
+
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree() or is_queued_for_deletion() or not _can_act() or str(view.get("phase", "")) != "playing":
+		_cancel_drag()
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		var point = get_global_transform_with_canvas().affine_inverse() * event.position
+		if event.pressed:
+			_cancel_drag()
+			var id = _card_at(point)
+			if id >= 0:
+				_begin_drag(point)
+				_visit_drag_card(id)
+				get_viewport().set_input_as_handled()
+		elif _drag_active:
+			_sweep_to(point)
+			_cancel_drag()
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and _drag_active:
+		# A release outside this viewport might not have been forwarded. Its
+		# next motion carries the current button mask, which safely ends capture.
+		if not (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
+			_cancel_drag()
+			return
+		_sweep_to(get_global_transform_with_canvas().affine_inverse() * event.position)
+		# Let GUI hover tracking see motion; no BaseButton owns the consumed
+		# hand press, and the eventual release is consumed above.
+
+func _card_rect(card: Control) -> Rect2:
+	return get_global_transform().affine_inverse() * card.get_global_transform() * Rect2(Vector2.ZERO, card.size)
+
+func _card_at(point: Vector2) -> int:
+	# The last drawn card owns an overlapped point, just as normal GUI picking.
+	for index in range(hand_cards.size() - 1, -1, -1):
+		var card = hand_cards[index]
+		if not card.disabled and _card_rect(card).has_point(point): return int(card.card_id)
+	return -1
+
+func _begin_drag(point: Vector2) -> void:
+	_drag_active = true
+	_drag_last = point
+	_drag_visited.clear()
+	_drag_regions.clear()
+	var occluders: Array[Rect2] = []
+	for index in range(hand_cards.size() - 1, -1, -1):
+		var card = hand_cards[index]
+		var rect = _card_rect(card)
+		# Freeze footprints for the whole gesture. A card lifting or lowering
+		# underneath the held pointer cannot redirect the hit to its neighbour.
+		rect = rect.merge(Rect2(Vector2(rect.position.x, HAND_Y), rect.size))
+		var visible: Array[Rect2] = [rect]
+		for covering in occluders:
+			var parts: Array[Rect2] = []
+			for region in visible: parts.append_array(_subtract_rect(region, covering))
+			visible = parts
+		_drag_regions.append({"id": int(card.card_id), "rects": visible})
+		occluders.append(rect)
+
+func _subtract_rect(rect: Rect2, covering: Rect2) -> Array[Rect2]:
+	if not rect.intersects(covering): return [rect]
+	var cut = rect.intersection(covering)
+	var pieces: Array[Rect2] = []
+	if cut.position.y > rect.position.y: pieces.append(Rect2(rect.position, Vector2(rect.size.x, cut.position.y - rect.position.y)))
+	if cut.end.y < rect.end.y: pieces.append(Rect2(Vector2(rect.position.x, cut.end.y), Vector2(rect.size.x, rect.end.y - cut.end.y)))
+	if cut.position.x > rect.position.x: pieces.append(Rect2(Vector2(rect.position.x, cut.position.y), Vector2(cut.position.x - rect.position.x, cut.size.y)))
+	if cut.end.x < rect.end.x: pieces.append(Rect2(Vector2(cut.end.x, cut.position.y), Vector2(rect.end.x - cut.end.x, cut.size.y)))
+	return pieces
+
+func _segment_entry(from: Vector2, to: Vector2, rect: Rect2) -> float:
+	# Slab clipping returns entry order and catches narrow card strips even
+	# when the OS coalesces a fast movement into one distant mouse event.
+	var direction = to - from
+	var low = 0.0
+	var high = 1.0
+	for axis in range(2):
+		var edge_min = rect.position[axis]
+		var edge_max = rect.end[axis] - 0.001
+		if absf(direction[axis]) < 0.00001:
+			if from[axis] < edge_min or from[axis] > edge_max: return INF
+			continue
+		var first = (edge_min - from[axis]) / direction[axis]
+		var last = (edge_max - from[axis]) / direction[axis]
+		low = maxf(low, minf(first, last))
+		high = minf(high, maxf(first, last))
+		if low > high: return INF
+	return low
+
+func _sweep_to(point: Vector2) -> void:
+	var hits: Array = []
+	for entry in _drag_regions:
+		if _drag_visited.has(entry.id): continue
+		var first = INF
+		for rect in entry.rects: first = minf(first, _segment_entry(_drag_last, point, rect))
+		if first != INF: hits.append({"id": entry.id, "at": first})
+	hits.sort_custom(func(a, b): return a.at < b.at)
+	for hit in hits: _visit_drag_card(int(hit.id))
+	_drag_last = point
+
+func _visit_drag_card(id: int) -> void:
+	if _drag_visited.has(id): return
+	_drag_visited[id] = true
+	_toggle_card(id)
+
+func _cancel_drag() -> void:
+	_drag_active = false
+	_drag_visited.clear()
+	_drag_regions.clear()
+
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_WM_WINDOW_FOCUS_OUT, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_MOUSE_EXIT]:
+		_cancel_drag()
+
+func _exit_tree() -> void:
+	_cancel_drag()
 
 func _send_bid(amount: int) -> void:
 	if str(view.get("phase", "")) != "bidding" or amount < 0 or amount > 3 or (amount > 0 and amount <= int(view.get("highest_bid", 0))): return
@@ -358,12 +521,14 @@ func _send_pass() -> void:
 
 func _send(action: Dictionary) -> void:
 	if not _can_act(): return
+	_cancel_drag()
 	action["revision"] = int(view.revision)
 	_submitted_revision = int(view.revision)
 	_refresh_selection()
 	action_requested.emit(action)
 
 func _open_modal(kind: String, dimensions: Vector2) -> Control:
+	_cancel_drag()
 	_clear(modal_layer)
 	_modal_kind = kind
 	var shade = ColorRect.new()
@@ -453,7 +618,8 @@ func show_rules() -> void:
 		["牌型与大小", "单张、对子、三张、三带一、三带一对、顺子（至少 5 张）、连对（至少 3 对）、飞机及带翅膀、四带二、炸弹和王炸。通常须同牌型、同张数才能比较，按主体点数比较。3 最小，依次到 A、2、小王、大王；顺子、连对和飞机主体不含 2 与王。"],
 		["本桌采用的带牌约定", "飞机单翅每种点数最多两张，不能同时带双王；翅膀不能与飞机主体同点。飞机双翅须为不同点数的对子。四带二单可带一对，但不能带双王；四带二对须带两个不同点数的对子。"],
 		["炸弹、春天与本局分", "四张同点为炸弹，双王为王炸；每次炸弹或王炸使本局翻倍。地主获胜且农民都未出过牌为春天；农民获胜且地主只出过一手为反春天，均再翻倍。每名农民输赢为底分 × 倍率，地主为其两倍，三人合计为零。"],
-		["想玩就继续", "每局独立计分，没有金币、段位、局外结算或固定场数。打完可再来一局，也可随时退出。点选一张或多张手牌，再按出牌；提示只会帮你选牌，不会自动打出。"]
+		["记牌器", "统计自己手牌之外尚未打出的牌：不含自己的手牌和各家已出牌，叫分时包含尚未揭开的底牌。只依据公开出牌和自己的手牌计算，不读取机器人暗牌，可点顶部记牌器收起。"],
+		["想玩就继续", "每局独立计分，没有金币、段位、局外结算或固定场数。打完可再来一局，也可随时退出。点选手牌，或按住左键划过多张牌：未选的选中，已选的取消，同一次划选每张只切换一次；最后按出牌确认。提示只会帮你选牌，不会自动打出。"]
 	]
 	for section in sections:
 		var title = Label.new(); title.text = section[0]

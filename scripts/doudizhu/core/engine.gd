@@ -24,6 +24,7 @@ func act(seat: int, action: Dictionary) -> bool:
 	var combo = Rules.classify(cards)
 	if not Rules.beats(combo, state.target): return false
 	for card in cards: state.hands[seat].erase(card)
+	state.played_cards.append_array(combo.cards)
 	state.revision += 1
 	state.play_counts[seat] += 1
 	state.passes = 0
@@ -41,7 +42,7 @@ func act(seat: int, action: Dictionary) -> bool:
 func view(seat: int) -> Dictionary:
 	if state.is_empty() or seat < 0 or seat > 2: return {}
 	var output = {}
-	for key in ["phase", "revision", "turn", "landlord", "highest_bid", "bids", "bid_starter", "target", "target_seat", "passes", "last_actions", "event", "multiplier", "bomb_count", "result", "play_counts", "deal"]:
+	for key in ["phase", "revision", "turn", "landlord", "highest_bid", "bids", "bid_starter", "target", "target_seat", "passes", "last_actions", "event", "multiplier", "bomb_count", "result", "play_counts", "deal", "played_cards"]:
 		output[key] = state[key].duplicate(true) if state[key] is Array or state[key] is Dictionary else state[key]
 	output.seat = seat
 	output.hand = state.hands[seat].duplicate()
@@ -66,7 +67,7 @@ func _deal(first_bidder: int, redeal: bool) -> void:
 		"highest_bid": 0, "bid_starter": first_bidder, "bids": [-1, -1, -1],
 		"target": {}, "target_seat": -1, "passes": 0, "last_actions": [{}, {}, {}],
 		"event": {"type": "redeal" if redeal else "deal", "seat": first_bidder},
-		"multiplier": 1, "bomb_count": 0, "result": {}, "play_counts": [0, 0, 0]
+		"multiplier": 1, "bomb_count": 0, "result": {}, "play_counts": [0, 0, 0], "played_cards": []
 	}
 
 func _bid(seat: int, action: Dictionary) -> bool:

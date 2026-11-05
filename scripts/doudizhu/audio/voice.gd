@@ -6,9 +6,26 @@ const COMBOS = ["triple_single", "triple_pair", "straight", "pair_chain", "airpl
 var clips: Dictionary = {}
 var queue: Array[AudioStream] = []
 var last_key = ""
+var profile: String = "male"
+var _loaded_profile: String = ""
 
 func _ready() -> void:
 	volume_db = -3.0
+	profile = "female" if profile == "female" else "male"
+	_load_profile()
+	finished.connect(_next)
+
+func set_profile(value: String) -> void:
+	var next = "female" if value == "female" else "male"
+	if profile == next and (_loaded_profile == next or not is_node_ready()): return
+	profile = next
+	stop_all()
+	# Retain last_key so a setting change cannot replay the previous action.
+	if is_node_ready(): _load_profile()
+
+func _load_profile() -> void:
+	clips.clear()
+	_loaded_profile = profile
 	for rank_value in range(3, 18): _load_clip("single_%d" % rank_value)
 	for rank_value in range(3, 16):
 		_load_clip("pair_%d" % rank_value)
@@ -16,10 +33,9 @@ func _ready() -> void:
 	for kind in COMBOS: _load_clip(kind)
 	for value in range(4): _load_clip("bid_%d" % value)
 	for key in ["pass", "redeal", "spring", "counter_spring"]: _load_clip(key)
-	finished.connect(_next)
 
 func _load_clip(key: String) -> void:
-	var path = AUDIO_ROOT + key + ".wav"
+	var path = AUDIO_ROOT + ("female/" if profile == "female" else "") + key + ".wav"
 	if ResourceLoader.exists(path): clips[key] = load(path)
 
 func clip_keys(view: Dictionary) -> Array[String]:

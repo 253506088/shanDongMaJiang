@@ -56,6 +56,7 @@ func run() -> void:
 	check(not session.active and session.worker == null, "shutdown joins the owned worker")
 	session.free()
 	await _check_app_isolation()
+	await _check_voice_preferences()
 	print("DDZ_SESSION_RESULT: %d failures; %d checks" % [failures.size(), checks])
 	quit(0 if failures.is_empty() else 1)
 
@@ -89,4 +90,38 @@ func _check_app_isolation() -> void:
 	for file in ["current_match.json", "current_match.json.bak", "current_match.json.tmp"]:
 		var path = qa_path + file
 		if FileAccess.file_exists(path): DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(qa_path))
+
+func _check_voice_preferences() -> void:
+	# Use a private preferences path so persistence can be checked without
+	# reading or changing a real player's sound/fullscreen/game settings.
+	var qa_path = "user://qa-ddz-voice-%d/" % Time.get_ticks_usec()
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(qa_path))
+	var app = load("res://scenes/main.tscn").instantiate()
+	app.qa_mode = true
+	app.preferences_path = qa_path + "preferences.json"
+	root.add_child(app)
+	app.qa_mode = false
+	app._open_doudizhu()
+	var revision = app.doudizhu.session.engine.state.revision
+	app.doudizhu.set_voice_profile("female")
+	check(app.doudizhu_voice == "female" and app.doudizhu.voice.profile == "female", "voice picker updates playback and application preference")
+	check(app.doudizhu.table.voice_profile_button.text == "女声报牌", "picker reflects selected voice")
+	check(app.doudizhu.session.engine.state.revision == revision, "voice changes do not advance the game")
+	var preferences = JSON.parse_string(FileAccess.get_file_as_string(app.preferences_path))
+	check(preferences.get("doudizhu_voice") == "female" and preferences.get("muted") == true, "voice is saved alongside the existing sound setting")
+	app.free()
+	await process_frame
+	app = load("res://scenes/main.tscn").instantiate()
+	app.qa_mode = false
+	app.preferences_path = qa_path + "preferences.json"
+	root.add_child(app)
+	check(app.doudizhu_voice == "female", "new app restores selected voice")
+	app._open_doudizhu()
+	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 60, "new mode loads complete persisted voice")
+	app.doudizhu.set_voice_profile("male")
+	check(app.doudizhu.voice.profile == "male" and app.doudizhu.voice.clips.size() == 60, "both complete voice catalogs can be selected")
+	app.free()
+	await process_frame
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(qa_path + "preferences.json"))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(qa_path))
