@@ -1,6 +1,9 @@
 extends Node
 const DoudizhuMode = preload("res://scripts/doudizhu/mode.gd")
 const DoudizhuCardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
+const BluffMode = preload("res://scripts/bluff/mode.gd")
+var bluff: Control
+var bluff_settings = {"players": 3, "challenge": "turn", "theme": "traditional", "pace": 2.8, "voice": "male", "muted": false}
 var doudizhu: Control
 var doudizhu_voice = "male"
 var doudizhu_card_theme = "traditional"
@@ -91,7 +94,9 @@ func _ready() -> void:
 	_show_lobby()
 	get_tree().auto_accept_quit = false
 	var args = OS.get_cmdline_user_args()
-	if "--doudizhu" in args:
+	if "--bluff" in args:
+		_open_bluff()
+	elif "--doudizhu" in args:
 		_open_doudizhu()
 	elif "--demo" in args:
 		_start_game(false)
@@ -121,6 +126,9 @@ func _layer() -> Control:
 
 func _show_lobby() -> void:
 	if _is_lan(): _confirm_leave_lan(); return
+	if is_instance_valid(bluff):
+		bluff.session.shutdown()
+		bluff = null
 	if is_instance_valid(doudizhu):
 		doudizhu.session.shutdown()
 		doudizhu.voice.stop_all()
@@ -143,6 +151,7 @@ func _show_lobby() -> void:
 	UI.table_button(lobby,Rect2(1436,40,110,46),"设置",_show_settings,false,"settings")
 	UI.button(lobby,Rect2(105,90,180,46),"山东麻将",func(): pass,true)
 	UI.button(lobby,Rect2(297,90,180,46),"斗地主",_open_doudizhu)
+	UI.button(lobby,Rect2(489,90,180,46),"唬牌",_open_bluff)
 	UI.label(lobby,Rect2(104,157,650,30),"山 东 麻 将  ·  青 玉 台",20,UI.ACCENT,true)
 	UI.label(lobby,Rect2(98,215,740,106),"好牌，慢慢来。",70,UI.TEXT,true)
 	UI.label(lobby,Rect2(105,344,660,65),"一方庭院，四席牌友。\n熟悉的山东玩法，随时落座，随时续玩。",22,UI.MUTED)
@@ -184,7 +193,7 @@ func _show_lobby() -> void:
 	UI.button(lobby,Rect2(105,726,279,66),"入 座 开 局   →",func(): _start_game(true),true)
 	if session.has_save(): UI.button(lobby,Rect2(402,726,221,66),"继续上次牌局",_resume)
 	UI.button(lobby,Rect2(641,726,183,66),"附近同桌",_show_lan_browser)
-	UI.label(lobby,Rect2(105,839,1000,24),"麻将单机 / 附近同桌   ·   斗地主单机",14,UI.MUTED)
+	UI.label(lobby,Rect2(105,839,1000,24),"麻将单机 / 附近同桌   ·   斗地主单机   ·   唬牌单机",14,UI.MUTED)
 	UI.button(lobby,Rect2(1426,829,120,42),"关于",_about)
 
 func _open_doudizhu() -> void:
@@ -207,6 +216,21 @@ func _open_doudizhu() -> void:
 	doudizhu.voice_profile_changed.connect(func(value): doudizhu_voice = value; _save_preferences())
 	doudizhu.card_theme_changed.connect(func(value): doudizhu_card_theme = value; _save_preferences())
 	root.add_child(doudizhu)
+
+func _open_bluff() -> void:
+	if _is_lan(): return
+	session.paused = true
+	discovery.stop(); voice.stop_all()
+	current_screen = "bluff"
+	table.visible = false; desktop_window.set_frame_limit(60)
+	_clear(root)
+	modal = null; lobby = null; hud = null; toast_label = null
+	bluff = BluffMode.new()
+	bluff.qa_mode = qa_mode
+	bluff.settings = bluff_settings.duplicate(true)
+	bluff.exit_requested.connect(_show_lobby)
+	bluff.settings_changed.connect(func(value): bluff_settings = value.duplicate(true); _save_preferences())
+	root.add_child(bluff)
 
 func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callable) -> void:
 	var b = UI.button(parent,rect,text,callback,on)
@@ -1346,7 +1370,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n山东麻将单机 / 附近同桌 · 独立单机斗地主\n\n麻将规则、牌面和语音参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n山东麻将 / 附近同桌 · 单机斗地主 / 唬牌\n\n麻将规则、牌面和语音参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 
@@ -1424,6 +1448,9 @@ func _process(delta: float) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:return
+	if current_screen=="bluff":
+		if event.keycode==KEY_ESCAPE and is_instance_valid(bluff): bluff.pause_menu()
+		return
 	if current_screen=="doudizhu":
 		if event.keycode==KEY_ESCAPE and is_instance_valid(doudizhu): doudizhu.pause_menu()
 		return
@@ -1443,7 +1470,10 @@ func _notification(what: int) -> void:
 		if _is_lan(): (session as LanSession).leave_room()
 		get_tree().quit()
 	if what==NOTIFICATION_APPLICATION_PAUSED or what==NOTIFICATION_WM_GO_BACK_REQUEST:
-		if current_screen=="doudizhu" and is_instance_valid(doudizhu):
+		if current_screen=="bluff" and is_instance_valid(bluff):
+			if what==NOTIFICATION_APPLICATION_PAUSED: bluff.pause_on_background()
+			else: bluff.pause_menu()
+		elif current_screen=="doudizhu" and is_instance_valid(doudizhu):
 			if what==NOTIFICATION_APPLICATION_PAUSED: doudizhu.pause_on_background()
 			else: doudizhu.pause_menu()
 		elif current_screen=="table" and not is_instance_valid(modal):_pause()
@@ -1454,7 +1484,7 @@ func _notification(what: int) -> void:
 func _save_preferences() -> void:
 	if qa_mode:return
 	var file=FileAccess.open(preferences_path,FileAccess.WRITE)
-	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"doudizhu_voice":doudizhu_voice,"doudizhu_card_theme":doudizhu_card_theme}))
+	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"doudizhu_voice":doudizhu_voice,"doudizhu_card_theme":doudizhu_card_theme,"bluff_settings":bluff_settings}))
 
 func _load_preferences() -> void:
 	if qa_mode:return
@@ -1464,5 +1494,12 @@ func _load_preferences() -> void:
 	config.merge(prefs.get("config",{}),true); muted=prefs.get("muted",false);low_quality=prefs.get("low_quality",false)
 	doudizhu_voice = "female" if prefs.get("doudizhu_voice", "male") == "female" else "male"
 	doudizhu_card_theme = DoudizhuCardThemes.normalize(prefs.get("doudizhu_card_theme", "traditional"))
+	var saved_bluff = prefs.get("bluff_settings", {})
+	if saved_bluff is Dictionary:
+		bluff_settings.merge(preload("res://scripts/bluff/core/engine.gd").options(saved_bluff), true)
+		bluff_settings.theme = DoudizhuCardThemes.normalize(saved_bluff.get("theme", "traditional"))
+		bluff_settings.pace = 2.0 if saved_bluff.get("pace", 2.8) == 2.0 else 2.8
+		bluff_settings.voice = "female" if saved_bluff.get("voice", "male") == "female" else "male"
+		bluff_settings.muted = saved_bluff.get("muted", false) == true
 	session.speed=clampf(prefs.get("speed",1.0),0.75,1.5) if prefs.get("pace_version",0)==2 else 1.0;table.quality(low_quality)
 	desktop_window.set_fullscreen(prefs.get("fullscreen",false) == true)

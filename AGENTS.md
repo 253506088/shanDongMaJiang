@@ -29,3 +29,9 @@
 ## 2026-11-06 国风交付与竖排JOKER（0.7.0）
 
 用户已按提示词交付6张专属插画，原生848×1264；PNG/JPG共12文件在 `artifacts/art-delivery-doudizhu-guofeng-2026-11-06/raw/`，仓库外备份在 `D:/code/my/2/山东麻将-美术备份/art-delivery-doudizhu-guofeng-2026-11-06/raw/`，已逐文件校验。当前国风青玉正式开放切换与偏好保存，替代此前“等待插画”的状态；传统仍为默认。两套牌面JOKER均按用户要求改为逐字竖排、右下倒置，保留黑红区分。J/Q/K按腰线拼双头，牌背180度对称；来源与处理见 `assets/licenses/doudizhu-guofeng-manifest.json`、`tools/prepare_doudizhu_guofeng.py`。原图与备份保留，不是缓存。实测结果见 `docs/verification.md`，不将截图验收写成手机手感已确认。
+
+## 2026-11-06 独立单机唬牌（0.8.0）
+
+新增 `scripts/bluff/`，1 真人加 2–5 机器人，默认 3 人；3 人一副牌，4–6 人两副牌。猜拳定先手，领出 1–4 张；用户明确回复**跟牌不限张数**。只翻最近一手，输家收中央整堆，大小王万能；其余玩家全过形成死牌，由最后出牌者领出。默认顺位质疑，另可选任何人抢开。最后一手需获认可或开牌证明为真才获胜，是补足未指定收官细节的实现选择，不能写成用户明确确认。详情 `docs/bluff-rules.md`。
+
+只共用 `scripts/poker/ui/` 牌面绘制、主题和既有基础素材；斗地主原牌面路径保留兼容入口。唬牌规则、会话、AI、语音独立，不改麻将存档／重放／LAN。QA 入口 `--bluff`，专项 `bluff_core_test`／`bluff_session_test`／`bluff_ui_test`／`bluff_audio_test`，可见渲染单独 `tools/test_ui.ps1 -Suites bluff_ui_test`。254 段新离线语音来源见 `assets/licenses/bluff-voice-manifest.json`；原模型缓存复用且保留，截图与日志按 `.gitignore` 排除。提交／推送和真实渲染的验证范围见 `docs/verification.md`。

@@ -1,0 +1,2568 @@
+{
+  "format_version": 1,
+  "generated_date": "2026-11-06",
+  "model": {
+    "id": "hexgrad/Kokoro-82M-v1.1-zh",
+    "revision": "01e7505bd6a7a2ac4975463114c3a7650a9f7218",
+    "license": "Apache-2.0",
+    "model_card": "https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh/blob/01e7505bd6a7a2ac4975463114c3a7650a9f7218/README.md",
+    "onnx_archive": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_1.tar.bz2",
+    "archive_sha256": "259c9c8bc906d6078e4e0570421885dabb68b539c2f970fcbb890a58eeaf3e9c",
+    "onnx_sha256": "05d793700b0b507f760c183c0e39bdd6a97b43d32fdc7bf7b54a5179f1b11222",
+    "voices_sha256": "e64a5a581d8c2a350d848f51c3121657cd83aa07ed6109172177345874a7244c"
+  },
+  "generation": {
+    "runtime": "sherpa-onnx",
+    "runtime_version": "1.12.40",
+    "profiles": {
+      "male": 59,
+      "female": 3
+    },
+    "speed": 1.0,
+    "format": "mono PCM16 24000 Hz",
+    "processing": "trim <0.003 silence; retain 35ms/55ms; -2dBFS peak, max gain 4; 5ms fades"
+  },
+  "notes": "Generated offline speech, not human recordings. Declarations concatenate count and rank. Independent bluff runtime; no model ships.",
+  "clips": [
+    {
+      "profile": "male",
+      "key": "count_1",
+      "text": "一张",
+      "synthesis_text": "一张。",
+      "path": "assets/bluff/audio/male/count_1.wav",
+      "sha256": "4205a9fc6d120375f1fdbbd5cd0aa21b234f53c2f4fef98a70fdc9d32b85bbab",
+      "bytes": 30104,
+      "duration_seconds": 0.62625
+    },
+    {
+      "profile": "male",
+      "key": "count_2",
+      "text": "两张",
+      "synthesis_text": "两张。",
+      "path": "assets/bluff/audio/male/count_2.wav",
+      "sha256": "fded5ad6d6afe04ccc7f01374acde4c67215baad61053a11ae0f7800307a5837",
+      "bytes": 31454,
+      "duration_seconds": 0.654375
+    },
+    {
+      "profile": "male",
+      "key": "count_3",
+      "text": "三张",
+      "synthesis_text": "三张。",
+      "path": "assets/bluff/audio/male/count_3.wav",
+      "sha256": "d33db949546b7d032e86635d49373dd20ec8aa0d66acbefed0c6b38de8e01a4e",
+      "bytes": 30324,
+      "duration_seconds": 0.630833
+    },
+    {
+      "profile": "male",
+      "key": "count_4",
+      "text": "四张",
+      "synthesis_text": "四张。",
+      "path": "assets/bluff/audio/male/count_4.wav",
+      "sha256": "b4d3062648e9efb459905b30b78b9a059169e469ae47bad3147708601f0cf9d9",
+      "bytes": 29278,
+      "duration_seconds": 0.609042
+    },
+    {
+      "profile": "male",
+      "key": "count_5",
+      "text": "五张",
+      "synthesis_text": "五张。",
+      "path": "assets/bluff/audio/male/count_5.wav",
+      "sha256": "2025b812fab56bd8d127c9ba8609f965ca92d419594661a5c1f976e0dbe9dfd9",
+      "bytes": 29326,
+      "duration_seconds": 0.610042
+    },
+    {
+      "profile": "male",
+      "key": "count_6",
+      "text": "六张",
+      "synthesis_text": "六张。",
+      "path": "assets/bluff/audio/male/count_6.wav",
+      "sha256": "94bd7b3bc27e49ee33f23075dc96960d1bc7d9f1875c2a2c5b1336105cf3245e",
+      "bytes": 30702,
+      "duration_seconds": 0.638708
+    },
+    {
+      "profile": "male",
+      "key": "count_7",
+      "text": "七张",
+      "synthesis_text": "七张。",
+      "path": "assets/bluff/audio/male/count_7.wav",
+      "sha256": "3a40da4a6de9f97a133222a7c260615034f871f0ad38da5fea1f026a1f29b935",
+      "bytes": 31320,
+      "duration_seconds": 0.651583
+    },
+    {
+      "profile": "male",
+      "key": "count_8",
+      "text": "八张",
+      "synthesis_text": "八张。",
+      "path": "assets/bluff/audio/male/count_8.wav",
+      "sha256": "eb0e0d25e5d6f356b1b4d622c7cb3c62e67bb30dc45e4aeda59d68d807b90896",
+      "bytes": 28314,
+      "duration_seconds": 0.588958
+    },
+    {
+      "profile": "male",
+      "key": "count_9",
+      "text": "九张",
+      "synthesis_text": "九张。",
+      "path": "assets/bluff/audio/male/count_9.wav",
+      "sha256": "e4e826a71e0ba1bc8f77ca4cbbaf977f6bed0e4b6a61e56c8e300b07b9c696f8",
+      "bytes": 30250,
+      "duration_seconds": 0.629292
+    },
+    {
+      "profile": "male",
+      "key": "count_10",
+      "text": "十张",
+      "synthesis_text": "十张。",
+      "path": "assets/bluff/audio/male/count_10.wav",
+      "sha256": "a771d45516f43fb85d9e9afb5b070533a6b9b3295b85cd5595a441ddefb70a0b",
+      "bytes": 30036,
+      "duration_seconds": 0.624833
+    },
+    {
+      "profile": "male",
+      "key": "count_11",
+      "text": "十一张",
+      "synthesis_text": "十一张。",
+      "path": "assets/bluff/audio/male/count_11.wav",
+      "sha256": "9fde9ee824be08f081be2b9a48737b53c7bc23e65e9e43e2c0a13a107a953eb7",
+      "bytes": 43810,
+      "duration_seconds": 0.911792
+    },
+    {
+      "profile": "male",
+      "key": "count_12",
+      "text": "十二张",
+      "synthesis_text": "十二张。",
+      "path": "assets/bluff/audio/male/count_12.wav",
+      "sha256": "dbe53a65ca621e4b6328272fd419028e1ce317b6a5991a02ef314de7fd9f9427",
+      "bytes": 41742,
+      "duration_seconds": 0.868708
+    },
+    {
+      "profile": "male",
+      "key": "count_13",
+      "text": "十三张",
+      "synthesis_text": "十三张。",
+      "path": "assets/bluff/audio/male/count_13.wav",
+      "sha256": "5ba18d107396bdbc54d0d7ea3e1444028186358be96c38c59231a08dbcbd5ef2",
+      "bytes": 44800,
+      "duration_seconds": 0.932417
+    },
+    {
+      "profile": "male",
+      "key": "count_14",
+      "text": "十四张",
+      "synthesis_text": "十四张。",
+      "path": "assets/bluff/audio/male/count_14.wav",
+      "sha256": "4b44c2e68d4e46bef3605adc0df458f15d9f246f5b0a253c495c92356ccd8bf2",
+      "bytes": 45456,
+      "duration_seconds": 0.946083
+    },
+    {
+      "profile": "male",
+      "key": "count_15",
+      "text": "十五张",
+      "synthesis_text": "十五张。",
+      "path": "assets/bluff/audio/male/count_15.wav",
+      "sha256": "8a0d9efb340c2fc83da12614ce1139c3492f48e41f2a5541f88a5d4685b9e52f",
+      "bytes": 39046,
+      "duration_seconds": 0.812542
+    },
+    {
+      "profile": "male",
+      "key": "count_16",
+      "text": "十六张",
+      "synthesis_text": "十六张。",
+      "path": "assets/bluff/audio/male/count_16.wav",
+      "sha256": "2f15e569ee71c7e7950d830a8ef4bb58a2fdc0817c80348cd5e8562f5e308153",
+      "bytes": 45754,
+      "duration_seconds": 0.952292
+    },
+    {
+      "profile": "male",
+      "key": "count_17",
+      "text": "十七张",
+      "synthesis_text": "十七张。",
+      "path": "assets/bluff/audio/male/count_17.wav",
+      "sha256": "406e40260e6ffb7b4204b19f4909f2b6e60a32125255e2b2f0db26457e80511b",
+      "bytes": 46714,
+      "duration_seconds": 0.972292
+    },
+    {
+      "profile": "male",
+      "key": "count_18",
+      "text": "十八张",
+      "synthesis_text": "十八张。",
+      "path": "assets/bluff/audio/male/count_18.wav",
+      "sha256": "060316d68b2af79b3be64465b26310beca7dd7ae003b4eca803872fcf5725158",
+      "bytes": 46734,
+      "duration_seconds": 0.972708
+    },
+    {
+      "profile": "male",
+      "key": "count_19",
+      "text": "十九张",
+      "synthesis_text": "十九张。",
+      "path": "assets/bluff/audio/male/count_19.wav",
+      "sha256": "7f9a5a2ba27fd94b153716bb718b0c9189bae21d3bdc71ad341124d0709a72f4",
+      "bytes": 44768,
+      "duration_seconds": 0.93175
+    },
+    {
+      "profile": "male",
+      "key": "count_20",
+      "text": "二十张",
+      "synthesis_text": "二十张。",
+      "path": "assets/bluff/audio/male/count_20.wav",
+      "sha256": "87da45651eae656a3a634d607737dc7cedf5cacf84740ad0b42e07fe786457f5",
+      "bytes": 44714,
+      "duration_seconds": 0.930625
+    },
+    {
+      "profile": "male",
+      "key": "count_21",
+      "text": "二十一张",
+      "synthesis_text": "二十一张。",
+      "path": "assets/bluff/audio/male/count_21.wav",
+      "sha256": "97576697da3f942918cee4028321a3cc1cd81082e1245113007c15cbe158bd16",
+      "bytes": 53020,
+      "duration_seconds": 1.103667
+    },
+    {
+      "profile": "male",
+      "key": "count_22",
+      "text": "二十二张",
+      "synthesis_text": "二十二张。",
+      "path": "assets/bluff/audio/male/count_22.wav",
+      "sha256": "a173afdb7061ac93949e5bf588eae386c6fba9484e08ba815459a79402ef7813",
+      "bytes": 52920,
+      "duration_seconds": 1.101583
+    },
+    {
+      "profile": "male",
+      "key": "count_23",
+      "text": "二十三张",
+      "synthesis_text": "二十三张。",
+      "path": "assets/bluff/audio/male/count_23.wav",
+      "sha256": "7486e09317a761da1d5255793bbed8b3c922ccb45bb72ddaf2248b4c85e3a665",
+      "bytes": 54120,
+      "duration_seconds": 1.126583
+    },
+    {
+      "profile": "male",
+      "key": "count_24",
+      "text": "二十四张",
+      "synthesis_text": "二十四张。",
+      "path": "assets/bluff/audio/male/count_24.wav",
+      "sha256": "a3b6e893d896a53ffc6fcb826666540bf838dcd08ef4235627a667c31f2ffd5c",
+      "bytes": 54108,
+      "duration_seconds": 1.126333
+    },
+    {
+      "profile": "male",
+      "key": "count_25",
+      "text": "二十五张",
+      "synthesis_text": "二十五张。",
+      "path": "assets/bluff/audio/male/count_25.wav",
+      "sha256": "05c2ada45f778b549e0ee0f8a3f77abe87087a305e9dc457bb42c89512d18557",
+      "bytes": 54286,
+      "duration_seconds": 1.130042
+    },
+    {
+      "profile": "male",
+      "key": "count_26",
+      "text": "二十六张",
+      "synthesis_text": "二十六张。",
+      "path": "assets/bluff/audio/male/count_26.wav",
+      "sha256": "bc720282a0afe476da01dc59748f505bb73b22e4de5c0c961fc7aad8932567ce",
+      "bytes": 54182,
+      "duration_seconds": 1.127875
+    },
+    {
+      "profile": "male",
+      "key": "count_27",
+      "text": "二十七张",
+      "synthesis_text": "二十七张。",
+      "path": "assets/bluff/audio/male/count_27.wav",
+      "sha256": "4b7aec7ed7da1acda55a3c054b68bf9edf02ef2d4b51efb3ac032be31a2158c1",
+      "bytes": 56154,
+      "duration_seconds": 1.168958
+    },
+    {
+      "profile": "male",
+      "key": "count_28",
+      "text": "二十八张",
+      "synthesis_text": "二十八张。",
+      "path": "assets/bluff/audio/male/count_28.wav",
+      "sha256": "a363356e7313e687df2b6a4eb2e462aac76a0e28e00061bb0adba60c24278ce7",
+      "bytes": 54128,
+      "duration_seconds": 1.12675
+    },
+    {
+      "profile": "male",
+      "key": "count_29",
+      "text": "二十九张",
+      "synthesis_text": "二十九张。",
+      "path": "assets/bluff/audio/male/count_29.wav",
+      "sha256": "70db38ca7a6e851a43bc07ada54200cc2fb4d7c09bc22dc314973b5ae4cd48c8",
+      "bytes": 54180,
+      "duration_seconds": 1.127833
+    },
+    {
+      "profile": "male",
+      "key": "count_30",
+      "text": "三十张",
+      "synthesis_text": "三十张。",
+      "path": "assets/bluff/audio/male/count_30.wav",
+      "sha256": "d7c1878c8a534a8afa79632f0c805e7422339c8f6c72271d1873252acd98d0de",
+      "bytes": 47104,
+      "duration_seconds": 0.980417
+    },
+    {
+      "profile": "male",
+      "key": "count_31",
+      "text": "三十一张",
+      "synthesis_text": "三十一张。",
+      "path": "assets/bluff/audio/male/count_31.wav",
+      "sha256": "0a2dcea06be401f437be12479ca1d6f75780e9425299bb69d043bb596b46a30e",
+      "bytes": 57372,
+      "duration_seconds": 1.194333
+    },
+    {
+      "profile": "male",
+      "key": "count_32",
+      "text": "三十二张",
+      "synthesis_text": "三十二张。",
+      "path": "assets/bluff/audio/male/count_32.wav",
+      "sha256": "05abf1a4ff01a1c1c02f304271e07ec3beb2cc4d8d41e59ea1ebe96a0e2d7e03",
+      "bytes": 55426,
+      "duration_seconds": 1.153792
+    },
+    {
+      "profile": "male",
+      "key": "count_33",
+      "text": "三十三张",
+      "synthesis_text": "三十三张。",
+      "path": "assets/bluff/audio/male/count_33.wav",
+      "sha256": "233ea0664a9951367739b8e8281cb4040781ef3b1a06bcca0558e9dab9488da2",
+      "bytes": 56430,
+      "duration_seconds": 1.174708
+    },
+    {
+      "profile": "male",
+      "key": "count_34",
+      "text": "三十四张",
+      "synthesis_text": "三十四张。",
+      "path": "assets/bluff/audio/male/count_34.wav",
+      "sha256": "636449f9f787d7ecd04e4034dbe6663b6d8dd057402c5149a418a22b0b6b9593",
+      "bytes": 56412,
+      "duration_seconds": 1.174333
+    },
+    {
+      "profile": "male",
+      "key": "count_35",
+      "text": "三十五张",
+      "synthesis_text": "三十五张。",
+      "path": "assets/bluff/audio/male/count_35.wav",
+      "sha256": "412cb972f4a8bfaec31f71eae9eb20e7918b3f613dbe2465099c92042ad6518b",
+      "bytes": 54560,
+      "duration_seconds": 1.13575
+    },
+    {
+      "profile": "male",
+      "key": "count_36",
+      "text": "三十六张",
+      "synthesis_text": "三十六张。",
+      "path": "assets/bluff/audio/male/count_36.wav",
+      "sha256": "814958febcd0ab91446a66a53a0edaff2b962f3064fc8c52edc3bbe74de352b2",
+      "bytes": 56412,
+      "duration_seconds": 1.174333
+    },
+    {
+      "profile": "male",
+      "key": "count_37",
+      "text": "三十七张",
+      "synthesis_text": "三十七张。",
+      "path": "assets/bluff/audio/male/count_37.wav",
+      "sha256": "45fbf9a7b8ff9680d1b7faba297fe988d7d74c7fd971e352671ce4fd6ac09cb9",
+      "bytes": 57460,
+      "duration_seconds": 1.196167
+    },
+    {
+      "profile": "male",
+      "key": "count_38",
+      "text": "三十八张",
+      "synthesis_text": "三十八张。",
+      "path": "assets/bluff/audio/male/count_38.wav",
+      "sha256": "224c34d8e881c3196400e31b973280e75e0ef72a9203f764b6df0a9fde26b60b",
+      "bytes": 56510,
+      "duration_seconds": 1.176375
+    },
+    {
+      "profile": "male",
+      "key": "count_39",
+      "text": "三十九张",
+      "synthesis_text": "三十九张。",
+      "path": "assets/bluff/audio/male/count_39.wav",
+      "sha256": "e2cbd368a4e4d918539f273e22d1c569d69b13e3f9aa603955a8c1c2bf004b02",
+      "bytes": 56616,
+      "duration_seconds": 1.178583
+    },
+    {
+      "profile": "male",
+      "key": "count_40",
+      "text": "四十张",
+      "synthesis_text": "四十张。",
+      "path": "assets/bluff/audio/male/count_40.wav",
+      "sha256": "684cd36f4f1c3804c84114e7a9823d70c49048440a880474ce81e16c832733d2",
+      "bytes": 47174,
+      "duration_seconds": 0.981875
+    },
+    {
+      "profile": "male",
+      "key": "count_41",
+      "text": "四十一张",
+      "synthesis_text": "四十一张。",
+      "path": "assets/bluff/audio/male/count_41.wav",
+      "sha256": "1dd6506ee92297094c768614f06660afcca605ea7fd64136f2c3c497fef68c07",
+      "bytes": 54224,
+      "duration_seconds": 1.12875
+    },
+    {
+      "profile": "male",
+      "key": "count_42",
+      "text": "四十二张",
+      "synthesis_text": "四十二张。",
+      "path": "assets/bluff/audio/male/count_42.wav",
+      "sha256": "cfdf9017175992cc28a4656ccdbc16b3e26a051be5ce6449db364d857a7d9e35",
+      "bytes": 53364,
+      "duration_seconds": 1.110833
+    },
+    {
+      "profile": "male",
+      "key": "count_43",
+      "text": "四十三张",
+      "synthesis_text": "四十三张。",
+      "path": "assets/bluff/audio/male/count_43.wav",
+      "sha256": "a44bfdc7b1d952e195c6f39ca90ffe760e3a3c8571cebf7348fbafeaf19d4d38",
+      "bytes": 54460,
+      "duration_seconds": 1.133667
+    },
+    {
+      "profile": "male",
+      "key": "count_44",
+      "text": "四十四张",
+      "synthesis_text": "四十四张。",
+      "path": "assets/bluff/audio/male/count_44.wav",
+      "sha256": "1238af6e5647abc957d691881260b5a433bdd059fd274a2ceb41c789d72974e5",
+      "bytes": 54384,
+      "duration_seconds": 1.132083
+    },
+    {
+      "profile": "male",
+      "key": "count_45",
+      "text": "四十五张",
+      "synthesis_text": "四十五张。",
+      "path": "assets/bluff/audio/male/count_45.wav",
+      "sha256": "a66f659f4e6c30c46ab3d6d75861804c2220397c72877e501743a7926b62c0f3",
+      "bytes": 53414,
+      "duration_seconds": 1.111875
+    },
+    {
+      "profile": "male",
+      "key": "count_46",
+      "text": "四十六张",
+      "synthesis_text": "四十六张。",
+      "path": "assets/bluff/audio/male/count_46.wav",
+      "sha256": "a35c525fd15d7536a065bfedbf0ca15e6e9fbe36deb90b78b5e19d2f28676138",
+      "bytes": 55300,
+      "duration_seconds": 1.151167
+    },
+    {
+      "profile": "male",
+      "key": "count_47",
+      "text": "四十七张",
+      "synthesis_text": "四十七张。",
+      "path": "assets/bluff/audio/male/count_47.wav",
+      "sha256": "a09bb580f89c3f52ea0beabbbcd9740552ff35cc140f0962eff88bbbc5f97945",
+      "bytes": 55318,
+      "duration_seconds": 1.151542
+    },
+    {
+      "profile": "male",
+      "key": "count_48",
+      "text": "四十八张",
+      "synthesis_text": "四十八张。",
+      "path": "assets/bluff/audio/male/count_48.wav",
+      "sha256": "9f29c7edd4a56fa970e9909f04fb35e2dfca5450ec9a70b92b25355f3b815c6c",
+      "bytes": 55628,
+      "duration_seconds": 1.158
+    },
+    {
+      "profile": "male",
+      "key": "count_49",
+      "text": "四十九张",
+      "synthesis_text": "四十九张。",
+      "path": "assets/bluff/audio/male/count_49.wav",
+      "sha256": "99160311844d199f03b941ad39053470dbd48fd8ef98183b70cb07363e5e28d1",
+      "bytes": 56488,
+      "duration_seconds": 1.175917
+    },
+    {
+      "profile": "male",
+      "key": "count_50",
+      "text": "五十张",
+      "synthesis_text": "五十张。",
+      "path": "assets/bluff/audio/male/count_50.wav",
+      "sha256": "f80f8462d9719ac8317ef782cc1f1b970575c49d994f7d667208d0a2da0e1ada",
+      "bytes": 43498,
+      "duration_seconds": 0.905292
+    },
+    {
+      "profile": "male",
+      "key": "count_51",
+      "text": "五十一张",
+      "synthesis_text": "五十一张。",
+      "path": "assets/bluff/audio/male/count_51.wav",
+      "sha256": "aeeb9f4c513a86d8dc92a5505de5ce8b5fb3778f69714ec857225152e394c903",
+      "bytes": 53816,
+      "duration_seconds": 1.12025
+    },
+    {
+      "profile": "male",
+      "key": "count_52",
+      "text": "五十二张",
+      "synthesis_text": "五十二张。",
+      "path": "assets/bluff/audio/male/count_52.wav",
+      "sha256": "caf307b83cb91d60bd1210107efb932cdfc8a217fdc376d4dc697d4e6c436452",
+      "bytes": 54374,
+      "duration_seconds": 1.131875
+    },
+    {
+      "profile": "male",
+      "key": "count_53",
+      "text": "五十三张",
+      "synthesis_text": "五十三张。",
+      "path": "assets/bluff/audio/male/count_53.wav",
+      "sha256": "da1befa0b9e309dc6df7da477fc5cc6c443d5b75f2caebbede21281e6400a9b2",
+      "bytes": 55262,
+      "duration_seconds": 1.150375
+    },
+    {
+      "profile": "male",
+      "key": "count_54",
+      "text": "五十四张",
+      "synthesis_text": "五十四张。",
+      "path": "assets/bluff/audio/male/count_54.wav",
+      "sha256": "3ba5f1aafe4622a9131966212e7a1212947eaa4795ecb2ad4fa4b2586cdcd8f6",
+      "bytes": 55324,
+      "duration_seconds": 1.151667
+    },
+    {
+      "profile": "male",
+      "key": "count_55",
+      "text": "五十五张",
+      "synthesis_text": "五十五张。",
+      "path": "assets/bluff/audio/male/count_55.wav",
+      "sha256": "e24529b593ee1c83ad03ba420a1c9eabe00c406f733281d4cbfd17c4db484b41",
+      "bytes": 55016,
+      "duration_seconds": 1.14525
+    },
+    {
+      "profile": "male",
+      "key": "count_56",
+      "text": "五十六张",
+      "synthesis_text": "五十六张。",
+      "path": "assets/bluff/audio/male/count_56.wav",
+      "sha256": "f86fa23819ebd60a3a87d2057f5fe34c2eddd725f9243b371b1c6ecaf4acde90",
+      "bytes": 56096,
+      "duration_seconds": 1.16775
+    },
+    {
+      "profile": "male",
+      "key": "count_57",
+      "text": "五十七张",
+      "synthesis_text": "五十七张。",
+      "path": "assets/bluff/audio/male/count_57.wav",
+      "sha256": "3b16c073321d0231ed2287a861dce69bd3ca5b353617d2bd500ce5069fa60370",
+      "bytes": 55140,
+      "duration_seconds": 1.147833
+    },
+    {
+      "profile": "male",
+      "key": "count_58",
+      "text": "五十八张",
+      "synthesis_text": "五十八张。",
+      "path": "assets/bluff/audio/male/count_58.wav",
+      "sha256": "cbecff52dc908beac981c53fba3d3d01cb4cdd4d337a0b93d6919733d766bac3",
+      "bytes": 55312,
+      "duration_seconds": 1.151417
+    },
+    {
+      "profile": "male",
+      "key": "count_59",
+      "text": "五十九张",
+      "synthesis_text": "五十九张。",
+      "path": "assets/bluff/audio/male/count_59.wav",
+      "sha256": "4e022ddd0bd9802f78acc9582297e05ce4049f60ab5da97d238197454797c90b",
+      "bytes": 56438,
+      "duration_seconds": 1.174875
+    },
+    {
+      "profile": "male",
+      "key": "count_60",
+      "text": "六十张",
+      "synthesis_text": "六十张。",
+      "path": "assets/bluff/audio/male/count_60.wav",
+      "sha256": "e61bec115c5515f181b6ad998c81901219b4ab281178cc918a328f911e05fdf5",
+      "bytes": 47896,
+      "duration_seconds": 0.996917
+    },
+    {
+      "profile": "male",
+      "key": "count_61",
+      "text": "六十一张",
+      "synthesis_text": "六十一张。",
+      "path": "assets/bluff/audio/male/count_61.wav",
+      "sha256": "27f6a8c01d9b346c9ce6473d95e2a90d641aeb6e1514cf3865dc0de3b8f02ff7",
+      "bytes": 55206,
+      "duration_seconds": 1.149208
+    },
+    {
+      "profile": "male",
+      "key": "count_62",
+      "text": "六十二张",
+      "synthesis_text": "六十二张。",
+      "path": "assets/bluff/audio/male/count_62.wav",
+      "sha256": "d0799e6a910290066ca476c56cd5fd78992238e77f20c120c25ce1300ed71236",
+      "bytes": 54104,
+      "duration_seconds": 1.12625
+    },
+    {
+      "profile": "male",
+      "key": "count_63",
+      "text": "六十三张",
+      "synthesis_text": "六十三张。",
+      "path": "assets/bluff/audio/male/count_63.wav",
+      "sha256": "9a45388115f640ba49f3029ed7a100ccc19b9bc58afc26c8435b678d953c181d",
+      "bytes": 56348,
+      "duration_seconds": 1.173
+    },
+    {
+      "profile": "male",
+      "key": "count_64",
+      "text": "六十四张",
+      "synthesis_text": "六十四张。",
+      "path": "assets/bluff/audio/male/count_64.wav",
+      "sha256": "337e1a386de90046a3bf88dee56a8ce2ddff87b71e47e31819557f9d9dc7981f",
+      "bytes": 55226,
+      "duration_seconds": 1.149625
+    },
+    {
+      "profile": "male",
+      "key": "count_65",
+      "text": "六十五张",
+      "synthesis_text": "六十五张。",
+      "path": "assets/bluff/audio/male/count_65.wav",
+      "sha256": "2df04998fc19c4104f148c417d59d4eb3db16ff090a3623031d1b4466e2940b0",
+      "bytes": 54498,
+      "duration_seconds": 1.134458
+    },
+    {
+      "profile": "male",
+      "key": "count_66",
+      "text": "六十六张",
+      "synthesis_text": "六十六张。",
+      "path": "assets/bluff/audio/male/count_66.wav",
+      "sha256": "f07e6f02a4fb037759c371d35387e50a447295ab756621f7720bfe1e3e125574",
+      "bytes": 54994,
+      "duration_seconds": 1.144792
+    },
+    {
+      "profile": "male",
+      "key": "count_67",
+      "text": "六十七张",
+      "synthesis_text": "六十七张。",
+      "path": "assets/bluff/audio/male/count_67.wav",
+      "sha256": "1cf234dc71d790a394b20dc0586fc1260ee746ed2d2707db242c443a975e22f3",
+      "bytes": 56316,
+      "duration_seconds": 1.172333
+    },
+    {
+      "profile": "male",
+      "key": "count_68",
+      "text": "六十八张",
+      "synthesis_text": "六十八张。",
+      "path": "assets/bluff/audio/male/count_68.wav",
+      "sha256": "a1e4d0c5e6b7f49a98ae8dc9213862c50a3310b6b5247ca501783e984c8b598e",
+      "bytes": 55238,
+      "duration_seconds": 1.149875
+    },
+    {
+      "profile": "male",
+      "key": "count_69",
+      "text": "六十九张",
+      "synthesis_text": "六十九张。",
+      "path": "assets/bluff/audio/male/count_69.wav",
+      "sha256": "4469be236ecfc7020f0e6e9d6e8a6866c2323fe6be87785fa357621c9e8b68a8",
+      "bytes": 56428,
+      "duration_seconds": 1.174667
+    },
+    {
+      "profile": "male",
+      "key": "count_70",
+      "text": "七十张",
+      "synthesis_text": "七十张。",
+      "path": "assets/bluff/audio/male/count_70.wav",
+      "sha256": "e4b4ad76528aeaaa85d87bd7a4a28b117fedf9ede37aa72befe43912b076088c",
+      "bytes": 45890,
+      "duration_seconds": 0.955125
+    },
+    {
+      "profile": "male",
+      "key": "count_71",
+      "text": "七十一张",
+      "synthesis_text": "七十一张。",
+      "path": "assets/bluff/audio/male/count_71.wav",
+      "sha256": "56b9e32f4cd52aaa37347622067b0a1b99711eb3ac5aa401d995da2c60849d0d",
+      "bytes": 56612,
+      "duration_seconds": 1.1785
+    },
+    {
+      "profile": "male",
+      "key": "count_72",
+      "text": "七十二张",
+      "synthesis_text": "七十二张。",
+      "path": "assets/bluff/audio/male/count_72.wav",
+      "sha256": "ceacaf57cff441873c1ea5e50e0ba7fbbfbdfafb2763eb9773571af1acacad71",
+      "bytes": 53472,
+      "duration_seconds": 1.113083
+    },
+    {
+      "profile": "male",
+      "key": "count_73",
+      "text": "七十三张",
+      "synthesis_text": "七十三张。",
+      "path": "assets/bluff/audio/male/count_73.wav",
+      "sha256": "9adef93fc05ef94d4b6e61722f112458c4f854f3bb20fb8cf42024ac318be303",
+      "bytes": 55504,
+      "duration_seconds": 1.155417
+    },
+    {
+      "profile": "male",
+      "key": "count_74",
+      "text": "七十四张",
+      "synthesis_text": "七十四张。",
+      "path": "assets/bluff/audio/male/count_74.wav",
+      "sha256": "e3b886dceb26099f7f1b07dd64c68f8f066c04b6e1b74d2bfb6c4ef8410788e6",
+      "bytes": 54536,
+      "duration_seconds": 1.13525
+    },
+    {
+      "profile": "male",
+      "key": "count_75",
+      "text": "七十五张",
+      "synthesis_text": "七十五张。",
+      "path": "assets/bluff/audio/male/count_75.wav",
+      "sha256": "cd04be61f34bb1301f3c786cf0463e007bda59a875a2ec622e6bca82755c752c",
+      "bytes": 54620,
+      "duration_seconds": 1.137
+    },
+    {
+      "profile": "male",
+      "key": "count_76",
+      "text": "七十六张",
+      "synthesis_text": "七十六张。",
+      "path": "assets/bluff/audio/male/count_76.wav",
+      "sha256": "5be3657666f7de290c55e38fc2fcdb14ef6805b6addb274596d83e1eb053c455",
+      "bytes": 55490,
+      "duration_seconds": 1.155125
+    },
+    {
+      "profile": "male",
+      "key": "count_77",
+      "text": "七十七张",
+      "synthesis_text": "七十七张。",
+      "path": "assets/bluff/audio/male/count_77.wav",
+      "sha256": "c11ab0934e3b745a181ed092a23667cf7281d3a3c62b7c864f95e1185e845e55",
+      "bytes": 57670,
+      "duration_seconds": 1.200542
+    },
+    {
+      "profile": "male",
+      "key": "count_78",
+      "text": "七十八张",
+      "synthesis_text": "七十八张。",
+      "path": "assets/bluff/audio/male/count_78.wav",
+      "sha256": "29d606811896efaeb8b6297458d00d9e0f9dc2ec67694ee9bdc827546c269463",
+      "bytes": 56692,
+      "duration_seconds": 1.180167
+    },
+    {
+      "profile": "male",
+      "key": "count_79",
+      "text": "七十九张",
+      "synthesis_text": "七十九张。",
+      "path": "assets/bluff/audio/male/count_79.wav",
+      "sha256": "4ce6325d5ee3a04c3faf410012c54fe5c7d1f033f9374a1c3e24eadf9a90cc02",
+      "bytes": 55476,
+      "duration_seconds": 1.154833
+    },
+    {
+      "profile": "male",
+      "key": "count_80",
+      "text": "八十张",
+      "synthesis_text": "八十张。",
+      "path": "assets/bluff/audio/male/count_80.wav",
+      "sha256": "5caf3888d2b2596730a69f8f244b3ebf365cb92e79251867eb13e40a2aae31ba",
+      "bytes": 47714,
+      "duration_seconds": 0.993125
+    },
+    {
+      "profile": "male",
+      "key": "count_81",
+      "text": "八十一张",
+      "synthesis_text": "八十一张。",
+      "path": "assets/bluff/audio/male/count_81.wav",
+      "sha256": "12567a02f5af95a78a87708885a6a247cf59288dd3858b505922019d3fdf9576",
+      "bytes": 53696,
+      "duration_seconds": 1.11775
+    },
+    {
+      "profile": "male",
+      "key": "count_82",
+      "text": "八十二张",
+      "synthesis_text": "八十二张。",
+      "path": "assets/bluff/audio/male/count_82.wav",
+      "sha256": "a65e5285543262b59843706a69dc001118a39243403a66fba8d582b94109f536",
+      "bytes": 53686,
+      "duration_seconds": 1.117542
+    },
+    {
+      "profile": "male",
+      "key": "count_83",
+      "text": "八十三张",
+      "synthesis_text": "八十三张。",
+      "path": "assets/bluff/audio/male/count_83.wav",
+      "sha256": "d24020593b977810f1a890b71dc9b9a1549ddbe5ef6fb1a8b6eef4135886e4ed",
+      "bytes": 52778,
+      "duration_seconds": 1.098625
+    },
+    {
+      "profile": "male",
+      "key": "count_84",
+      "text": "八十四张",
+      "synthesis_text": "八十四张。",
+      "path": "assets/bluff/audio/male/count_84.wav",
+      "sha256": "070896cb73513550c79aad12f583676a0ce7cfa51b0d8d1e31bbc2210613ee16",
+      "bytes": 52844,
+      "duration_seconds": 1.1
+    },
+    {
+      "profile": "male",
+      "key": "count_85",
+      "text": "八十五张",
+      "synthesis_text": "八十五张。",
+      "path": "assets/bluff/audio/male/count_85.wav",
+      "sha256": "e27230a409b11112d481843555c7917bdd1e11a7a17dfcb1ea26ddd92e4fc990",
+      "bytes": 52890,
+      "duration_seconds": 1.100958
+    },
+    {
+      "profile": "male",
+      "key": "count_86",
+      "text": "八十六张",
+      "synthesis_text": "八十六张。",
+      "path": "assets/bluff/audio/male/count_86.wav",
+      "sha256": "5a912113fb6e43cefe3a5214df9a8ebd8fd1a5cfff79a231139e88ef84e4f228",
+      "bytes": 54894,
+      "duration_seconds": 1.142708
+    },
+    {
+      "profile": "male",
+      "key": "count_87",
+      "text": "八十七张",
+      "synthesis_text": "八十七张。",
+      "path": "assets/bluff/audio/male/count_87.wav",
+      "sha256": "577e2357be2331cdb48b63d931cd196d05b25b6c1f4e1337fea247854dd8f3d1",
+      "bytes": 57020,
+      "duration_seconds": 1.187
+    },
+    {
+      "profile": "male",
+      "key": "count_88",
+      "text": "八十八张",
+      "synthesis_text": "八十八张。",
+      "path": "assets/bluff/audio/male/count_88.wav",
+      "sha256": "08c5ba12a9846ea89028e5b72540ec9f1714294d09c3fddcb4e1d80f881cd54a",
+      "bytes": 53822,
+      "duration_seconds": 1.120375
+    },
+    {
+      "profile": "male",
+      "key": "count_89",
+      "text": "八十九张",
+      "synthesis_text": "八十九张。",
+      "path": "assets/bluff/audio/male/count_89.wav",
+      "sha256": "690484164706dcd02cd7e01053dd61e8392e235d8d5f2086780dd0b2f00d6de1",
+      "bytes": 54084,
+      "duration_seconds": 1.125833
+    },
+    {
+      "profile": "male",
+      "key": "count_90",
+      "text": "九十张",
+      "synthesis_text": "九十张。",
+      "path": "assets/bluff/audio/male/count_90.wav",
+      "sha256": "cea41e6d0e614a8d7ac9eec6dbb9dfdd7a54c16782063ccf1c971c4b35286d0f",
+      "bytes": 44938,
+      "duration_seconds": 0.935292
+    },
+    {
+      "profile": "male",
+      "key": "count_91",
+      "text": "九十一张",
+      "synthesis_text": "九十一张。",
+      "path": "assets/bluff/audio/male/count_91.wav",
+      "sha256": "a64925aeeacc166b8999154e2da0bf163f9418f91571f68a1e313950e22b1e55",
+      "bytes": 55504,
+      "duration_seconds": 1.155417
+    },
+    {
+      "profile": "male",
+      "key": "count_92",
+      "text": "九十二张",
+      "synthesis_text": "九十二张。",
+      "path": "assets/bluff/audio/male/count_92.wav",
+      "sha256": "ee320f074e9f48b5347b81f667206155fa17da0589d698854edfccabf66f8e86",
+      "bytes": 54562,
+      "duration_seconds": 1.135792
+    },
+    {
+      "profile": "male",
+      "key": "count_93",
+      "text": "九十三张",
+      "synthesis_text": "九十三张。",
+      "path": "assets/bluff/audio/male/count_93.wav",
+      "sha256": "d6d0135fb89fec090b6419877f70281ba35613a895fd436d7d9909a4e88edcd3",
+      "bytes": 54550,
+      "duration_seconds": 1.135542
+    },
+    {
+      "profile": "male",
+      "key": "count_94",
+      "text": "九十四张",
+      "synthesis_text": "九十四张。",
+      "path": "assets/bluff/audio/male/count_94.wav",
+      "sha256": "a679653dfba3d82702c1e92813044afe8d8a8b400cb13e8f6bed97f06f716fbc",
+      "bytes": 55030,
+      "duration_seconds": 1.145542
+    },
+    {
+      "profile": "male",
+      "key": "count_95",
+      "text": "九十五张",
+      "synthesis_text": "九十五张。",
+      "path": "assets/bluff/audio/male/count_95.wav",
+      "sha256": "c5d77d22a6fce455f33085ada8ab877bedad55823cbfcc5b14f4c52412f1c0c5",
+      "bytes": 53474,
+      "duration_seconds": 1.113125
+    },
+    {
+      "profile": "male",
+      "key": "count_96",
+      "text": "九十六张",
+      "synthesis_text": "九十六张。",
+      "path": "assets/bluff/audio/male/count_96.wav",
+      "sha256": "f5b15a35eed8a05113ca1c8873db0fd316699a1f3cad4f7bf29f9ee2e6decd50",
+      "bytes": 54562,
+      "duration_seconds": 1.135792
+    },
+    {
+      "profile": "male",
+      "key": "count_97",
+      "text": "九十七张",
+      "synthesis_text": "九十七张。",
+      "path": "assets/bluff/audio/male/count_97.wav",
+      "sha256": "669246ed22c5f33dee8a2f87af9ab00d830bead64ee77729dd4795b84a67f1c7",
+      "bytes": 55490,
+      "duration_seconds": 1.155125
+    },
+    {
+      "profile": "male",
+      "key": "count_98",
+      "text": "九十八张",
+      "synthesis_text": "九十八张。",
+      "path": "assets/bluff/audio/male/count_98.wav",
+      "sha256": "b0c444ec3d1a00a65c79dfee96a860ab18384535ffbc7bb0cc3b4103b8b5e230",
+      "bytes": 54578,
+      "duration_seconds": 1.136125
+    },
+    {
+      "profile": "male",
+      "key": "count_99",
+      "text": "九十九张",
+      "synthesis_text": "九十九张。",
+      "path": "assets/bluff/audio/male/count_99.wav",
+      "sha256": "40fe7a1ea5abbfb11a52ed276898ed9c9c2f8e5a5a0a6868444028ad058a0057",
+      "bytes": 55740,
+      "duration_seconds": 1.160333
+    },
+    {
+      "profile": "male",
+      "key": "count_100",
+      "text": "一百张",
+      "synthesis_text": "一百张。",
+      "path": "assets/bluff/audio/male/count_100.wav",
+      "sha256": "ece3a4a5f4ce18582b65124d5d7725305a792e118b6610537af624f1896613da",
+      "bytes": 42022,
+      "duration_seconds": 0.874542
+    },
+    {
+      "profile": "male",
+      "key": "count_101",
+      "text": "一百零一张",
+      "synthesis_text": "一百零一张。",
+      "path": "assets/bluff/audio/male/count_101.wav",
+      "sha256": "6e81b96f21086c8d4cb4ab8ba92d6bda3dc685bd3b108002a288d1ff0be3379d",
+      "bytes": 62614,
+      "duration_seconds": 1.303542
+    },
+    {
+      "profile": "male",
+      "key": "count_102",
+      "text": "一百零二张",
+      "synthesis_text": "一百零二张。",
+      "path": "assets/bluff/audio/male/count_102.wav",
+      "sha256": "aa8d33e2c5235820ad1c900ea525203818c6e941b76882b8b754a604088b2954",
+      "bytes": 63464,
+      "duration_seconds": 1.32125
+    },
+    {
+      "profile": "male",
+      "key": "count_103",
+      "text": "一百零三张",
+      "synthesis_text": "一百零三张。",
+      "path": "assets/bluff/audio/male/count_103.wav",
+      "sha256": "40e371fe23bbe3f65f89b9eca98068b2783dea1a6688b8dcc6884e85f5801572",
+      "bytes": 64622,
+      "duration_seconds": 1.345375
+    },
+    {
+      "profile": "male",
+      "key": "count_104",
+      "text": "一百零四张",
+      "synthesis_text": "一百零四张。",
+      "path": "assets/bluff/audio/male/count_104.wav",
+      "sha256": "9b7072bd4b62851be9cd8554841c6ad9257659d9972164c7a6f23742aadbb4d8",
+      "bytes": 63492,
+      "duration_seconds": 1.321833
+    },
+    {
+      "profile": "male",
+      "key": "count_105",
+      "text": "一百零五张",
+      "synthesis_text": "一百零五张。",
+      "path": "assets/bluff/audio/male/count_105.wav",
+      "sha256": "353653eb5e1a52e9c69e3c87cd6a2afb651dd4c7e90343b9a137713a99d6ac3a",
+      "bytes": 62482,
+      "duration_seconds": 1.300792
+    },
+    {
+      "profile": "male",
+      "key": "count_106",
+      "text": "一百零六张",
+      "synthesis_text": "一百零六张。",
+      "path": "assets/bluff/audio/male/count_106.wav",
+      "sha256": "eeb1b2eb9ef4558d89f8a7af5b2a16c495c6b026974f08e2f1cf99696da4c4a2",
+      "bytes": 64626,
+      "duration_seconds": 1.345458
+    },
+    {
+      "profile": "male",
+      "key": "count_107",
+      "text": "一百零七张",
+      "synthesis_text": "一百零七张。",
+      "path": "assets/bluff/audio/male/count_107.wav",
+      "sha256": "6bbd1b25d99dcd398664aa100e392538eb7db369830f191e8131de6486428d30",
+      "bytes": 61574,
+      "duration_seconds": 1.281875
+    },
+    {
+      "profile": "male",
+      "key": "count_108",
+      "text": "一百零八张",
+      "synthesis_text": "一百零八张。",
+      "path": "assets/bluff/audio/male/count_108.wav",
+      "sha256": "1e82b05810882fd89dd021be5a81662f3438f20eea6d74ea03a9bdf9acf55b69",
+      "bytes": 63652,
+      "duration_seconds": 1.325167
+    },
+    {
+      "profile": "male",
+      "key": "rank_3",
+      "text": "三",
+      "synthesis_text": "三。",
+      "path": "assets/bluff/audio/male/rank_3.wav",
+      "sha256": "fad7607b1cf23e929166625433a59321fbf866357076205613ab8477d2243e16",
+      "bytes": 22844,
+      "duration_seconds": 0.475
+    },
+    {
+      "profile": "male",
+      "key": "rank_4",
+      "text": "四",
+      "synthesis_text": "四。",
+      "path": "assets/bluff/audio/male/rank_4.wav",
+      "sha256": "a7442a2273249cdc727ad217dd8f45f2db51ff5df5306d41d9d16b17e4b94435",
+      "bytes": 21028,
+      "duration_seconds": 0.437167
+    },
+    {
+      "profile": "male",
+      "key": "rank_5",
+      "text": "五",
+      "synthesis_text": "五。",
+      "path": "assets/bluff/audio/male/rank_5.wav",
+      "sha256": "f6766d485e3549e4bae7855c5b4d96424bc221418d8d986ed79ed892fa7e577f",
+      "bytes": 28362,
+      "duration_seconds": 0.589958
+    },
+    {
+      "profile": "male",
+      "key": "rank_6",
+      "text": "六",
+      "synthesis_text": "六。",
+      "path": "assets/bluff/audio/male/rank_6.wav",
+      "sha256": "1658feba3a9da9ccb1192d4dcc9b71aaa91fd0f756e2417ccf4dbe65dc35d9a4",
+      "bytes": 20144,
+      "duration_seconds": 0.41875
+    },
+    {
+      "profile": "male",
+      "key": "rank_7",
+      "text": "七",
+      "synthesis_text": "七。",
+      "path": "assets/bluff/audio/male/rank_7.wav",
+      "sha256": "471576ebf1742ff901c04f84b44d3b94e7eb0f62cd2ee922a3d2d31b1180fd9d",
+      "bytes": 22030,
+      "duration_seconds": 0.458042
+    },
+    {
+      "profile": "male",
+      "key": "rank_8",
+      "text": "八",
+      "synthesis_text": "八。",
+      "path": "assets/bluff/audio/male/rank_8.wav",
+      "sha256": "8baabfa53569e6bc7bcff2b00a0aa53e8e358a039edfb03b0e4b2766a607ae7f",
+      "bytes": 18726,
+      "duration_seconds": 0.389208
+    },
+    {
+      "profile": "male",
+      "key": "rank_9",
+      "text": "九",
+      "synthesis_text": "九。",
+      "path": "assets/bluff/audio/male/rank_9.wav",
+      "sha256": "f4bfa8c6ea215db78424c4d386333f76bae53bdd663305e1f44d3aa813bfef02",
+      "bytes": 21220,
+      "duration_seconds": 0.441167
+    },
+    {
+      "profile": "male",
+      "key": "rank_10",
+      "text": "十",
+      "synthesis_text": "十。",
+      "path": "assets/bluff/audio/male/rank_10.wav",
+      "sha256": "0feb8edfb660906772df101a62c2998bd81e1d928bf8b74707ab5bedd4a79301",
+      "bytes": 21910,
+      "duration_seconds": 0.455542
+    },
+    {
+      "profile": "male",
+      "key": "rank_11",
+      "text": "勾",
+      "synthesis_text": "勾。",
+      "path": "assets/bluff/audio/male/rank_11.wav",
+      "sha256": "0e441fb9b490fef3b3590c2725bfb2f28d9fb99ffc8139dfa5cdc59f6fae5b94",
+      "bytes": 27444,
+      "duration_seconds": 0.570833
+    },
+    {
+      "profile": "male",
+      "key": "rank_12",
+      "text": "圈",
+      "synthesis_text": "圈。",
+      "path": "assets/bluff/audio/male/rank_12.wav",
+      "sha256": "26df7ec6d44f7963176c6d5ee7dcfcae3f0907018d2c2d69478682961a323261",
+      "bytes": 29638,
+      "duration_seconds": 0.616542
+    },
+    {
+      "profile": "male",
+      "key": "rank_13",
+      "text": "凯",
+      "synthesis_text": "凯。",
+      "path": "assets/bluff/audio/male/rank_13.wav",
+      "sha256": "9f6bbf3d2a3cead607b4ccd3911c8494fc7f3b26b3ee4d9b735d59af9abfdb08",
+      "bytes": 22072,
+      "duration_seconds": 0.458917
+    },
+    {
+      "profile": "male",
+      "key": "rank_14",
+      "text": "尖",
+      "synthesis_text": "尖。",
+      "path": "assets/bluff/audio/male/rank_14.wav",
+      "sha256": "532ea4775604cecc9c801e894cdf2faab03bb40f6016d3cd6a49f252e26af903",
+      "bytes": 21446,
+      "duration_seconds": 0.445875
+    },
+    {
+      "profile": "male",
+      "key": "rank_15",
+      "text": "二",
+      "synthesis_text": "二。",
+      "path": "assets/bluff/audio/male/rank_15.wav",
+      "sha256": "55354da126fd9bab6cc470c58650b676ecfa8197fd23a94cc17aba5fcf82bcfe",
+      "bytes": 30272,
+      "duration_seconds": 0.62975
+    },
+    {
+      "profile": "male",
+      "key": "pass",
+      "text": "过",
+      "synthesis_text": "过。",
+      "path": "assets/bluff/audio/male/pass.wav",
+      "sha256": "a1ae0336a678b53dd968205481d4fea6b4e452a1e7c81b03b713a242f23b32ad",
+      "bytes": 21766,
+      "duration_seconds": 0.452542
+    },
+    {
+      "profile": "male",
+      "key": "challenge",
+      "text": "开",
+      "synthesis_text": "开！",
+      "path": "assets/bluff/audio/male/challenge.wav",
+      "sha256": "4656a1854dede444952252bcd9d0b882962da042d9a9b870af2342ee44ecc9a1",
+      "bytes": 19342,
+      "duration_seconds": 0.402042
+    },
+    {
+      "profile": "male",
+      "key": "truth",
+      "text": "全是真的",
+      "synthesis_text": "全是真的。",
+      "path": "assets/bluff/audio/male/truth.wav",
+      "sha256": "be92d284dcaf3be428be075607ecebccec2f7fd05a641e6f4566e766ecd00e80",
+      "bytes": 56594,
+      "duration_seconds": 1.178125
+    },
+    {
+      "profile": "male",
+      "key": "lie",
+      "text": "有假牌",
+      "synthesis_text": "有假牌。",
+      "path": "assets/bluff/audio/male/lie.wav",
+      "sha256": "e37f91b3b02e8d9f3475363563741900322e6184d08997bd12eb8b71cd59b75d",
+      "bytes": 43838,
+      "duration_seconds": 0.912375
+    },
+    {
+      "profile": "male",
+      "key": "dead",
+      "text": "全部过牌，移出牌堆",
+      "synthesis_text": "全部过牌，移出牌堆。",
+      "path": "assets/bluff/audio/male/dead.wav",
+      "sha256": "7185a9982d219ccc24d71b1c74cbf640cedceb301bf24e4537c7646aecef1ceb",
+      "bytes": 116192,
+      "duration_seconds": 2.41975
+    },
+    {
+      "profile": "male",
+      "key": "win",
+      "text": "本局结束",
+      "synthesis_text": "本局结束！",
+      "path": "assets/bluff/audio/male/win.wav",
+      "sha256": "3be9df77efcccd2a8ee0c7a6eb9832407aed6f70e1a7a353cff3d87f0cabc276",
+      "bytes": 59070,
+      "duration_seconds": 1.229708
+    },
+    {
+      "profile": "female",
+      "key": "count_1",
+      "text": "一张",
+      "synthesis_text": "一张。",
+      "path": "assets/bluff/audio/female/count_1.wav",
+      "sha256": "b8109e0f0a88bac30fea396c711d3c200c1778d7a5538d29f246e33d7084e27c",
+      "bytes": 29048,
+      "duration_seconds": 0.60425
+    },
+    {
+      "profile": "female",
+      "key": "count_2",
+      "text": "两张",
+      "synthesis_text": "两张。",
+      "path": "assets/bluff/audio/female/count_2.wav",
+      "sha256": "9f013cb71b1dc7c6feac27a0160e435f8503714e6d8e07389c1bd1046721ff1a",
+      "bytes": 30240,
+      "duration_seconds": 0.629083
+    },
+    {
+      "profile": "female",
+      "key": "count_3",
+      "text": "三张",
+      "synthesis_text": "三张。",
+      "path": "assets/bluff/audio/female/count_3.wav",
+      "sha256": "cd3e7724f2e794fa0853dafc4c23d559e202b2b9acf471f83c54722b563b41bc",
+      "bytes": 30286,
+      "duration_seconds": 0.630042
+    },
+    {
+      "profile": "female",
+      "key": "count_4",
+      "text": "四张",
+      "synthesis_text": "四张。",
+      "path": "assets/bluff/audio/female/count_4.wav",
+      "sha256": "e40b9021fa624e370bedc6570fcd69b0b5c947e711dc38ffba83d3220fc8f04a",
+      "bytes": 32266,
+      "duration_seconds": 0.671292
+    },
+    {
+      "profile": "female",
+      "key": "count_5",
+      "text": "五张",
+      "synthesis_text": "五张。",
+      "path": "assets/bluff/audio/female/count_5.wav",
+      "sha256": "73a3dade2a7e3bf3556232c717b5cbd86b80348548f705d7c153194ef3075375",
+      "bytes": 28816,
+      "duration_seconds": 0.599417
+    },
+    {
+      "profile": "female",
+      "key": "count_6",
+      "text": "六张",
+      "synthesis_text": "六张。",
+      "path": "assets/bluff/audio/female/count_6.wav",
+      "sha256": "23c81922b16f83665c72e389cb4248c05598bb032e7302faf84f3d073604c8e1",
+      "bytes": 28226,
+      "duration_seconds": 0.587125
+    },
+    {
+      "profile": "female",
+      "key": "count_7",
+      "text": "七张",
+      "synthesis_text": "七张。",
+      "path": "assets/bluff/audio/female/count_7.wav",
+      "sha256": "683619a098632254d664d00e52a414c173221e72dc975b8c8f32091616b67f55",
+      "bytes": 31238,
+      "duration_seconds": 0.649875
+    },
+    {
+      "profile": "female",
+      "key": "count_8",
+      "text": "八张",
+      "synthesis_text": "八张。",
+      "path": "assets/bluff/audio/female/count_8.wav",
+      "sha256": "7ea6fd7b0be2bfe4fe27b588bf56fae16b892a5176aa6e81e10dd2bc4f229fc3",
+      "bytes": 27650,
+      "duration_seconds": 0.575125
+    },
+    {
+      "profile": "female",
+      "key": "count_9",
+      "text": "九张",
+      "synthesis_text": "九张。",
+      "path": "assets/bluff/audio/female/count_9.wav",
+      "sha256": "d1978593d26c5332a9920807cca0e42c975b7b1724368f802823cf6e6e371193",
+      "bytes": 30100,
+      "duration_seconds": 0.626167
+    },
+    {
+      "profile": "female",
+      "key": "count_10",
+      "text": "十张",
+      "synthesis_text": "十张。",
+      "path": "assets/bluff/audio/female/count_10.wav",
+      "sha256": "30669ddd674074129f98d334c953e72bfe1249bec25cefde5525ec1cb72bbcd3",
+      "bytes": 30808,
+      "duration_seconds": 0.640917
+    },
+    {
+      "profile": "female",
+      "key": "count_11",
+      "text": "十一张",
+      "synthesis_text": "十一张。",
+      "path": "assets/bluff/audio/female/count_11.wav",
+      "sha256": "1feac71b8d7d47270d7e7c27076a3c9471a6cc4451d939829dcaa4a8437cf97e",
+      "bytes": 40052,
+      "duration_seconds": 0.8335
+    },
+    {
+      "profile": "female",
+      "key": "count_12",
+      "text": "十二张",
+      "synthesis_text": "十二张。",
+      "path": "assets/bluff/audio/female/count_12.wav",
+      "sha256": "e6c164a4f530f67ed0dc42f9911850ce939922d25492d3c52521d21305ac6903",
+      "bytes": 39816,
+      "duration_seconds": 0.828583
+    },
+    {
+      "profile": "female",
+      "key": "count_13",
+      "text": "十三张",
+      "synthesis_text": "十三张。",
+      "path": "assets/bluff/audio/female/count_13.wav",
+      "sha256": "a2c3e3d5292dbf3643d24d1a63277ef0ec35d0b3dba7537f82eca4579bd93efe",
+      "bytes": 42016,
+      "duration_seconds": 0.874417
+    },
+    {
+      "profile": "female",
+      "key": "count_14",
+      "text": "十四张",
+      "synthesis_text": "十四张。",
+      "path": "assets/bluff/audio/female/count_14.wav",
+      "sha256": "9a54c848bee8733b69fe6acc5c3c603d2b13978efed7673517dc5143a6e78896",
+      "bytes": 42694,
+      "duration_seconds": 0.888542
+    },
+    {
+      "profile": "female",
+      "key": "count_15",
+      "text": "十五张",
+      "synthesis_text": "十五张。",
+      "path": "assets/bluff/audio/female/count_15.wav",
+      "sha256": "65e6e521232a9564bc6d079f2e93d33683204780e0f04b7cb0d89d848cdd989b",
+      "bytes": 37978,
+      "duration_seconds": 0.790292
+    },
+    {
+      "profile": "female",
+      "key": "count_16",
+      "text": "十六张",
+      "synthesis_text": "十六张。",
+      "path": "assets/bluff/audio/female/count_16.wav",
+      "sha256": "6d8089dbca232ad5ea3dfdda84e6601e7fd3007b8e83b046c825e3fa52796a91",
+      "bytes": 40178,
+      "duration_seconds": 0.836125
+    },
+    {
+      "profile": "female",
+      "key": "count_17",
+      "text": "十七张",
+      "synthesis_text": "十七张。",
+      "path": "assets/bluff/audio/female/count_17.wav",
+      "sha256": "2dea5dcbc44843d65a230cef17c1f9441b9e1d472dbd6a80a527dada3e4c2701",
+      "bytes": 42782,
+      "duration_seconds": 0.890375
+    },
+    {
+      "profile": "female",
+      "key": "count_18",
+      "text": "十八张",
+      "synthesis_text": "十八张。",
+      "path": "assets/bluff/audio/female/count_18.wav",
+      "sha256": "3488da7e6f4fddd50d1c4b8a514cab36e9d47dde4978c9a8054ce5545e2e0807",
+      "bytes": 41640,
+      "duration_seconds": 0.866583
+    },
+    {
+      "profile": "female",
+      "key": "count_19",
+      "text": "十九张",
+      "synthesis_text": "十九张。",
+      "path": "assets/bluff/audio/female/count_19.wav",
+      "sha256": "5e59d4ba8f925af7148f8b8c331a48e062d8829a95bf2e680c1f35044b5d72ba",
+      "bytes": 41444,
+      "duration_seconds": 0.8625
+    },
+    {
+      "profile": "female",
+      "key": "count_20",
+      "text": "二十张",
+      "synthesis_text": "二十张。",
+      "path": "assets/bluff/audio/female/count_20.wav",
+      "sha256": "4f43ad77873f0390990b69bded79ba9a77d04eb6cc94bf3572436733b6026d8c",
+      "bytes": 40448,
+      "duration_seconds": 0.84175
+    },
+    {
+      "profile": "female",
+      "key": "count_21",
+      "text": "二十一张",
+      "synthesis_text": "二十一张。",
+      "path": "assets/bluff/audio/female/count_21.wav",
+      "sha256": "7ae0556126b377136cea6210df2478d90cec8246a57bd44e7d523aa1ea3d3ff2",
+      "bytes": 51226,
+      "duration_seconds": 1.066292
+    },
+    {
+      "profile": "female",
+      "key": "count_22",
+      "text": "二十二张",
+      "synthesis_text": "二十二张。",
+      "path": "assets/bluff/audio/female/count_22.wav",
+      "sha256": "b51c123122d1262d842cea9ca224a35c3cc76897b9d9f5f2222962fa012b05b5",
+      "bytes": 51558,
+      "duration_seconds": 1.073208
+    },
+    {
+      "profile": "female",
+      "key": "count_23",
+      "text": "二十三张",
+      "synthesis_text": "二十三张。",
+      "path": "assets/bluff/audio/female/count_23.wav",
+      "sha256": "e7774732f6d96c8438512e935fc000c7b2c4fd5c654943430e55bc49022f0a05",
+      "bytes": 53842,
+      "duration_seconds": 1.120792
+    },
+    {
+      "profile": "female",
+      "key": "count_24",
+      "text": "二十四张",
+      "synthesis_text": "二十四张。",
+      "path": "assets/bluff/audio/female/count_24.wav",
+      "sha256": "13463bd79ce6d01a94f22ed50ab7c3bd507704099bff39f56cd32b57ceb78f87",
+      "bytes": 54324,
+      "duration_seconds": 1.130833
+    },
+    {
+      "profile": "female",
+      "key": "count_25",
+      "text": "二十五张",
+      "synthesis_text": "二十五张。",
+      "path": "assets/bluff/audio/female/count_25.wav",
+      "sha256": "d8608823e631a83202027750ea907da140953137b64895384d5a186f10d01168",
+      "bytes": 51374,
+      "duration_seconds": 1.069375
+    },
+    {
+      "profile": "female",
+      "key": "count_26",
+      "text": "二十六张",
+      "synthesis_text": "二十六张。",
+      "path": "assets/bluff/audio/female/count_26.wav",
+      "sha256": "8b5071a771870df58d0d620d89ca3ea72e929d6306e57cc6896431c345a49eda",
+      "bytes": 52410,
+      "duration_seconds": 1.090958
+    },
+    {
+      "profile": "female",
+      "key": "count_27",
+      "text": "二十七张",
+      "synthesis_text": "二十七张。",
+      "path": "assets/bluff/audio/female/count_27.wav",
+      "sha256": "4b26f0b67a12355dc52f551a0ad4f10d321f942598703cb75a10e4d85ed09e3e",
+      "bytes": 53816,
+      "duration_seconds": 1.12025
+    },
+    {
+      "profile": "female",
+      "key": "count_28",
+      "text": "二十八张",
+      "synthesis_text": "二十八张。",
+      "path": "assets/bluff/audio/female/count_28.wav",
+      "sha256": "ba8591cc17910ab7faf5120bed058bb1a7ebd549738f1884324c38f6c02fd47b",
+      "bytes": 52674,
+      "duration_seconds": 1.096458
+    },
+    {
+      "profile": "female",
+      "key": "count_29",
+      "text": "二十九张",
+      "synthesis_text": "二十九张。",
+      "path": "assets/bluff/audio/female/count_29.wav",
+      "sha256": "ccfab8fb09d4e3220e19e601ddd6cb2b58b6b28a8adca6e77eb6963d5dba9542",
+      "bytes": 54886,
+      "duration_seconds": 1.142542
+    },
+    {
+      "profile": "female",
+      "key": "count_30",
+      "text": "三十张",
+      "synthesis_text": "三十张。",
+      "path": "assets/bluff/audio/female/count_30.wav",
+      "sha256": "5a743433648cc473db4dd29bceeb4764b577353872a81e7dd1024e58726b64d5",
+      "bytes": 43946,
+      "duration_seconds": 0.914625
+    },
+    {
+      "profile": "female",
+      "key": "count_31",
+      "text": "三十一张",
+      "synthesis_text": "三十一张。",
+      "path": "assets/bluff/audio/female/count_31.wav",
+      "sha256": "9714ab57630cf9b058f0856b0df5f29d5197f3ca352e4c17e2fcc42056fceb38",
+      "bytes": 56240,
+      "duration_seconds": 1.17075
+    },
+    {
+      "profile": "female",
+      "key": "count_32",
+      "text": "三十二张",
+      "synthesis_text": "三十二张。",
+      "path": "assets/bluff/audio/female/count_32.wav",
+      "sha256": "7890b4388d14bb02286821ccb42951a548bc3ff462e7e227667e038f53158728",
+      "bytes": 54750,
+      "duration_seconds": 1.139708
+    },
+    {
+      "profile": "female",
+      "key": "count_33",
+      "text": "三十三张",
+      "synthesis_text": "三十三张。",
+      "path": "assets/bluff/audio/female/count_33.wav",
+      "sha256": "c6a9abf870e331c0dbacd20e6bbe37d2b396a63dfe6065247b1740a190ad692a",
+      "bytes": 55772,
+      "duration_seconds": 1.161
+    },
+    {
+      "profile": "female",
+      "key": "count_34",
+      "text": "三十四张",
+      "synthesis_text": "三十四张。",
+      "path": "assets/bluff/audio/female/count_34.wav",
+      "sha256": "88109b5dab3b0d98b88c269b7c33a59d09b549fd7746874ceab26349bde24605",
+      "bytes": 55698,
+      "duration_seconds": 1.159458
+    },
+    {
+      "profile": "female",
+      "key": "count_35",
+      "text": "三十五张",
+      "synthesis_text": "三十五张。",
+      "path": "assets/bluff/audio/female/count_35.wav",
+      "sha256": "0a7ad57468ef6a83619d3d47d8a3afbcfd6600cff9b0f2da0f9a45e6353e1786",
+      "bytes": 54326,
+      "duration_seconds": 1.130875
+    },
+    {
+      "profile": "female",
+      "key": "count_36",
+      "text": "三十六张",
+      "synthesis_text": "三十六张。",
+      "path": "assets/bluff/audio/female/count_36.wav",
+      "sha256": "e469e3969f96f474a7d500ca6a2b09707dadaaac38f929096044e7c8101642d0",
+      "bytes": 55694,
+      "duration_seconds": 1.159375
+    },
+    {
+      "profile": "female",
+      "key": "count_37",
+      "text": "三十七张",
+      "synthesis_text": "三十七张。",
+      "path": "assets/bluff/audio/female/count_37.wav",
+      "sha256": "c0509e50688e4b1281914f006d53a22aeae47ea8f2f180e775a4416d5f0deae1",
+      "bytes": 55750,
+      "duration_seconds": 1.160542
+    },
+    {
+      "profile": "female",
+      "key": "count_38",
+      "text": "三十八张",
+      "synthesis_text": "三十八张。",
+      "path": "assets/bluff/audio/female/count_38.wav",
+      "sha256": "b908993e98d35fb3ae2d9e540e2be4a5782bc10a94ec67880a9bd55274b1d78f",
+      "bytes": 56368,
+      "duration_seconds": 1.173417
+    },
+    {
+      "profile": "female",
+      "key": "count_39",
+      "text": "三十九张",
+      "synthesis_text": "三十九张。",
+      "path": "assets/bluff/audio/female/count_39.wav",
+      "sha256": "c777e8791f32dc5b8019e31d63fd6b56ba825183ed21538f4f763ba5635b46c7",
+      "bytes": 56884,
+      "duration_seconds": 1.184167
+    },
+    {
+      "profile": "female",
+      "key": "count_40",
+      "text": "四十张",
+      "synthesis_text": "四十张。",
+      "path": "assets/bluff/audio/female/count_40.wav",
+      "sha256": "8c29193dbe1da0f60d4be4ee6fa01d81e31d0511e09d663bb2118587adb8929e",
+      "bytes": 42960,
+      "duration_seconds": 0.894083
+    },
+    {
+      "profile": "female",
+      "key": "count_41",
+      "text": "四十一张",
+      "synthesis_text": "四十一张。",
+      "path": "assets/bluff/audio/female/count_41.wav",
+      "sha256": "014c2e6b2b7aef2d75c09b11c5fc1d0bc2dc7a56431ae921c08dc2d905bd9b76",
+      "bytes": 54400,
+      "duration_seconds": 1.132417
+    },
+    {
+      "profile": "female",
+      "key": "count_42",
+      "text": "四十二张",
+      "synthesis_text": "四十二张。",
+      "path": "assets/bluff/audio/female/count_42.wav",
+      "sha256": "564fa55a8c017038cb045d8063b06b3f54ae001da9a203b6aceea8d0abefc943",
+      "bytes": 54550,
+      "duration_seconds": 1.135542
+    },
+    {
+      "profile": "female",
+      "key": "count_43",
+      "text": "四十三张",
+      "synthesis_text": "四十三张。",
+      "path": "assets/bluff/audio/female/count_43.wav",
+      "sha256": "cd49d0f020381bfcd3717aafe8175f98178681df412b9f7825d5d75f7b40b62f",
+      "bytes": 55498,
+      "duration_seconds": 1.155292
+    },
+    {
+      "profile": "female",
+      "key": "count_44",
+      "text": "四十四张",
+      "synthesis_text": "四十四张。",
+      "path": "assets/bluff/audio/female/count_44.wav",
+      "sha256": "493e2f09e85252ad6120e62117a39173f12a1bcde4f59a34c96d057b5a4b5038",
+      "bytes": 55516,
+      "duration_seconds": 1.155667
+    },
+    {
+      "profile": "female",
+      "key": "count_45",
+      "text": "四十五张",
+      "synthesis_text": "四十五张。",
+      "path": "assets/bluff/audio/female/count_45.wav",
+      "sha256": "3a25d638bd2208abd54587995d085fa5bc0d009fce027b9f27afdb4c4c82ae2c",
+      "bytes": 53090,
+      "duration_seconds": 1.105125
+    },
+    {
+      "profile": "female",
+      "key": "count_46",
+      "text": "四十六张",
+      "synthesis_text": "四十六张。",
+      "path": "assets/bluff/audio/female/count_46.wav",
+      "sha256": "777ad7ce1cf5c31fc4321d8962a0769e456680fd156156639a526445d1db9e8b",
+      "bytes": 56600,
+      "duration_seconds": 1.17825
+    },
+    {
+      "profile": "female",
+      "key": "count_47",
+      "text": "四十七张",
+      "synthesis_text": "四十七张。",
+      "path": "assets/bluff/audio/female/count_47.wav",
+      "sha256": "02c039a982e5ec26cf4cbbf92896c14ff2f735a33ea334c4005a5c9c3620ed15",
+      "bytes": 54794,
+      "duration_seconds": 1.140625
+    },
+    {
+      "profile": "female",
+      "key": "count_48",
+      "text": "四十八张",
+      "synthesis_text": "四十八张。",
+      "path": "assets/bluff/audio/female/count_48.wav",
+      "sha256": "327abc3e58349ca44b425f662509c0d3cdd17e4db2fe5d87ec8b7013d5e80e40",
+      "bytes": 54716,
+      "duration_seconds": 1.139
+    },
+    {
+      "profile": "female",
+      "key": "count_49",
+      "text": "四十九张",
+      "synthesis_text": "四十九张。",
+      "path": "assets/bluff/audio/female/count_49.wav",
+      "sha256": "f023ab0650b98c6775ce201704fb759712d62a23fadfbe5f727d551c9f454551",
+      "bytes": 56058,
+      "duration_seconds": 1.166958
+    },
+    {
+      "profile": "female",
+      "key": "count_50",
+      "text": "五十张",
+      "synthesis_text": "五十张。",
+      "path": "assets/bluff/audio/female/count_50.wav",
+      "sha256": "b24bf7180a9348d0acc247188f49f0ef5fe0935ffd8876a280ef5f0702a0a651",
+      "bytes": 38626,
+      "duration_seconds": 0.803792
+    },
+    {
+      "profile": "female",
+      "key": "count_51",
+      "text": "五十一张",
+      "synthesis_text": "五十一张。",
+      "path": "assets/bluff/audio/female/count_51.wav",
+      "sha256": "a5eb7faccec2a8c55ba6026e389ef7c3f6270975f05fad1b14f350095252298b",
+      "bytes": 51544,
+      "duration_seconds": 1.072917
+    },
+    {
+      "profile": "female",
+      "key": "count_52",
+      "text": "五十二张",
+      "synthesis_text": "五十二张。",
+      "path": "assets/bluff/audio/female/count_52.wav",
+      "sha256": "728f3e0d2bf875619adac6699047d28a576ec201eb49110cab59e3f66deea76d",
+      "bytes": 51414,
+      "duration_seconds": 1.070208
+    },
+    {
+      "profile": "female",
+      "key": "count_53",
+      "text": "五十三张",
+      "synthesis_text": "五十三张。",
+      "path": "assets/bluff/audio/female/count_53.wav",
+      "sha256": "92cea4d9df118341670a3f6a3c9bc8862109a6c1172ad445b7b2df6f01dc77e9",
+      "bytes": 53002,
+      "duration_seconds": 1.103292
+    },
+    {
+      "profile": "female",
+      "key": "count_54",
+      "text": "五十四张",
+      "synthesis_text": "五十四张。",
+      "path": "assets/bluff/audio/female/count_54.wav",
+      "sha256": "92822688c70b86ad63f27cb1faccdf9f812b317bb674cf6995ae1c2b662e1716",
+      "bytes": 53714,
+      "duration_seconds": 1.118125
+    },
+    {
+      "profile": "female",
+      "key": "count_55",
+      "text": "五十五张",
+      "synthesis_text": "五十五张。",
+      "path": "assets/bluff/audio/female/count_55.wav",
+      "sha256": "8acf89352214c12b64b826d20f6bf7da871e86cdabb90636087b63f9940f35f1",
+      "bytes": 51540,
+      "duration_seconds": 1.072833
+    },
+    {
+      "profile": "female",
+      "key": "count_56",
+      "text": "五十六张",
+      "synthesis_text": "五十六张。",
+      "path": "assets/bluff/audio/female/count_56.wav",
+      "sha256": "85d277cc8fc41c7b10b4e57b8f15d5998316d1234aa222c7504908e45d54bde0",
+      "bytes": 52502,
+      "duration_seconds": 1.092875
+    },
+    {
+      "profile": "female",
+      "key": "count_57",
+      "text": "五十七张",
+      "synthesis_text": "五十七张。",
+      "path": "assets/bluff/audio/female/count_57.wav",
+      "sha256": "4a46a7ea6cac5131117b104d21700223080159a9638cdd20514ab3d715c458d8",
+      "bytes": 53580,
+      "duration_seconds": 1.115333
+    },
+    {
+      "profile": "female",
+      "key": "count_58",
+      "text": "五十八张",
+      "synthesis_text": "五十八张。",
+      "path": "assets/bluff/audio/female/count_58.wav",
+      "sha256": "a27c7d7bc24b143debf5a097abc40dd71a375774a84f2d4dbef199e2afd496ca",
+      "bytes": 51856,
+      "duration_seconds": 1.079417
+    },
+    {
+      "profile": "female",
+      "key": "count_59",
+      "text": "五十九张",
+      "synthesis_text": "五十九张。",
+      "path": "assets/bluff/audio/female/count_59.wav",
+      "sha256": "322d5a71f9ad3f2a4692d9bbbb4e638364c58a7ae0ef695b832b0193d5227fe2",
+      "bytes": 54270,
+      "duration_seconds": 1.129708
+    },
+    {
+      "profile": "female",
+      "key": "count_60",
+      "text": "六十张",
+      "synthesis_text": "六十张。",
+      "path": "assets/bluff/audio/female/count_60.wav",
+      "sha256": "9d5d2581083d06f354a0c9eba765ba9f75d0460baa97b0c245df1e877c12575b",
+      "bytes": 40828,
+      "duration_seconds": 0.849667
+    },
+    {
+      "profile": "female",
+      "key": "count_61",
+      "text": "六十一张",
+      "synthesis_text": "六十一张。",
+      "path": "assets/bluff/audio/female/count_61.wav",
+      "sha256": "d5a2f3221682281390d51ecbfee0d71f57d3c3765a1a46282f3b9be053b86546",
+      "bytes": 51798,
+      "duration_seconds": 1.078208
+    },
+    {
+      "profile": "female",
+      "key": "count_62",
+      "text": "六十二张",
+      "synthesis_text": "六十二张。",
+      "path": "assets/bluff/audio/female/count_62.wav",
+      "sha256": "a6b00018bf01996be0058ceb3216d285a31e8b10d56d4c79a74ce8fcdd37b3c5",
+      "bytes": 53018,
+      "duration_seconds": 1.103625
+    },
+    {
+      "profile": "female",
+      "key": "count_63",
+      "text": "六十三张",
+      "synthesis_text": "六十三张。",
+      "path": "assets/bluff/audio/female/count_63.wav",
+      "sha256": "24bb5ec9984825214a40eaf96b8a7b6385d864f541bd0eed41c1b958d44f674c",
+      "bytes": 55060,
+      "duration_seconds": 1.146167
+    },
+    {
+      "profile": "female",
+      "key": "count_64",
+      "text": "六十四张",
+      "synthesis_text": "六十四张。",
+      "path": "assets/bluff/audio/female/count_64.wav",
+      "sha256": "6c2116fc19c22ccbcc80451e6440695cddc48229ceb2763e2c2716489352a9e5",
+      "bytes": 53018,
+      "duration_seconds": 1.103625
+    },
+    {
+      "profile": "female",
+      "key": "count_65",
+      "text": "六十五张",
+      "synthesis_text": "六十五张。",
+      "path": "assets/bluff/audio/female/count_65.wav",
+      "sha256": "eeb835d7e773a078de188108378e0cdbd3c23a5a435ea4fccebf686dedea78c1",
+      "bytes": 51470,
+      "duration_seconds": 1.071375
+    },
+    {
+      "profile": "female",
+      "key": "count_66",
+      "text": "六十六张",
+      "synthesis_text": "六十六张。",
+      "path": "assets/bluff/audio/female/count_66.wav",
+      "sha256": "dbcbcc96e2b615b595fcf19a87b7c54443e8e7f15b5c5b0edefc045fdc62fd6f",
+      "bytes": 53894,
+      "duration_seconds": 1.121875
+    },
+    {
+      "profile": "female",
+      "key": "count_67",
+      "text": "六十七张",
+      "synthesis_text": "六十七张。",
+      "path": "assets/bluff/audio/female/count_67.wav",
+      "sha256": "8759521c32702434e6042381b9869aff1a5f13c3e676cd7569db0dc4a8b8df1b",
+      "bytes": 53338,
+      "duration_seconds": 1.110292
+    },
+    {
+      "profile": "female",
+      "key": "count_68",
+      "text": "六十八张",
+      "synthesis_text": "六十八张。",
+      "path": "assets/bluff/audio/female/count_68.wav",
+      "sha256": "75a6ed504884c459496070c402eb60def72f11aec08c5047e747348bcfe23ab3",
+      "bytes": 54290,
+      "duration_seconds": 1.130125
+    },
+    {
+      "profile": "female",
+      "key": "count_69",
+      "text": "六十九张",
+      "synthesis_text": "六十九张。",
+      "path": "assets/bluff/audio/female/count_69.wav",
+      "sha256": "a8612b53cfd08c9b5251aab8a02f151efa82ad86101908dbb4d223630740e4bd",
+      "bytes": 54780,
+      "duration_seconds": 1.140333
+    },
+    {
+      "profile": "female",
+      "key": "count_70",
+      "text": "七十张",
+      "synthesis_text": "七十张。",
+      "path": "assets/bluff/audio/female/count_70.wav",
+      "sha256": "96f8b5066c94f9587bb65a488e61bd9f99cbfdf50c404eb3d0eace80da380225",
+      "bytes": 41700,
+      "duration_seconds": 0.867833
+    },
+    {
+      "profile": "female",
+      "key": "count_71",
+      "text": "七十一张",
+      "synthesis_text": "七十一张。",
+      "path": "assets/bluff/audio/female/count_71.wav",
+      "sha256": "e423c00e005fc8b06588a9ba259ff11ed55b6fca1780a64bd77285c88565e264",
+      "bytes": 54134,
+      "duration_seconds": 1.126875
+    },
+    {
+      "profile": "female",
+      "key": "count_72",
+      "text": "七十二张",
+      "synthesis_text": "七十二张。",
+      "path": "assets/bluff/audio/female/count_72.wav",
+      "sha256": "d1503551b3f51251a816f8e86077cd7d741d512640ca4ccc0b49486e140756ef",
+      "bytes": 53946,
+      "duration_seconds": 1.122958
+    },
+    {
+      "profile": "female",
+      "key": "count_73",
+      "text": "七十三张",
+      "synthesis_text": "七十三张。",
+      "path": "assets/bluff/audio/female/count_73.wav",
+      "sha256": "2340a1fd9548c2faa3ec77c0d73a88d33f8b7883fc3fa603ddcea03b6f16a6a6",
+      "bytes": 53584,
+      "duration_seconds": 1.115417
+    },
+    {
+      "profile": "female",
+      "key": "count_74",
+      "text": "七十四张",
+      "synthesis_text": "七十四张。",
+      "path": "assets/bluff/audio/female/count_74.wav",
+      "sha256": "35cd425e1229bd34d588ade2d72c3d9d57bd63f442aa1dd236d68da07efc4b95",
+      "bytes": 52424,
+      "duration_seconds": 1.09125
+    },
+    {
+      "profile": "female",
+      "key": "count_75",
+      "text": "七十五张",
+      "synthesis_text": "七十五张。",
+      "path": "assets/bluff/audio/female/count_75.wav",
+      "sha256": "8eec7e270b7f73f173c89a7fd5477c0edb796aedf752b10d686eadc2dce4a4c4",
+      "bytes": 53092,
+      "duration_seconds": 1.105167
+    },
+    {
+      "profile": "female",
+      "key": "count_76",
+      "text": "七十六张",
+      "synthesis_text": "七十六张。",
+      "path": "assets/bluff/audio/female/count_76.wav",
+      "sha256": "dbbc1e34df22e390a47d30c6d0dee2bbaf89a8a4183df7a19ef06fc9d68a0169",
+      "bytes": 54978,
+      "duration_seconds": 1.144458
+    },
+    {
+      "profile": "female",
+      "key": "count_77",
+      "text": "七十七张",
+      "synthesis_text": "七十七张。",
+      "path": "assets/bluff/audio/female/count_77.wav",
+      "sha256": "e040f6315725dcdede124c5a95d82b9bbf935827c7493a1406a1af9dbb766aa2",
+      "bytes": 53110,
+      "duration_seconds": 1.105542
+    },
+    {
+      "profile": "female",
+      "key": "count_78",
+      "text": "七十八张",
+      "synthesis_text": "七十八张。",
+      "path": "assets/bluff/audio/female/count_78.wav",
+      "sha256": "2a181366ecb81bca03240bf7a4a7d8b712ea1c60d4698a72ebcbbde1d618fbc6",
+      "bytes": 56754,
+      "duration_seconds": 1.181458
+    },
+    {
+      "profile": "female",
+      "key": "count_79",
+      "text": "七十九张",
+      "synthesis_text": "七十九张。",
+      "path": "assets/bluff/audio/female/count_79.wav",
+      "sha256": "78780848f1df3487e0ccccddc74bfb2b21643870045c28a52cad7cac0d58e2b5",
+      "bytes": 53978,
+      "duration_seconds": 1.123625
+    },
+    {
+      "profile": "female",
+      "key": "count_80",
+      "text": "八十张",
+      "synthesis_text": "八十张。",
+      "path": "assets/bluff/audio/female/count_80.wav",
+      "sha256": "068c1b5bce0c99bf3b5693fd8d1fa6e2400f57041535dace87bda2a5ab7c70e7",
+      "bytes": 39954,
+      "duration_seconds": 0.831458
+    },
+    {
+      "profile": "female",
+      "key": "count_81",
+      "text": "八十一张",
+      "synthesis_text": "八十一张。",
+      "path": "assets/bluff/audio/female/count_81.wav",
+      "sha256": "f55f59227e629e624e24c4ec8a86f6e17e00c426d201df521227e5e2bb3287f1",
+      "bytes": 52392,
+      "duration_seconds": 1.090583
+    },
+    {
+      "profile": "female",
+      "key": "count_82",
+      "text": "八十二张",
+      "synthesis_text": "八十二张。",
+      "path": "assets/bluff/audio/female/count_82.wav",
+      "sha256": "fb2a470ef27690c4fae31b530b2faa7232d415b6a9b0c73ebf0dd00801047ebd",
+      "bytes": 51430,
+      "duration_seconds": 1.070542
+    },
+    {
+      "profile": "female",
+      "key": "count_83",
+      "text": "八十三张",
+      "synthesis_text": "八十三张。",
+      "path": "assets/bluff/audio/female/count_83.wav",
+      "sha256": "b00190d2fb91da956ed04f4cf53a142a6c934efb221155f5b02c455d11cc8e72",
+      "bytes": 53060,
+      "duration_seconds": 1.1045
+    },
+    {
+      "profile": "female",
+      "key": "count_84",
+      "text": "八十四张",
+      "synthesis_text": "八十四张。",
+      "path": "assets/bluff/audio/female/count_84.wav",
+      "sha256": "fd6ac76fb55dfc6b2006c5e0e116ae5896f495b794a24510ba10b0e1fe945a90",
+      "bytes": 53388,
+      "duration_seconds": 1.111333
+    },
+    {
+      "profile": "female",
+      "key": "count_85",
+      "text": "八十五张",
+      "synthesis_text": "八十五张。",
+      "path": "assets/bluff/audio/female/count_85.wav",
+      "sha256": "75473db03425bffabb20b071ce4ea44dc19c63693e748ddb60747305eb133026",
+      "bytes": 50634,
+      "duration_seconds": 1.053958
+    },
+    {
+      "profile": "female",
+      "key": "count_86",
+      "text": "八十六张",
+      "synthesis_text": "八十六张。",
+      "path": "assets/bluff/audio/female/count_86.wav",
+      "sha256": "0b9c691fa2261955dc744985b4fa997726844668dfa998018e5b2cc9a8d0ee77",
+      "bytes": 52848,
+      "duration_seconds": 1.100083
+    },
+    {
+      "profile": "female",
+      "key": "count_87",
+      "text": "八十七张",
+      "synthesis_text": "八十七张。",
+      "path": "assets/bluff/audio/female/count_87.wav",
+      "sha256": "a78a902eb213570109151615b82c65de110bb53a46f313f50afc5441b72c9c8d",
+      "bytes": 54186,
+      "duration_seconds": 1.127958
+    },
+    {
+      "profile": "female",
+      "key": "count_88",
+      "text": "八十八张",
+      "synthesis_text": "八十八张。",
+      "path": "assets/bluff/audio/female/count_88.wav",
+      "sha256": "479d9df7ab4b2b6d222f91cda64f9f2ff006935da6fc1dec5778e0966f471216",
+      "bytes": 53406,
+      "duration_seconds": 1.111708
+    },
+    {
+      "profile": "female",
+      "key": "count_89",
+      "text": "八十九张",
+      "synthesis_text": "八十九张。",
+      "path": "assets/bluff/audio/female/count_89.wav",
+      "sha256": "62901c18df0dd00532d588948807d356f8ab7085b0fd31e2eec9f7a6d57aa351",
+      "bytes": 54100,
+      "duration_seconds": 1.126167
+    },
+    {
+      "profile": "female",
+      "key": "count_90",
+      "text": "九十张",
+      "synthesis_text": "九十张。",
+      "path": "assets/bluff/audio/female/count_90.wav",
+      "sha256": "bf5e8635c3ad7beb35a33feb4beb3cb94c80f5a8399dc71eec784c629849dc89",
+      "bytes": 42460,
+      "duration_seconds": 0.883667
+    },
+    {
+      "profile": "female",
+      "key": "count_91",
+      "text": "九十一张",
+      "synthesis_text": "九十一张。",
+      "path": "assets/bluff/audio/female/count_91.wav",
+      "sha256": "c116e9619ebf82ccd0f3c57fd5e4202b90c9cdbadb5603191a4c8588aa6f2420",
+      "bytes": 53550,
+      "duration_seconds": 1.114708
+    },
+    {
+      "profile": "female",
+      "key": "count_92",
+      "text": "九十二张",
+      "synthesis_text": "九十二张。",
+      "path": "assets/bluff/audio/female/count_92.wav",
+      "sha256": "6846023b5f544178af0651f95a35e61862344e98c36463b888300fe3ea719864",
+      "bytes": 53640,
+      "duration_seconds": 1.116583
+    },
+    {
+      "profile": "female",
+      "key": "count_93",
+      "text": "九十三张",
+      "synthesis_text": "九十三张。",
+      "path": "assets/bluff/audio/female/count_93.wav",
+      "sha256": "c42b10e041575fbfcc263cafa88cfb1e08ec460da3826c0868b4d1277baf9d30",
+      "bytes": 54794,
+      "duration_seconds": 1.140625
+    },
+    {
+      "profile": "female",
+      "key": "count_94",
+      "text": "九十四张",
+      "synthesis_text": "九十四张。",
+      "path": "assets/bluff/audio/female/count_94.wav",
+      "sha256": "881dc988165510bcb0ec95da234474857c8f70a6302b651d5fac2195ae01d501",
+      "bytes": 53622,
+      "duration_seconds": 1.116208
+    },
+    {
+      "profile": "female",
+      "key": "count_95",
+      "text": "九十五张",
+      "synthesis_text": "九十五张。",
+      "path": "assets/bluff/audio/female/count_95.wav",
+      "sha256": "acd12bf9fa337f8d96d0267a2791b5f61e55296d95cd8e1d6b2591efa791df22",
+      "bytes": 52534,
+      "duration_seconds": 1.093542
+    },
+    {
+      "profile": "female",
+      "key": "count_96",
+      "text": "九十六张",
+      "synthesis_text": "九十六张。",
+      "path": "assets/bluff/audio/female/count_96.wav",
+      "sha256": "67ef54588687a6359ec6aec24acaad00064b6e34c0236ce01f089cf2291031a0",
+      "bytes": 53598,
+      "duration_seconds": 1.115708
+    },
+    {
+      "profile": "female",
+      "key": "count_97",
+      "text": "九十七张",
+      "synthesis_text": "九十七张。",
+      "path": "assets/bluff/audio/female/count_97.wav",
+      "sha256": "0ab84d488561f6ef84eff497046cc8fc4deaed86dcf63946581ba6665b81f75d",
+      "bytes": 55078,
+      "duration_seconds": 1.146542
+    },
+    {
+      "profile": "female",
+      "key": "count_98",
+      "text": "九十八张",
+      "synthesis_text": "九十八张。",
+      "path": "assets/bluff/audio/female/count_98.wav",
+      "sha256": "11565c67b8bf5672adf033499ea3323659a39f9e2b90930bd08cee7dd94b2ad9",
+      "bytes": 54808,
+      "duration_seconds": 1.140917
+    },
+    {
+      "profile": "female",
+      "key": "count_99",
+      "text": "九十九张",
+      "synthesis_text": "九十九张。",
+      "path": "assets/bluff/audio/female/count_99.wav",
+      "sha256": "5cbf34f5132f440ce30ecd82190143bb0da8acdeb68b952b24429c18aa9aead1",
+      "bytes": 56078,
+      "duration_seconds": 1.167375
+    },
+    {
+      "profile": "female",
+      "key": "count_100",
+      "text": "一百张",
+      "synthesis_text": "一百张。",
+      "path": "assets/bluff/audio/female/count_100.wav",
+      "sha256": "94398fddfa52d48e3948eecd9af7f26b259c4290d075c989f64cee7cc842be6b",
+      "bytes": 39232,
+      "duration_seconds": 0.816417
+    },
+    {
+      "profile": "female",
+      "key": "count_101",
+      "text": "一百零一张",
+      "synthesis_text": "一百零一张。",
+      "path": "assets/bluff/audio/female/count_101.wav",
+      "sha256": "a56a26e1ef30a78677a10e2362b09772fd470046b1b77ecca59384e36aa5c3d1",
+      "bytes": 58734,
+      "duration_seconds": 1.222708
+    },
+    {
+      "profile": "female",
+      "key": "count_102",
+      "text": "一百零二张",
+      "synthesis_text": "一百零二张。",
+      "path": "assets/bluff/audio/female/count_102.wav",
+      "sha256": "313bb7a323e1ea6793c9fe22ccd465a5590e954ec998aaaf5981cfd40f8f4325",
+      "bytes": 58104,
+      "duration_seconds": 1.209583
+    },
+    {
+      "profile": "female",
+      "key": "count_103",
+      "text": "一百零三张",
+      "synthesis_text": "一百零三张。",
+      "path": "assets/bluff/audio/female/count_103.wav",
+      "sha256": "fa3f24774ae5be7e2ebf25f10633847e85efaa8fb5f4f7fc085ef0bb51ca9a01",
+      "bytes": 60676,
+      "duration_seconds": 1.263167
+    },
+    {
+      "profile": "female",
+      "key": "count_104",
+      "text": "一百零四张",
+      "synthesis_text": "一百零四张。",
+      "path": "assets/bluff/audio/female/count_104.wav",
+      "sha256": "069ebf59b8761b47822b94051ca810c04470006522d7a49ae76baae45a0909dd",
+      "bytes": 59538,
+      "duration_seconds": 1.239458
+    },
+    {
+      "profile": "female",
+      "key": "count_105",
+      "text": "一百零五张",
+      "synthesis_text": "一百零五张。",
+      "path": "assets/bluff/audio/female/count_105.wav",
+      "sha256": "1ccf811c5469de535da823fdd2ef8cf6af96cbb9d833a058d05f74efa5a34a05",
+      "bytes": 59316,
+      "duration_seconds": 1.234833
+    },
+    {
+      "profile": "female",
+      "key": "count_106",
+      "text": "一百零六张",
+      "synthesis_text": "一百零六张。",
+      "path": "assets/bluff/audio/female/count_106.wav",
+      "sha256": "c2b54a622aaf3e8faf63b5d74cd550a745b714de18f7b04b52a3a40a6adb461e",
+      "bytes": 59926,
+      "duration_seconds": 1.247542
+    },
+    {
+      "profile": "female",
+      "key": "count_107",
+      "text": "一百零七张",
+      "synthesis_text": "一百零七张。",
+      "path": "assets/bluff/audio/female/count_107.wav",
+      "sha256": "34a669376f9099e7245864fc6057ac4845953eeb4d0e627d7810311b5b550333",
+      "bytes": 60500,
+      "duration_seconds": 1.2595
+    },
+    {
+      "profile": "female",
+      "key": "count_108",
+      "text": "一百零八张",
+      "synthesis_text": "一百零八张。",
+      "path": "assets/bluff/audio/female/count_108.wav",
+      "sha256": "2e5156cc64c55a2faad8d0f6fbe1cc7ba128a8f8521d09ccbabad22609bb887f",
+      "bytes": 60564,
+      "duration_seconds": 1.260833
+    },
+    {
+      "profile": "female",
+      "key": "rank_3",
+      "text": "三",
+      "synthesis_text": "三。",
+      "path": "assets/bluff/audio/female/rank_3.wav",
+      "sha256": "b4c602693c1e897678db682ba5588052d5dd4cc65c7fdce25f8cde65a7178fe6",
+      "bytes": 21902,
+      "duration_seconds": 0.455375
+    },
+    {
+      "profile": "female",
+      "key": "rank_4",
+      "text": "四",
+      "synthesis_text": "四。",
+      "path": "assets/bluff/audio/female/rank_4.wav",
+      "sha256": "34c14ce95e53de62d0a6e4453547cd5f8e045cf1c8e6fce5c64e364186dbf28a",
+      "bytes": 23998,
+      "duration_seconds": 0.499042
+    },
+    {
+      "profile": "female",
+      "key": "rank_5",
+      "text": "五",
+      "synthesis_text": "五。",
+      "path": "assets/bluff/audio/female/rank_5.wav",
+      "sha256": "1fd702183bf1247c7e4960e3aad7b9ddcf7f683af480746688a30d7f91e98b2b",
+      "bytes": 29444,
+      "duration_seconds": 0.6125
+    },
+    {
+      "profile": "female",
+      "key": "rank_6",
+      "text": "六",
+      "synthesis_text": "六。",
+      "path": "assets/bluff/audio/female/rank_6.wav",
+      "sha256": "e04feea11cb77353d5413073d445e10fea105a51259ee27af241fa92e3f2a995",
+      "bytes": 21412,
+      "duration_seconds": 0.445167
+    },
+    {
+      "profile": "female",
+      "key": "rank_7",
+      "text": "七",
+      "synthesis_text": "七。",
+      "path": "assets/bluff/audio/female/rank_7.wav",
+      "sha256": "4498324904c1684dcb0c728b8750366e9dd832baa344bf9b0a8a26e755b5e17f",
+      "bytes": 22072,
+      "duration_seconds": 0.458917
+    },
+    {
+      "profile": "female",
+      "key": "rank_8",
+      "text": "八",
+      "synthesis_text": "八。",
+      "path": "assets/bluff/audio/female/rank_8.wav",
+      "sha256": "1fba7b0709ba65d6d63a5ac528396da44c2a86790d3331e62da3a12bac9afb84",
+      "bytes": 22014,
+      "duration_seconds": 0.457708
+    },
+    {
+      "profile": "female",
+      "key": "rank_9",
+      "text": "九",
+      "synthesis_text": "九。",
+      "path": "assets/bluff/audio/female/rank_9.wav",
+      "sha256": "5df54901ef3e39765e9bf9aa44186a1e025627f5d2c482b2734cb57a68df9c1f",
+      "bytes": 21574,
+      "duration_seconds": 0.448542
+    },
+    {
+      "profile": "female",
+      "key": "rank_10",
+      "text": "十",
+      "synthesis_text": "十。",
+      "path": "assets/bluff/audio/female/rank_10.wav",
+      "sha256": "f56e891856b39e39748ad5b42322af037e29b843e54948277772418a91383999",
+      "bytes": 29730,
+      "duration_seconds": 0.618458
+    },
+    {
+      "profile": "female",
+      "key": "rank_11",
+      "text": "勾",
+      "synthesis_text": "勾。",
+      "path": "assets/bluff/audio/female/rank_11.wav",
+      "sha256": "f9264fedc201c532efc3988f737fd97566cf8d01957741ce3c17bd1daf5ab0f8",
+      "bytes": 22018,
+      "duration_seconds": 0.457792
+    },
+    {
+      "profile": "female",
+      "key": "rank_12",
+      "text": "圈",
+      "synthesis_text": "圈。",
+      "path": "assets/bluff/audio/female/rank_12.wav",
+      "sha256": "9d33910c27272ebe928b85940ed0b83159373ccdb83ed3c0f0e4a659c7d67579",
+      "bytes": 23442,
+      "duration_seconds": 0.487458
+    },
+    {
+      "profile": "female",
+      "key": "rank_13",
+      "text": "凯",
+      "synthesis_text": "凯。",
+      "path": "assets/bluff/audio/female/rank_13.wav",
+      "sha256": "ea1e40e1c7e6a1cae37619e5b3d39f55b1d3e2880cc0c4565ae67a0581d3edd5",
+      "bytes": 32284,
+      "duration_seconds": 0.671667
+    },
+    {
+      "profile": "female",
+      "key": "rank_14",
+      "text": "尖",
+      "synthesis_text": "尖。",
+      "path": "assets/bluff/audio/female/rank_14.wav",
+      "sha256": "aadf1418db3a212c2ceeffddf914a9f79d3f9f8d7255517c2390d539bf5adf05",
+      "bytes": 22906,
+      "duration_seconds": 0.476292
+    },
+    {
+      "profile": "female",
+      "key": "rank_15",
+      "text": "二",
+      "synthesis_text": "二。",
+      "path": "assets/bluff/audio/female/rank_15.wav",
+      "sha256": "3914c37ab26fdda80ee797cd162bf480260596e05b2f4d5b73111ed0e78b5d52",
+      "bytes": 20312,
+      "duration_seconds": 0.42225
+    },
+    {
+      "profile": "female",
+      "key": "pass",
+      "text": "过",
+      "synthesis_text": "过。",
+      "path": "assets/bluff/audio/female/pass.wav",
+      "sha256": "9a7ad1b9315c192f842aa7fea6d609ef49134ce804a6d997749667337ebdd1a0",
+      "bytes": 29546,
+      "duration_seconds": 0.614625
+    },
+    {
+      "profile": "female",
+      "key": "challenge",
+      "text": "开",
+      "synthesis_text": "开！",
+      "path": "assets/bluff/audio/female/challenge.wav",
+      "sha256": "ed2629e4adbf52b446e9e60b81a201bf4046060d80a436ae0d5e4df9b4b03e11",
+      "bytes": 21844,
+      "duration_seconds": 0.454167
+    },
+    {
+      "profile": "female",
+      "key": "truth",
+      "text": "全是真的",
+      "synthesis_text": "全是真的。",
+      "path": "assets/bluff/audio/female/truth.wav",
+      "sha256": "7840aebaf9368a798f414915b3d020bf20d32708aa2f7c2a1867b244881b1b39",
+      "bytes": 56994,
+      "duration_seconds": 1.186458
+    },
+    {
+      "profile": "female",
+      "key": "lie",
+      "text": "有假牌",
+      "synthesis_text": "有假牌。",
+      "path": "assets/bluff/audio/female/lie.wav",
+      "sha256": "257efa1026e7ecf3c69a38612e709301d0748cbeb15704d271f3cb7143b22f99",
+      "bytes": 41182,
+      "duration_seconds": 0.857042
+    },
+    {
+      "profile": "female",
+      "key": "dead",
+      "text": "全部过牌，移出牌堆",
+      "synthesis_text": "全部过牌，移出牌堆。",
+      "path": "assets/bluff/audio/female/dead.wav",
+      "sha256": "62ed20a5871e87acbe30fca89d642a51c5b193d39b177ba5210835d60bad0333",
+      "bytes": 114054,
+      "duration_seconds": 2.375208
+    },
+    {
+      "profile": "female",
+      "key": "win",
+      "text": "本局结束",
+      "synthesis_text": "本局结束！",
+      "path": "assets/bluff/audio/female/win.wav",
+      "sha256": "bca292a496c85e6544759c4ce4668bf8aa61cd3b3f951e473173ca15bb205ae2",
+      "bytes": 56768,
+      "duration_seconds": 1.18175
+    }
+  ]
+}

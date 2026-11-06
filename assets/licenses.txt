@@ -1467,6 +1467,14 @@ necessary.  Here is a sample; alter the names:
 That's all there is to it!
 
 
+唬牌离线宣言（2026-11-06）：
+assets/bluff/audio/ 内254段男／女声由固定版本Kokoro / sherpa-onnx开放模型生成。
+数量与点数组合朗读公开宣言，不朗读扣牌真实身份；不是商业游戏录音。
+模型与运行时遵循Apache-2.0，完整正文已在本文件上文收录并随包保存。
+来源、参数和逐文件SHA-256见 assets/licenses/bluff-voice-manifest.json；
+署名见 assets/licenses/bluff-voice-NOTICE.txt，生成脚本 tools/generate_bluff_audio.py。
+扑克牌面由斗地主和唬牌共用，保留各自来源与许可。
+
 斗地主国风青玉牌面（2026-11-06）：
 用户按 docs/doudizhu-guofeng-art-prompts.md 生成并交付6张原生848×1264素材。
 J/Q/K由单向人物按腰线裁切制作双头，双王单向，青玉牌背保持180度对称。

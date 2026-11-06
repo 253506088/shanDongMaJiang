@@ -2,6 +2,12 @@
 
 本仓库为用户的独立私有项目。这里列出第三方部分的许可，不对项目全部自有代码另行授予开源许可。
 
+## 唬牌与离线宣言（2026-11-06）
+
+`scripts/bluff/` 按用户提供的规则独立实现，没有复制第三方唬牌源码。牌面使用下述既有 SVG-cards／用户交付国风素材，保留各自来源，不重复复制牌图。
+
+`assets/bluff/audio/` 新增 254 段由同一固定 Kokoro / sherpa-onnx 开放模型生成的离线宣言（男／女各 127 段）。数量和点数顺序播放，只朗读公开宣言；不是商业游戏录音或真人配音。模型、SHA-256、生成参数、台词和文件校验见 `assets/licenses/bluff-voice-manifest.json`，署名见 `bluff-voice-NOTICE.txt`，完整 Apache-2.0 正文共用 `doudizhu-Apache-2.0.txt`。生成脚本为 `tools/generate_bluff_audio.py`；模型、依赖和测试日志不进入游戏包。
+
 ## 斗地主与离线中文报牌（2026-11-05）
 
 `scripts/doudizhu/` 的规则实现、AI和牌桌由本项目独立编写。玩法核对 [Pagat — Dou Dizhu](https://www.pagat.com/climbing/doudizhu.html) 等公开资料，未复制网页正文或第三方斗地主源码。采用的规则变体与资料差异见 `docs/doudizhu-rules.md`。0.6.0的传统牌面美术来源单列如下。

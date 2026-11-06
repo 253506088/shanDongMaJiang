@@ -18,6 +18,9 @@ build/
 # assets/licenses/doudizhu-guofeng-manifest.json, not the raw archive.
 # Window/fullscreen QA screenshots and render/resize benchmark JSON also belong
 # here; commit their reproducible tests and reviewed measurements, not captures.
+# Bluff 0.8 QA screenshots, packaged-game captures and speech-generation logs
+# live in artifacts/bluff-2026-11-06/. Keep reviewed results in docs/verification.md;
+# commit assets/bluff/audio, its hash manifest and reproducible tests/tools.
 artifacts/
 # Superseded procedural cloth/floor previews are reproducible with
 # tools/make_table_texture.py. Keep local copies for design comparison;
