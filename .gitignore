@@ -24,6 +24,8 @@ build/
 # Bluff 0.8.1 recorder/history/timing captures and package logs use
 # artifacts/bluff-refinement-2026-11-06/; keep their source tests and reviewed
 # results in Git, not machine-generated screenshots or installers.
+# Bluff 0.8.2 memory/AI and multirow verification use
+# artifacts/bluff-ai-2026-11-06/; retain final QA evidence locally.
 artifacts/
 # Superseded procedural cloth/floor previews are reproducible with
 # tools/make_table_texture.py. Keep local copies for design comparison;

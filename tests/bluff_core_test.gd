@@ -92,7 +92,6 @@ func run() -> void:
 	check(not game.view(0).event.has("cards"), "dead identities never exposed")
 	invariant(game)
 	game = fixture([[0, 4, 8, 12, 16], [1, 5, 9, 13, 17, 21], [2, 6]])
-	check(not act(game, 0, {"type": "play", "cards": [0, 4, 8, 12, 16], "rank": 3}), "lead limited to four")
 	act(game, 0, {"type": "play", "cards": [0], "rank": 3})
 	check(act(game, 1, {"type": "play", "cards": [1, 5, 9, 13, 17, 21], "rank": 3}), "follow has no card-count cap")
 	check(game.state.phase == "playing" and game.state.hands[1].is_empty(), "empty hand awaits response")
@@ -116,6 +115,33 @@ func run() -> void:
 	check(not game.can_challenge(0) and game.can_challenge(3), "free call excludes declarer, includes non-next seat")
 	check(act(game, 3, {"type": "challenge"}) and game.state.next_leader == 3, "non-next caller can win lead")
 	check(not act(game, 2, {"type": "challenge"}), "only first valid call settles")
+	# User screenshot: all four aces plus both jokers are a valid six-card lead.
+	game = fixture([range(44, 54), [0, 4], [1, 5]])
+	check(act(game, 0, {"type": "play", "cards": [44, 45, 46, 47, 52, 53], "rank": 14}), "six truthful aces may lead")
+	act(game, 1, {"type": "challenge"})
+	check(game.state.event.truthful and game.state.event.count == 6 and game.state.event.loser == 1, "all four aces and both jokers prove true")
+	invariant(game)
+	# Both the screenshot's entire hand and ten non-aces without jokers may lie.
+	for hand in [range(44, 54), range(10)]:
+		var others = range(54).filter(func(id): return id not in hand)
+		game = fixture([hand, others.slice(0, 22), others.slice(22)])
+		check(act(game, 0, {"type": "play", "cards": hand, "rank": 14}), "whole ten-card hand may claim aces regardless of faces")
+		check(game.state.phase == "playing" and game.state.last.count == 10 and game.state.hands[0].is_empty(), "whole-hand bluff waits for challenge rather than being blocked")
+		var random = RandomNumberGenerator.new(); random.seed = 805
+		var response = AI.choose(game.view(1), random)
+		check(response.type == "challenge", "AI may call ten aces because a single pack has at most six matches")
+		check(game.act(1, response) and not game.state.event.truthful and game.state.hands[0].size() == 10 and game.state.winner == -1, "legal impossible claim loses only after being called")
+		invariant(game)
+	game = fixture([[44, 45, 46, 47, 98, 99, 100, 101, 52, 53, 106, 107], [0], [1], [2]])
+	check(act(game, 0, {"type": "play", "cards": game.state.hands[0].duplicate(), "rank": 14}), "twelve truthful aces may lead in two decks")
+	act(game, 1, {"type": "challenge"})
+	check(game.state.event.truthful and game.state.winner == 0, "large truthful final hand can win")
+	invariant(game)
+	game = fixture([range(105), [105], [106], [107]])
+	check(act(game, 0, {"type": "play", "cards": range(105), "rank": 14}), "large accumulated hand has no artificial lead cap")
+	for seat in [1, 2, 3]: act(game, seat, {"type": "pass"})
+	check(game.state.winner == 0 and game.view(0).recorder.total == 105, "unchallenged large bluff clears and wins normally")
+	invariant(game)
 	var games = 0; var most_moves = 0
 	for count in range(3, 7):
 		for seed_value in range(24):

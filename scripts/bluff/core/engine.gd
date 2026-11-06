@@ -2,6 +2,7 @@ extends RefCounted
 ## Pure deterministic rules. No scene, IO, Mahjong or Dou Dizhu dependency.
 const Cards = preload("res://scripts/bluff/core/cards.gd")
 const Recorder = preload("res://scripts/bluff/core/recorder.gd")
+const Knowledge = preload("res://scripts/bluff/core/knowledge.gd")
 var state: Dictionary = {}
 var rng = RandomNumberGenerator.new()
 
@@ -31,6 +32,7 @@ func start(seed_value: int, settings: Dictionary = {}) -> void:
 		"rps_round": 0, "pile": [], "dead": [], "last": {}, "passed": [],
 		"rank": 0, "event": {}, "history": [], "trick": [], "winner": -1, "next_leader": -1}
 	state["recorder"] = Recorder.create(count)
+	state["knowledge"] = Knowledge.create(count)
 
 func act(seat: int, action: Dictionary) -> bool:
 	if state.is_empty() or action.get("revision", -1) != state.revision: return false
@@ -55,9 +57,9 @@ func act(seat: int, action: Dictionary) -> bool:
 				if not cards is Array or cards.is_empty() or not Cards.valid(cards, state.decks): return false
 				if not cards.all(func(id): return id in state.hands[seat]): return false
 				if typeof(declared) != TYPE_INT or declared not in Cards.DECLARATIONS: return false
-				if state.last.is_empty():
-					if cards.size() > 4: return false
-				elif declared != state.rank: return false
+				# Any nonempty owned selection can be declared, even an obviously
+				# impossible claim. Truth is checked only when another player calls.
+				if not state.last.is_empty() and declared != state.rank: return false
 				# A new declaration accepts the previous player's final hand.
 				if not state.last.is_empty() and state.hands[state.last.seat].is_empty():
 					_finish(state.last.seat, "accepted")
@@ -92,9 +94,12 @@ func _rps(human: int) -> void:
 	_record(state.event)
 
 func _play(seat: int, cards: Array, declared: int) -> void:
+	if not state.last.is_empty(): Knowledge.responded(state.knowledge, seat, false)
+	Knowledge.sync_own(state.knowledge, seat, state.hands[seat])
+	Knowledge.played(state.knowledge, seat, cards, declared, state.hands[seat].size())
 	for id in cards: state.hands[seat].erase(id)
 	state.pile.append_array(cards)
-	state.last = {"seat": seat, "cards": cards.duplicate(), "rank": declared, "count": cards.size()}
+	state.last = {"seat": seat, "cards": cards.duplicate(), "rank": declared, "count": cards.size(), "revision": state.revision + 1}
 	state.rank = declared; state.passed.clear()
 	state.turn = (seat + 1) % state.config.players
 	state.stats[seat].plays += 1
@@ -103,6 +108,7 @@ func _play(seat: int, cards: Array, declared: int) -> void:
 	_record(state.event)
 
 func _pass(seat: int) -> void:
+	Knowledge.responded(state.knowledge, seat, false)
 	state.passed.append(seat)
 	state.event = {"type": "pass", "seat": seat}
 	_record(state.event)
@@ -110,6 +116,7 @@ func _pass(seat: int) -> void:
 		var leader = state.last.seat
 		state.event = {"type": "dead", "count": state.pile.size(), "seat": leader}
 		Recorder.clear_pile(state.recorder, state.trick, state.pile)
+		Knowledge.cleared(state.knowledge)
 		state.dead.append_array(state.pile)
 		_reset_trick(leader)
 		# A unanimous pass starts the next trick in this same accepted action.
@@ -129,7 +136,10 @@ func _challenge(seat: int) -> void:
 	state.stats[loser].collected += state.pile.size()
 	state.event = {"type": "challenge", "caller": seat, "seat": last.seat, "rank": last.rank,
 		"cards": last.cards.duplicate(), "truthful": truthful, "loser": loser, "count": state.pile.size(), "leader": leader}
+	Knowledge.responded(state.knowledge, seat, true)
+	Knowledge.revealed(state.knowledge, last.seat, loser, last.cards, truthful)
 	state.hands[loser].append_array(state.pile)
+	Knowledge.sync_own(state.knowledge, loser, state.hands[loser])
 	_reset_trick(leader)
 	_record(state.event)
 	if truthful and state.hands[last.seat].is_empty(): _finish(last.seat, "proved")
@@ -157,8 +167,9 @@ func view(seat: int) -> Dictionary:
 	result["hand"] = Cards.sorted(state.hands[seat])
 	result["hand_counts"] = state.hands.map(func(hand): return hand.size())
 	result["pile_count"] = state.pile.size(); result["dead_count"] = state.dead.size()
-	result["last"] = {} if state.last.is_empty() else {"seat": state.last.seat, "rank": state.last.rank, "count": state.last.count}
+	result["last"] = {} if state.last.is_empty() else {"seat": state.last.seat, "rank": state.last.rank, "count": state.last.count, "revision": state.last.revision}
 	result["can_challenge"] = can_challenge(seat)
 	result["finish_reason"] = state.get("finish_reason", "")
 	result["recorder"] = Recorder.view(state.recorder, seat)
+	result["memory"] = Knowledge.view(state.knowledge, seat, state.hands[seat])
 	return result

@@ -71,12 +71,9 @@ func run() -> void:
 	session.start({"challenge": "any"}, 830)
 	# Construct an impossible public claim on the human's turn. The bot's
 	# certainty is based only on the six possible rank/wild cards in one pack.
-	session.engine.state.phase = "playing"; session.engine.state.turn = 0
-	session.engine.state.last = {"seat": 2, "cards": range(7), "count": 7, "rank": 3}
-	session.engine.state.rank = 3
-	session.engine.state.pile = range(7)
-	for hand in session.engine.state.hands:
-		for id in range(7): hand.erase(id)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 2
+	session.engine.state.hands = [range(7, 22), range(22, 40), range(7) + range(40, 54)]
+	check(session.engine.act(2, {"type": "play", "cards": range(7), "rank": 3, "revision": 0}), "free-call fixture enters through normal play and memory updates")
 	session._process(10)
 	check(session.engine.state.phase == "review" and session.engine.state.event.caller == 1, "free-call bots may interrupt on human turn using public impossibility")
 	check(session.delay == Session.REVEAL_SECONDS, "both bluff outcomes get a four-second reveal")
@@ -93,6 +90,27 @@ func run() -> void:
 	check(submit(session, {"type": "pass"}), "human can finish unanimous pass cycle")
 	check(session.engine.state.phase == "playing" and session.engine.state.turn == 1 and session.engine.state.event.type == "dead", "unanimous pass immediately gives the last declarer a new trick")
 	check(session.current_view().review_remaining == 0, "dead clearing introduces no review countdown")
+	session.start({}, 834)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 0
+	session.engine.state.hands = [range(10), range(10, 32), range(32, 54)]
+	check(submit(session, {"type": "play", "cards": range(10), "rank": 14}), "session accepts ten non-aces as a whole-hand ace lead")
+	check(session.engine.state.last.count == 10 and session.engine.state.winner == -1, "obvious lie is accepted until another seat acts")
+	session._process(10)
+	check(session.engine.state.phase == "review" and session.engine.state.event.loser == 0 and session.engine.state.event.count == 10, "bot opens impossible claim after presentation, without preventing its submission")
+	# One free-call assessment belongs to the declaration, not to later passes.
+	session.start({"challenge": "any"}, 835)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 2
+	var card = session.engine.state.hands[2][0]
+	check(session.engine.act(2, {"type": "play", "cards": [card], "rank": 3, "revision": 0}), "free-call identity fixture")
+	var claim_revision = session.engine.state.last.revision
+	session.calls_checked_revision = claim_revision
+	var rng_state = session.rng.state
+	session._process(100)
+	check(session.rng.state == rng_state, "idle human turn never rerolls a checked free-call claim")
+	check(submit(session, {"type": "pass"}), "human passes on the same claim")
+	check(session.engine.state.last.revision == claim_revision and session.engine.state.revision != claim_revision, "pass increments action revision while preserving declaration identity")
+	session._process(100)
+	check(session.calls_checked_revision == claim_revision and session.engine.state.event.type != "challenge", "next bot does not reroll challenge after a pass or duplicate its first assessment")
 	session.shutdown()
 	before = session.engine.state.duplicate(true); session._process(200)
 	check(not session.active and before == session.engine.state, "shutdown stops all future bot actions")

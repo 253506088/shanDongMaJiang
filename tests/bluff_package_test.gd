@@ -20,7 +20,7 @@ func capture(name: String) -> void:
 	check(root.get_texture().get_image().save_png(args[index + 1].path_join(name + ".png")) == OK, "actual package screenshot " + name)
 
 func run() -> void:
-	check(ProjectSettings.get_setting("application/config/version") == "0.8.1", "package version 0.8.1")
+	check(ProjectSettings.get_setting("application/config/version") == "0.8.2", "package version 0.8.2")
 	check(not FileAccess.file_exists("res://tests/bluff_package_test.gd") and not FileAccess.file_exists("res://tools/generate_bluff_audio.py"), "tests and generation tools excluded")
 	for file in ["bluff-voice-manifest.json", "bluff-voice-NOTICE.txt", "doudizhu-Apache-2.0.txt", "doudizhu-cards-source.svg.txt", "doudizhu-guofeng-manifest.json"]:
 		check(FileAccess.file_exists("res://assets/licenses/" + file), "license/provenance ships: " + file)
@@ -85,6 +85,34 @@ func run() -> void:
 	session._publish()
 	check(app.bluff.table.round_rows.size() == 6 and app.bluff.table.recorder.data.total == 1, "packaged history and recorder are visible")
 	await capture("package-bluff-six")
+	session.set_process(false)
+	session.start({"players": 3}, 8712)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 0
+	session.engine.state.hands = [range(10), range(10, 32), range(32, 54)]
+	session._publish()
+	app.bluff.table.rank_buttons[0].pressed.emit()
+	for id in range(10): app.bluff.table.toggle_card(id)
+	check(not app.bluff.table.play_button.disabled and app.bluff.table.play_button.text == "扣下 10 张 A", "package enables ten-card ace lead without aces or jokers")
+	await capture("package-ten-aces-ready")
+	app.bluff.table.send_play()
+	check(session.engine.state.last.count == 10 and session.engine.state.hands[0].is_empty(), "packaged UI delivers entire bluff hand to authority")
+	await capture("package-ten-aces-played")
+	session._process(session.delay + 0.1)
+	check(session.engine.state.phase == "review" and session.engine.state.event.loser == 0, "package allows AI to call only after the impossible claim was played")
+	session.start({"players": 3}, 8713)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 0
+	session.engine.state.hands = [[40, 0, 4], [1, 5], [2, 6]]
+	check(session.engine.act(0, {"type": "play", "cards": [40], "rank": 13, "revision": 0}), "packaged known-K fixture plays through authority")
+	check(session.engine.act(1, {"type": "challenge", "revision": 1}), "packaged known-K reveal")
+	check(session.engine.view(2).memory.hands[1][13] == 1, "exported memory knows failed caller received K")
+	session.start({"players": 6}, 8714)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 0
+	session.engine.state.hands = [range(80), range(80, 86), range(86, 92), range(92, 98), range(98, 103), range(103, 108)]
+	session._publish()
+	check(app.bluff.table.hand_cards.size() == 80 and app.bluff.table.compact_hand(), "package shows accumulated hand without paging")
+	for id in [0, 27, 54, 79]: app.bluff.table.toggle_card(id)
+	check(app.bluff.table.selected.size() == 4 and not app.bluff.table.play_button.disabled, "packaged cross-row selection can submit")
+	await capture("package-multirow-hand")
 	app.bluff.table.exit_requested.emit(); await process_frame
 	check(app.current_screen == "lobby", "packaged return works")
 	app._open_doudizhu(); await process_frame

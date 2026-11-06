@@ -55,17 +55,20 @@ func _process(delta: float) -> void:
 	if engine.state.phase != "playing": return
 	var seat = engine.state.turn
 	# In free-call rooms any bot can call before the next declaration.
-	if engine.state.config.challenge == "any" and calls_checked_revision != engine.state.revision:
-		calls_checked_revision = engine.state.revision
+	var claim_revision = engine.state.last.get("revision", engine.state.revision)
+	if engine.state.config.challenge == "any" and calls_checked_revision != claim_revision:
+		calls_checked_revision = claim_revision
 		for candidate in range(1, engine.state.config.players):
 			if not engine.can_challenge(candidate): continue
-			var call = AI.choose(engine.view(candidate), rng)
-			if call.type == "challenge":
+			var candidate_view = engine.view(candidate)
+			if AI.wants_challenge(candidate_view, rng):
+				var call = {"type": "challenge", "revision": candidate_view.revision}
 				if engine.act(candidate, call):
 					delay = pace; _publish()
 				return
 	if seat == 0: return
-	var action = AI.choose(engine.view(seat), rng)
+	# Free-call candidates were already evaluated once for this declaration.
+	var action = AI.choose(engine.view(seat), rng, engine.state.config.challenge != "any")
 	if engine.act(seat, action):
 		delay = pace + rng.randf_range(0, 0.8)
 		_publish()
