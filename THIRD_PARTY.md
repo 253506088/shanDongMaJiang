@@ -12,9 +12,11 @@
 
 ## 传统扑克牌面（0.6.0）
 
-采用 [SVG-cards](https://github.com/htdebeer/SVG-cards)，Copyright (C) 2005 David Bellot，Copyright (C) 2016, 2017 Huub de Beer，GNU LGPL 2.1。固定提交 `6d88bf9c594997b82bc5668ab0877a4e9b717665`，使用上游2倍PNG的54张牌与青绿色牌背；仅做暖白乘色、小王灰度与两王中文角标，标准点阵和双头人物保留。修改后的图片仍按原LGPL条款提供，此素材许可不扩展为对本项目游戏代码的授权。
+采用 [SVG-cards](https://github.com/htdebeer/SVG-cards)，Copyright (C) 2005 David Bellot，Copyright (C) 2016, 2017 Huub de Beer，GNU LGPL 2.1。固定提交 `6d88bf9c594997b82bc5668ab0877a4e9b717665`，使用上游2倍PNG的54张牌与青绿色牌背；做暖白乘色及小王灰度处理，标准点阵和双头人物保留。0.6.1移除原先的中文大小王覆盖，恢复原图JOKER文字。修改后的图片仍按原LGPL条款提供，此素材许可不扩展为对本项目游戏代码的授权。
 
 完整LGPL、署名、原始SVG及其原始许可头、上游README和逐图SHA-256清单保存在 `assets/licenses/doudizhu-cards-*`，同时随游戏包分发。`doudizhu-cards-source.svg.txt` 是原始SVG的原字节副本，去掉末尾`.txt`可编辑；`tools/import_doudizhu_cards.py` 提供确定性的下载／处理／校验方法。具体来源和修改见 `docs/doudizhu-card-art.md`。
+
+0.6.1的国风主题预览由本项目代码绘制边框、云纹、折扇与明确待制作的插画槽，使用已有Noto字体；它不是已交付的国风人物插画，也不作为可用主题启用。待用户交付的专属素材需另行记录来源及处理。
 
 ## 山东麻将规则和 AI 的移植
 

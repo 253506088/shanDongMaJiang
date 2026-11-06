@@ -7,6 +7,8 @@ const Cards = preload("res://scripts/doudizhu/core/cards.gd")
 const Rules = preload("res://scripts/doudizhu/core/rules.gd")
 const CardFace = preload("res://scripts/doudizhu/ui/card.gd")
 const RecorderStrip = preload("res://scripts/doudizhu/ui/recorder.gd")
+const CardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
+const ThemePreview = preload("res://scripts/doudizhu/ui/theme_preview.gd")
 signal action_requested(action: Dictionary)
 signal hint_requested
 signal next_requested
@@ -14,6 +16,7 @@ signal exit_requested
 signal pause_changed(paused: bool)
 signal mute_requested
 signal voice_profile_requested(profile: String)
+signal card_theme_requested(theme_id: String)
 
 const NAMES = ["我", "听松", "观澜"]
 const HAND_Y = 695.0
@@ -48,6 +51,12 @@ var recorder: Control
 var recorder_button: Button
 var voice_profile = "male"
 var voice_profile_button: Button
+var card_theme = "traditional"
+var card_theme_button: Button
+var theme_apply_button: Button
+var theme_preview: Control
+var theme_preview_id = "traditional"
+var _themes_return = ""
 var _drag_active = false
 var _drag_last = Vector2.ZERO
 var _drag_visited: Dictionary = {}
@@ -130,6 +139,9 @@ func set_voice_profile(value: String) -> void:
 	voice_profile = "female" if value == "female" else "male"
 	if is_instance_valid(voice_profile_button): voice_profile_button.text = "女声报牌" if voice_profile == "female" else "男声报牌"
 
+func set_card_theme(value) -> void:
+	card_theme = CardThemes.normalize(value)
+
 func set_hint(cards: Array) -> void:
 	if not _can_act() or str(view.get("phase", "")) != "playing": return
 	# A delayed hint must not replace a hand selection currently being swept.
@@ -171,6 +183,7 @@ func _render() -> void:
 	_button(content, Rect2(191, 31, 126, 51), "玩法", show_rules)
 	recorder_button = _button(content, Rect2(329, 31, 154, 51), "记牌器", _toggle_recorder, recorder_expanded)
 	recorder_button.tooltip_text = "只统计你手牌之外尚未打出的牌；叫分时包含未揭底牌。"
+	card_theme_button = _button(content, Rect2(495, 31, 124, 51), "牌面", show_card_themes)
 	_label(content, Rect2(631, 28, 338, 57), "斗 地 主", 30, Kit.ACCENT, true)
 	voice_profile_button = _button(content, Rect2(1180, 31, 193, 51), "女声报牌" if voice_profile == "female" else "男声报牌", func(): voice_profile_requested.emit("female" if voice_profile == "male" else "male"))
 	voice_profile_button.tooltip_text = "点击切换男声／女声，下次报牌使用所选声音。"
@@ -556,7 +569,9 @@ func _close_modal() -> void:
 	_refresh_selection()
 
 func pause_menu() -> void:
-	if _modal_kind in ["rules", "inspect"]:
+	if _modal_kind == "themes":
+		_finish_card_themes()
+	elif _modal_kind in ["rules", "inspect"]:
 		_finish_rules()
 	elif _modal_kind == "result":
 		_hide_result()
@@ -567,6 +582,48 @@ func pause_menu() -> void:
 
 func ensure_paused() -> void:
 	if not _paused: _show_pause()
+
+func show_card_themes() -> void:
+	_themes_return = _modal_kind if _modal_kind in ["pause", "result"] else ""
+	_draw_card_themes(card_theme)
+
+func _draw_card_themes(preview_id: String) -> void:
+	theme_preview_id = preview_id if preview_id in ["traditional", "guofeng"] else "traditional"
+	var panel = _open_modal("themes", Vector2(1080, 730))
+	_label(panel, Rect2(44, 29, 896, 59), "牌面风格", 35, Kit.TEXT)
+	_button(panel, Rect2(970, 32, 66, 51), "×", _finish_card_themes)
+	_button(panel, Rect2(44, 105, 482, 57), "传统扑克牌 · 使用中" if card_theme == "traditional" else "传统扑克牌", _draw_card_themes.bind("traditional"), theme_preview_id == "traditional")
+	_button(panel, Rect2(544, 105, 492, 57), "国风青玉 · 预览", _draw_card_themes.bind("guofeng"), theme_preview_id == "guofeng")
+	theme_preview = null
+	if theme_preview_id == "traditional":
+		_label(panel, Rect2(44, 174, 992, 40), "标准花色点阵 · 双头人物 · 原版 JOKER", 25, Kit.MUTED, true)
+		_draw_group(panel, [40, 36, 32, 52, 53], Rect2(66, 242, 948, 270), 155, 179)
+		_label(panel, Rect2(44, 538, 992, 47), "当前可用。牌面设置不改变牌值、玩法或已选手牌。", 23, Kit.MUTED, true)
+	else:
+		_label(panel, Rect2(44, 174, 992, 40), "专属插画准备中，暂不可启用", 25, Kit.ACCENT, true)
+		theme_preview = ThemePreview.new()
+		theme_preview.position = Vector2(44, 222)
+		theme_preview.size = Vector2(992, 300)
+		panel.add_child(theme_preview)
+		_label(panel, Rect2(44, 538, 992, 47), "保留标准角标，人物与 JOKER 专属插画完成后开放切换。", 23, Kit.MUTED, true)
+	_button(panel, Rect2(44, 630, 362, 62), "返回牌桌", _finish_card_themes)
+	theme_apply_button = _button(panel, Rect2(424, 630, 612, 62), "使用传统牌面" if CardThemes.available(theme_preview_id) else "等待插画完成", _apply_preview_theme, true)
+	theme_apply_button.disabled = not CardThemes.available(theme_preview_id)
+
+func _apply_preview_theme() -> void:
+	# Availability is checked here and at the mode boundary, not only on the
+	# disabled button. Unfinished art cannot be activated by a stale callback.
+	if _modal_kind != "themes" or not CardThemes.available(theme_preview_id): return
+	card_theme_requested.emit(theme_preview_id)
+	_finish_card_themes()
+
+func _finish_card_themes() -> void:
+	var previous = _themes_return
+	_themes_return = ""
+	theme_preview = null
+	_close_modal()
+	if previous == "pause": _show_pause()
+	elif previous == "result": _show_result()
 
 func _show_last_play(seat: int) -> void:
 	var latest: Array = view.get("last_actions", [{}, {}, {}])

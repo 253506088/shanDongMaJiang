@@ -3,9 +3,7 @@ extends Button
 ## Traditional Bellot/de Beer card artwork, imported with source and LGPL-2.1.
 ## Input/selection remain owned by the table; this class only draws the face.
 const Kit = preload("res://scripts/ui/ui_kit.gd")
-const FACE_FONT = preload("res://assets/fonts/NotoSansSC-Bold.ttf")
 const ART_ROOT = "res://assets/doudizhu/cards/"
-const PAPER = Color("f6f1e7")
 static var _art: Dictionary = {}
 var card_id: int = 0
 var face_down: bool = false
@@ -45,11 +43,8 @@ func _draw() -> void:
 	_box(Rect2(2, 5, 109, 158), Color("04161369"), Color.TRANSPARENT, 8)
 	var texture = _face()
 	if texture: draw_texture_rect(texture, Rect2(0, 0, 109, 158), false)
-	if not face_down and card_id >= 52:
-		# The small joker's PNG is grayscale; this Chinese index also remains
-		# recognizable in the exposed strip of an overlapping physical hand.
-		draw_rect(Rect2(4, 3, 48, 26), PAPER)
-		draw_string(FACE_FONT, Vector2(5, 24), "大王" if card_id == 53 else "小王", HORIZONTAL_ALIGNMENT_LEFT, -1, 21, Color("b82228") if card_id == 53 else Color("142b2a"))
+	# Keep the original black/red JOKER lettering visible; do not paint over
+	# it with translated labels or a replacement corner background.
 	if chosen:
 		_box(Rect2(0, 0, 109, 158), Color.TRANSPARENT, Color("e5c982"), 6, 3)
 	elif interactive and _hovered and not disabled:

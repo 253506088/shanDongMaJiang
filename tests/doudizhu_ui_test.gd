@@ -3,6 +3,7 @@ extends SceneTree
 const TableScript = preload("res://scripts/doudizhu/ui/table.gd")
 const Rules = preload("res://scripts/doudizhu/core/rules.gd")
 const Surface = preload("res://scripts/ui/scene_surface.gd")
+const CardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 var table
 var surface
 var failures: Array = []
@@ -13,6 +14,7 @@ var hints: int = 0
 var nexts: int = 0
 var exits: int = 0
 var voice_choices: Array = []
+var theme_choices: Array = []
 
 func _initialize() -> void:
 	call_deferred("run")
@@ -231,6 +233,7 @@ func run() -> void:
 	table.next_requested.connect(func(): nexts += 1)
 	table.exit_requested.connect(func(): exits += 1)
 	table.voice_profile_requested.connect(func(profile): voice_choices.append(profile); table.set_voice_profile(profile))
+	table.card_theme_requested.connect(func(theme_id): theme_choices.append(theme_id); table.set_card_theme(theme_id))
 	table.set_muted(true)
 	var state = fixture()
 	table.set_view(state)
@@ -254,6 +257,28 @@ func run() -> void:
 	check(not table.play_button.disabled, "valid single can be played")
 	await click(find_card(1))
 	check(table.selected_cards.size() == 2 and not table.play_button.disabled, "identical ranks remain separately selectable")
+	await click(table.card_theme_button)
+	check(table._modal_kind == "themes" and table._paused, "theme picker pauses the game")
+	check(table.theme_preview_id == "traditional" and not table.theme_apply_button.disabled, "traditional artwork is the available current theme")
+	await capture("ddz-theme-traditional")
+	await click(find_button(table, "国风青玉 · 预览"))
+	check(table.theme_preview_id == "guofeng" and is_instance_valid(table.theme_preview), "pending guofeng has a visible layout preview")
+	check(table.theme_apply_button.disabled and table.theme_apply_button.text == "等待插画完成", "pending theme cannot be applied")
+	var options = CardThemes.options()
+	options[1].available = true
+	check(not CardThemes.available("guofeng"), "editing preview metadata cannot enable unfinished art")
+	for invalid in ["guofeng", "missing", null, {}, 1]:
+		check(CardThemes.normalize(invalid) == "traditional", "unavailable preference falls back safely")
+	table._apply_preview_theme()
+	check(theme_choices.is_empty() and table.card_theme == "traditional", "stale or direct apply cannot bypass unavailable status")
+	await capture("ddz-theme-guofeng-preview")
+	table.pause_menu()
+	check(not table._paused and table._modal_kind.is_empty(), "back closes preview and resumes")
+	check(table.selected_cards.size() == 2 and not table.play_button.disabled and actions.is_empty(), "theme preview preserves pending hand selection")
+	await click(table.card_theme_button)
+	await click(table.theme_apply_button)
+	check(theme_choices == ["traditional"] and table.card_theme == "traditional", "available theme emits its configuration")
+	check(table.selected_cards.size() == 2 and not table._paused, "applying available theme does not clear selection")
 	await click(table.voice_profile_button)
 	check(voice_choices == ["female"] and table.voice_profile_button.text == "女声报牌", "voice button selects female")
 	check(table.selected_cards.size() == 2 and actions.is_empty(), "voice switch preserves selection without submitting a play")

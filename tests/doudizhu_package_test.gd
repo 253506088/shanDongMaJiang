@@ -13,7 +13,7 @@ func check(value: bool, message: String) -> void:
 		printerr("DDZ PACKAGE FAIL: ", message)
 
 func run() -> void:
-	check(str(ProjectSettings.get_setting("application/config/version")) == "0.6.0", "package version")
+	check(str(ProjectSettings.get_setting("application/config/version")) == "0.6.1", "package version")
 	check(not FileAccess.file_exists("res://tests/doudizhu_package_test.gd"), "development tests are excluded")
 	check(not FileAccess.file_exists("res://tools/import_doudizhu_audio.py"), "voice generator is excluded")
 	check(FileAccess.file_exists("res://assets/licenses/doudizhu-voice-manifest.json"), "voice provenance ships with package")
@@ -41,6 +41,11 @@ func run() -> void:
 	check(app.current_screen == "doudizhu" and app.session.paused and not app.table.visible, "packaged entry isolates Mahjong")
 	check(app.doudizhu.table.hand_cards.size() == 17, "packaged table shows physical hand")
 	check(app.doudizhu.table.recorder.counts.size() == 15 and app.doudizhu.table.recorder.total == 37, "packaged recorder includes undealt bottom without exposing hidden hands")
+	app.doudizhu.table.show_card_themes()
+	app.doudizhu.table._draw_card_themes("guofeng")
+	check(app.doudizhu.table.theme_apply_button.disabled and is_instance_valid(app.doudizhu.table.theme_preview), "packaged guofeng preview is present but locked pending art")
+	check(not app.doudizhu.set_card_theme("guofeng"), "packaged settings cannot bypass pending art")
+	app.doudizhu.table.pause_menu()
 	check(app.doudizhu.voice.clips.size() == 60, "all sixty offline voice clips load from PCK")
 	app.doudizhu.set_voice_profile("female")
 	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 60, "female voice also loads completely from PCK")

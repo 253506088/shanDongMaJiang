@@ -3,14 +3,17 @@ extends Control
 const SessionScript = preload("res://scripts/doudizhu/session.gd")
 const TableScript = preload("res://scripts/doudizhu/ui/table.gd")
 const VoiceScript = preload("res://scripts/doudizhu/audio/voice.gd")
+const CardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 signal exit_requested
 signal mute_changed(enabled: bool)
 signal voice_profile_changed(profile: String)
+signal card_theme_changed(theme_id: String)
 var session: DdzSession
 var table: Control
 var voice: AudioStreamPlayer
 var muted = false
 var voice_profile = "male"
+var card_theme = "traditional"
 var qa_mode = false
 var notice_label: Label
 var notice_time = 0.0
@@ -28,6 +31,9 @@ func _ready() -> void:
 	table.set_muted(muted)
 	table.set_voice_profile(voice_profile)
 	table.voice_profile_requested.connect(set_voice_profile)
+	card_theme = CardThemes.normalize(card_theme)
+	table.set_card_theme(card_theme)
+	table.card_theme_requested.connect(set_card_theme)
 	table.action_requested.connect(func(action):
 		if not session.submit(action): table.action_rejected("这次操作已失效，请按当前牌面重新选择。"))
 	table.hint_requested.connect(session.request_hint)
@@ -58,6 +64,13 @@ func set_voice_profile(value: String) -> void:
 	voice.set_profile(chosen)
 	table.set_voice_profile(chosen)
 	voice_profile_changed.emit(chosen)
+
+func set_card_theme(value: String) -> bool:
+	if not CardThemes.available(value): return false
+	card_theme = CardThemes.normalize(value)
+	table.set_card_theme(card_theme)
+	card_theme_changed.emit(card_theme)
+	return true
 
 func _next_round() -> void:
 	voice.stop_all()

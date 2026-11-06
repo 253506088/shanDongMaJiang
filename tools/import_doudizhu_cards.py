@@ -86,7 +86,7 @@ def download() -> None:
         "license": "LGPL-2.1 (upstream repository license; SVG header preserved unchanged)",
         "copyright": ["Copyright (C) 2005 David Bellot", "Copyright (C) 2016, 2017 Huub de Beer"],
         **source_files,
-        "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Chinese small/big joker labels are a runtime Noto overlay in card.gd. PNG indices are rasterized, not runtime system-font text.",
+        "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Original black/red JOKER lettering is preserved without a runtime translated overlay. PNG indices are rasterized, not runtime system-font text.",
         "cards": entries,
     }
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

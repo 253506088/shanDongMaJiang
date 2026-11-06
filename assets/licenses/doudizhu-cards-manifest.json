@@ -24,7 +24,7 @@
     "path": "assets/licenses/doudizhu-cards-upstream-README.md",
     "sha256": "010e1a4c29eb848196806862f22a890440f69076413d047a2e69bb923f9f6d2e"
   },
-  "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Chinese small/big joker labels are a runtime Noto overlay in card.gd. PNG indices are rasterized, not runtime system-font text.",
+  "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Original black/red JOKER lettering is preserved without a runtime translated overlay. PNG indices are rasterized, not runtime system-font text.",
   "cards": [
     {
       "key": "00",

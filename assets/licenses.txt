@@ -920,10 +920,11 @@ the game. No operating-system voice, network connection or microphone is used.
    limitations under the License.
 
 
-斗地主传统扑克牌面（2026-11-05）：
+斗地主传统扑克牌面（2026-11-06更新）：
 SVG-cards，David Bellot / Huub de Beer，LGPL-2.1。
-使用标准花色点阵、双头J/Q/K和两王，调整暖白与小王灰度。
+使用标准花色点阵、双头J/Q/K和两王，调整暖白与小王灰度，牌面保留英文JOKER。
 原始可编辑SVG、许可、署名及逐图哈希随包保存在assets/licenses/doudizhu-cards-*。
+国风布局预览为项目代码绘制，专属插画尚未交付，暂不作为可用主题。
 
 Traditional Dou Dizhu playing-card artwork
 
@@ -944,10 +945,11 @@ doudizhu-cards-upstream-README.md.
 The game uses the upstream 2x PNG renderings of the 54 faces and teal back.
 Project modifications (2026-11-05): warm off-white RGB multiplication by
 #f6f1e7, preserving alpha; grayscale conversion of the small joker so its
-illustration is distinct from the large joker. The card renderer overlays
-Chinese small/big joker labels using the already bundled Noto Sans SC font
-(SIL OFL 1.1). Traditional pip arrangement and double-headed court artwork
-are preserved. The modified card images retain their upstream LGPL terms.
+illustration is distinct from the large joker. Traditional pip arrangement,
+double-headed court artwork and the original black/red JOKER lettering are
+preserved. The modified card images retain their upstream LGPL terms.
+On 2026-11-06 the runtime Chinese joker-label overlay was removed at the
+user's request; the PNG pixels and their recorded hashes were not changed.
 
 tools/import_doudizhu_cards.py is the reproducible downloader/processor.
 doudizhu-cards-manifest.json records every upstream URL, source SHA-256,

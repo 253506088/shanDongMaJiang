@@ -1,7 +1,9 @@
 extends Node
 const DoudizhuMode = preload("res://scripts/doudizhu/mode.gd")
+const DoudizhuCardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 var doudizhu: Control
 var doudizhu_voice = "male"
+var doudizhu_card_theme = "traditional"
 var session: LocalSession
 var table: Table3D
 var canvas: CanvasLayer
@@ -198,10 +200,12 @@ func _open_doudizhu() -> void:
 	doudizhu = DoudizhuMode.new()
 	doudizhu.muted = muted
 	doudizhu.voice_profile = doudizhu_voice
+	doudizhu.card_theme = doudizhu_card_theme
 	doudizhu.qa_mode = qa_mode
 	doudizhu.exit_requested.connect(_show_lobby)
 	doudizhu.mute_changed.connect(func(value): muted = value; _save_preferences())
 	doudizhu.voice_profile_changed.connect(func(value): doudizhu_voice = value; _save_preferences())
+	doudizhu.card_theme_changed.connect(func(value): doudizhu_card_theme = value; _save_preferences())
 	root.add_child(doudizhu)
 
 func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callable) -> void:
@@ -1450,7 +1454,7 @@ func _notification(what: int) -> void:
 func _save_preferences() -> void:
 	if qa_mode:return
 	var file=FileAccess.open(preferences_path,FileAccess.WRITE)
-	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"doudizhu_voice":doudizhu_voice}))
+	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"doudizhu_voice":doudizhu_voice,"doudizhu_card_theme":doudizhu_card_theme}))
 
 func _load_preferences() -> void:
 	if qa_mode:return
@@ -1459,5 +1463,6 @@ func _load_preferences() -> void:
 	if not prefs is Dictionary:return
 	config.merge(prefs.get("config",{}),true); muted=prefs.get("muted",false);low_quality=prefs.get("low_quality",false)
 	doudizhu_voice = "female" if prefs.get("doudizhu_voice", "male") == "female" else "male"
+	doudizhu_card_theme = DoudizhuCardThemes.normalize(prefs.get("doudizhu_card_theme", "traditional"))
 	session.speed=clampf(prefs.get("speed",1.0),0.75,1.5) if prefs.get("pace_version",0)==2 else 1.0;table.quality(low_quality)
 	desktop_window.set_fullscreen(prefs.get("fullscreen",false) == true)
