@@ -41,9 +41,13 @@ func run() -> void:
 				check(submit(session, {"type": "rps", "gesture": rng.randi_range(0, 2)}), "human RPS through boundary")
 			elif state.phase == "review":
 				var revision = state.revision
-				session._process(100)
-				check(state.revision == revision, "bots cannot skip opening/dead-pile review")
-				check(submit(session, {"type": "continue"}), "manual review acknowledgment")
+				check(not submit(session, {"type": "continue"}), "review is timer-owned, with no manual acknowledgment")
+				session._process(session.delay - 0.25)
+				check(state.revision == revision and session.delay > 0, "opening remains visible for its presentation time")
+				session.paused = true; session._process(30)
+				check(state.revision == revision and session.delay > 0, "inspection pauses the review countdown")
+				session.paused = false; session._process(0.3)
+				check(state.phase == "playing" and state.revision == revision + 1, "review automatically resumes one new trick when timer expires")
 			elif state.turn == 0:
 				if state.config.challenge == "turn":
 					var revision = state.revision
@@ -61,6 +65,9 @@ func run() -> void:
 			moves += 1
 		check(session.engine.state.phase == "finished", "session completes %d-player game" % count)
 		check(session.current_view().winner >= 0, "session publishes winner")
+		var finished = session.engine.state.duplicate(true)
+		session._process(200)
+		check(session.engine.state == finished, "automatic trick advance never restarts a finished match")
 	session.start({"challenge": "any"}, 830)
 	# Construct an impossible public claim on the human's turn. The bot's
 	# certainty is based only on the six possible rank/wild cards in one pack.
@@ -72,6 +79,20 @@ func run() -> void:
 		for id in range(7): hand.erase(id)
 	session._process(10)
 	check(session.engine.state.phase == "review" and session.engine.state.event.caller == 1, "free-call bots may interrupt on human turn using public impossibility")
+	check(session.delay == Session.REVEAL_SECONDS, "both bluff outcomes get a four-second reveal")
+	session._process(3.0)
+	check(session.engine.state.phase == "review", "reveal does not disappear before four seconds")
+	session._process(1.1)
+	check(session.engine.state.phase == "playing" and session.engine.state.turn == 1, "caught declarer yields lead automatically")
+	# No intermediate review or second action after all remaining players pass.
+	session.start({}, 832)
+	session.engine.state.phase = "playing"; session.engine.state.turn = 1
+	var lead = session.engine.state.hands[1][0]
+	session.engine.act(1, {"type": "play", "cards": [lead], "rank": 3, "revision": 0})
+	session.engine.act(2, {"type": "pass", "revision": 1})
+	check(submit(session, {"type": "pass"}), "human can finish unanimous pass cycle")
+	check(session.engine.state.phase == "playing" and session.engine.state.turn == 1 and session.engine.state.event.type == "dead", "unanimous pass immediately gives the last declarer a new trick")
+	check(session.current_view().review_remaining == 0, "dead clearing introduces no review countdown")
 	session.shutdown()
 	before = session.engine.state.duplicate(true); session._process(200)
 	check(not session.active and before == session.engine.state, "shutdown stops all future bot actions")

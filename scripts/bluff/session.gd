@@ -1,7 +1,9 @@
 extends Node
-## One human, 2..5 bots. Review screens wait for the human indefinitely.
+## One human, 2..5 bots. Reveal time belongs to the session, not a UI prompt.
 const Rules = preload("res://scripts/bluff/core/engine.gd")
 const AI = preload("res://scripts/bluff/core/ai.gd")
+const REVEAL_SECONDS = 4.0
+const RPS_RESULT_SECONDS = 1.8
 signal changed(view: Dictionary)
 var engine = Rules.new()
 var rng = RandomNumberGenerator.new()
@@ -25,13 +27,17 @@ func start(config: Dictionary = {}, seed_value: int = -1) -> void:
 func current_view() -> Dictionary:
 	var view = engine.view(0)
 	view["round_id"] = round_id
+	view["review_remaining"] = delay if engine.state.phase == "review" else 0.0
 	return view
 
 func _publish() -> void:
+	if engine.state.phase == "review":
+		delay = REVEAL_SECONDS if engine.state.event.get("type", "") == "challenge" else RPS_RESULT_SECONDS
 	changed.emit(current_view())
 
 func submit(action: Dictionary) -> bool:
 	if not active or paused or action.get("round_id", -1) != round_id: return false
+	if engine.state.phase == "review": return false
 	if not engine.act(0, action): return false
 	delay = pace
 	_publish()
@@ -40,7 +46,13 @@ func submit(action: Dictionary) -> bool:
 func _process(delta: float) -> void:
 	if not active or paused: return
 	delay = maxf(0, delay - delta)
-	if delay > 0 or engine.state.phase != "playing": return
+	if delay > 0: return
+	if engine.state.phase == "review":
+		if engine.act(0, {"type": "continue", "revision": engine.state.revision}):
+			delay = pace
+			_publish()
+		return
+	if engine.state.phase != "playing": return
 	var seat = engine.state.turn
 	# In free-call rooms any bot can call before the next declaration.
 	if engine.state.config.challenge == "any" and calls_checked_revision != engine.state.revision:

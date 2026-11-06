@@ -99,7 +99,23 @@ func run() -> void:
 	table.send_play(); check(actions.size() == 1, "same revision cannot submit twice")
 	view = fixture(6); view.revision = 3; view.hand = range(27)
 	view.last = {"seat": 5, "rank": 8, "count": 4}; view.rank = 8; view.pile_count = 19; view.can_challenge = true
+	view.trick = [{"seat": 0, "count": 1, "rank": 8}, {"seat": 1, "count": 3, "rank": 8},
+		{"seat": 2, "count": 2, "rank": 8}, {"seat": 3, "count": 1, "rank": 8},
+		{"seat": 4, "count": 1, "rank": 8}, {"seat": 5, "count": 4, "rank": 8},
+		{"seat": 1, "count": 3, "rank": 8}, {"seat": 5, "count": 4, "rank": 8}]
+	view.recorder.counts[4] = 1; view.recorder.counts[8] = 2; view.recorder.counts[16] = 1; view.recorder.total = 4
 	table.set_view(view)
+	check(table.round_rows.size() == 6 and table.round_rows[1].text == "听松  3 + 3 张", "every seat's full trick play sequence is visible")
+	check(table.round_rows[0].text == "我  1 张" and table.round_rows[5].text == "怀竹  4 + 4 张", "history includes human and repeated opponent plays")
+	await frames()
+	check(table.round_rows.back().get_global_rect().end.y <= table.round_history.get_global_rect().end.y - 12, "normal six-seat history fits without hiding the final player")
+	check(table.recorder.data.counts[4] == 1 and table.recorder.data.total == 4, "recorder shows only this seat's cleared physical cards")
+	await click(table.recorder)
+	check(table.modal_kind == "recorder" and table.paused, "recorder can be inspected while bots pause")
+	await capture("15-recorder"); table.close_modal()
+	await click(find_button(table, "本轮出牌 · 详情"))
+	check(table.modal_kind == "round_history" and table.paused, "chronological history is available without advancing game")
+	await capture("16-round-history"); table.close_modal()
 	for id in range(9): table.toggle_card(id)
 	check(not table.play_button.disabled and table.declared == 8, "unlimited follow and fixed rank")
 	await capture("05-six-follow")
@@ -115,6 +131,15 @@ func run() -> void:
 		root.push_input(touch, true); await frames()
 		await mouse(at, down, InputEvent.DEVICE_ID_EMULATION)
 	check(table.selected == [0], "touch plus emulated mouse toggles exactly once")
+	# A subsequent finger tap on the recorder must still reach its control;
+	# consuming all emulated mouse events would disable the touch UI buttons.
+	at = table.recorder.get_global_rect().get_center()
+	for down in [true, false]:
+		var touch = InputEventScreenTouch.new(); touch.position = at; touch.index = 0; touch.pressed = down
+		root.push_input(touch, true); await frames()
+		await mouse(at, down, InputEvent.DEVICE_ID_EMULATION)
+	check(table.modal_kind == "recorder", "touch opens recorder during own turn without hand-pair suppression")
+	table.close_modal()
 	view.revision = 6; view.hand = range(108); table.set_view(view)
 	check(table.hand_cards.size() == 30 and is_instance_valid(find_button(table, "›")), "large hand paginated at readable widths")
 	table.toggle_card(0)
@@ -128,7 +153,9 @@ func run() -> void:
 	view.event = {"type": "challenge", "caller": 2, "seat": 1, "rank": 3, "cards": [0, 54, 4, 52, 106], "truthful": false, "loser": 1, "count": 29, "leader": 2}
 	table.set_view(view)
 	await capture("09-caught")
-	check(is_instance_valid(find_button(table, "看清了，继续   →")), "open reveal requires human acknowledgment")
+	check(not is_instance_valid(find_button(table, "看清了，继续   →")) and is_instance_valid(table.review_label), "reveal has countdown instead of acknowledgment button")
+	table.set_review_remaining(2.3)
+	check(table.review_label.text.begins_with("3 秒"), "review updates remaining seconds without rebuilding the table")
 	view.revision = 8; view.event.cards = range(30); table.set_view(view)
 	await click(find_button(table, "展开全部 30 张"))
 	check(table.modal_kind == "reveal", "unlimited follow reveal can be inspected in full")
@@ -143,6 +170,12 @@ func run() -> void:
 	for count in [3, 4, 5]:
 		view = fixture(count); view.revision = 10 + count; table.set_view(view)
 		await capture("14-seats-%d" % count)
+	view = fixture(6); view.revision = 20; view.event = {"type": "dead", "count": 19, "seat": 0}
+	view.recorder.total = 1; view.recorder.counts[4] = 1
+	table.set_view(view)
+	check(table.round_rows.is_empty() and table.review_label == null and is_instance_valid(table.play_button), "clearing resets history and offers next lead immediately")
+	check(table.recorder.data.counts[4] == 1, "cleared count remains visible across tricks")
+	await capture("17-cleared-next-lead")
 	table.queue_free(); surface.queue_free(); await frames(3)
 	print("BLUFF_UI_RESULT: %d failures; %d checks" % [failures.size(), checks])
 	quit(0 if failures.is_empty() else 1)

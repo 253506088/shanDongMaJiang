@@ -88,6 +88,7 @@ func run() -> void:
 	check(game.state.passed.is_empty(), "following resets all-pass cycle")
 	act(game, 0, {"type": "pass"}); act(game, 1, {"type": "pass"})
 	check(game.state.event.type == "dead" and game.state.event.count == 2 and game.state.next_leader == 2 and game.state.pile.is_empty(), "full pass cycle clears hidden dead cards")
+	check(game.state.phase == "playing" and game.state.turn == 2 and game.state.trick.is_empty(), "dead pile immediately starts the next empty trick")
 	check(not game.view(0).event.has("cards"), "dead identities never exposed")
 	invariant(game)
 	game = fixture([[0, 4, 8, 12, 16], [1, 5, 9, 13, 17, 21], [2, 6]])

@@ -21,6 +21,9 @@ build/
 # Bluff 0.8 QA screenshots, packaged-game captures and speech-generation logs
 # live in artifacts/bluff-2026-11-06/. Keep reviewed results in docs/verification.md;
 # commit assets/bluff/audio, its hash manifest and reproducible tests/tools.
+# Bluff 0.8.1 recorder/history/timing captures and package logs use
+# artifacts/bluff-refinement-2026-11-06/; keep their source tests and reviewed
+# results in Git, not machine-generated screenshots or installers.
 artifacts/
 # Superseded procedural cloth/floor previews are reproducible with
 # tools/make_table_texture.py. Keep local copies for design comparison;

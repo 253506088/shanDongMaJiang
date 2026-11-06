@@ -1,6 +1,7 @@
 extends RefCounted
 ## Pure deterministic rules. No scene, IO, Mahjong or Dou Dizhu dependency.
 const Cards = preload("res://scripts/bluff/core/cards.gd")
+const Recorder = preload("res://scripts/bluff/core/recorder.gd")
 var state: Dictionary = {}
 var rng = RandomNumberGenerator.new()
 
@@ -29,6 +30,7 @@ func start(seed_value: int, settings: Dictionary = {}) -> void:
 		"phase": "rps", "revision": 0, "turn": -1, "contenders": range(count),
 		"rps_round": 0, "pile": [], "dead": [], "last": {}, "passed": [],
 		"rank": 0, "event": {}, "history": [], "trick": [], "winner": -1, "next_leader": -1}
+	state["recorder"] = Recorder.create(count)
 
 func act(seat: int, action: Dictionary) -> bool:
 	if state.is_empty() or action.get("revision", -1) != state.revision: return false
@@ -107,8 +109,12 @@ func _pass(seat: int) -> void:
 	if state.passed.size() == state.config.players - 1:
 		var leader = state.last.seat
 		state.event = {"type": "dead", "count": state.pile.size(), "seat": leader}
+		Recorder.clear_pile(state.recorder, state.trick, state.pile)
 		state.dead.append_array(state.pile)
 		_reset_trick(leader)
+		# A unanimous pass starts the next trick in this same accepted action.
+		# Keep the dead event for the log/recorder, without a review interstitial.
+		state.phase = "playing"; state.turn = leader
 		_record(state.event)
 		if state.hands[leader].is_empty(): _finish(leader, "passed")
 	else: state.turn = (seat + 1) % state.config.players
@@ -154,4 +160,5 @@ func view(seat: int) -> Dictionary:
 	result["last"] = {} if state.last.is_empty() else {"seat": state.last.seat, "rank": state.last.rank, "count": state.last.count}
 	result["can_challenge"] = can_challenge(seat)
 	result["finish_reason"] = state.get("finish_reason", "")
+	result["recorder"] = Recorder.view(state.recorder, seat)
 	return result

@@ -37,6 +37,10 @@ func _ready() -> void:
 func pause_menu() -> void:
 	table.pause_menu()
 
+func _process(_delta: float) -> void:
+	if is_instance_valid(table) and is_instance_valid(session):
+		table.set_review_remaining(session.delay)
+
 func pause_on_background() -> void:
 	if not table.paused: table.pause_menu()
 
