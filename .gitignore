@@ -13,6 +13,9 @@ build/
 # from the scripts. Keep a separate local backup; do not clean them as caches.
 # Commit selected runtime images under assets/, preparation tools, source hashes
 # in assets/art_manifest.json and reviewed results in docs/verification.md instead.
+# Dou Dizhu Guofeng 2026-11-06 raw PNG/JPG delivery is also irreplaceable;
+# its verified backup lives in ../山东麻将-美术备份/. Track runtime cards and
+# assets/licenses/doudizhu-guofeng-manifest.json, not the raw archive.
 # Window/fullscreen QA screenshots and render/resize benchmark JSON also belong
 # here; commit their reproducible tests and reviewed measurements, not captures.
 artifacts/

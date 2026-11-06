@@ -118,3 +118,8 @@
 用户要求加入此前的另一个“国风主题”选项，并指出牌面应显示JOKER，不能用“大王／小王”中文覆盖。用户随后明确选择先加配置入口和预览，等专属插画完成再启用国风。当前传统牌面恢复原始英文JOKER；顶部「牌面」可查看两种风格，国风明确标为待素材，不能通过改配置提前启用。
 
 国风素材仅需J、Q、K、黑红JOKER及牌背6张独立图，提示词在 `docs/doudizhu-guofeng-art-prompts.md`。建议先画J确定画风，开发负责裁切、双头拼接、角标和点阵；当前预览不是最终国风美术，不宣称已完成启用。
+
+
+## 2026-11-06 国风交付与竖排JOKER（0.7.0）
+
+用户已按提示词交付6张专属插画，原生848×1264；PNG/JPG共12文件在 `artifacts/art-delivery-doudizhu-guofeng-2026-11-06/raw/`，仓库外备份在 `D:/code/my/2/山东麻将-美术备份/art-delivery-doudizhu-guofeng-2026-11-06/raw/`，已逐文件校验。当前国风青玉正式开放切换与偏好保存，替代此前“等待插画”的状态；传统仍为默认。两套牌面JOKER均按用户要求改为逐字竖排、右下倒置，保留黑红区分。J/Q/K按腰线拼双头，牌背180度对称；来源与处理见 `assets/licenses/doudizhu-guofeng-manifest.json`、`tools/prepare_doudizhu_guofeng.py`。原图与备份保留，不是缓存。实测结果见 `docs/verification.md`，不将截图验收写成手机手感已确认。

@@ -18,10 +18,13 @@ The game uses the upstream 2x PNG renderings of the 54 faces and teal back.
 Project modifications (2026-11-05): warm off-white RGB multiplication by
 #f6f1e7, preserving alpha; grayscale conversion of the small joker so its
 illustration is distinct from the large joker. Traditional pip arrangement,
-double-headed court artwork and the original black/red JOKER lettering are
-preserved. The modified card images retain their upstream LGPL terms.
-On 2026-11-06 the runtime Chinese joker-label overlay was removed at the
-user's request; the PNG pixels and their recorded hashes were not changed.
+double-headed court artwork are preserved. The modified card images retain
+their upstream LGPL terms. On 2026-11-06 the Chinese overlay was removed;
+the subsequent 0.7.0 change replaces the original horizontal JOKER print with
+upright letters stacked at top-left and inverted at bottom-right, using the
+bundled Noto Sans SC Bold font under SIL OFL 1.1 (assets/fonts/OFL-NotoSansSC.txt).
+Only the two joker PNGs changed; their illustrations remain intact and new
+hashes are recorded in the manifest.
 
 tools/import_doudizhu_cards.py is the reproducible downloader/processor.
 doudizhu-cards-manifest.json records every upstream URL, source SHA-256,

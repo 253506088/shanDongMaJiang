@@ -1,10 +1,14 @@
 class_name DdzCard
 extends Button
-## Traditional Bellot/de Beer card artwork, imported with source and LGPL-2.1.
+## Traditional licensed artwork or the user's delivered Guofeng deck.
 ## Input/selection remain owned by the table; this class only draws the face.
 const Kit = preload("res://scripts/ui/ui_kit.gd")
-const ART_ROOT = "res://assets/doudizhu/cards/"
+const Themes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 static var _art: Dictionary = {}
+var theme_id: String = Themes.DEFAULT:
+	set(value):
+		theme_id = Themes.normalize(value)
+		queue_redraw()
 var card_id: int = 0
 var face_down: bool = false
 var chosen: bool = false
@@ -34,8 +38,9 @@ func _box(rect: Rect2, fill: Color, line: Color, radius: int, width: int = 1) ->
 
 func _face() -> Texture2D:
 	var key = "back" if face_down else "%02d" % clampi(card_id, 0, 53)
-	if not _art.has(key): _art[key] = load(ART_ROOT + key + ".png")
-	return _art[key]
+	var path = Themes.art_root(theme_id) + key + ".png"
+	if not _art.has(path): _art[path] = load(path)
+	return _art[path]
 
 func _draw() -> void:
 	if size.x <= 0 or size.y <= 0: return
@@ -43,8 +48,7 @@ func _draw() -> void:
 	_box(Rect2(2, 5, 109, 158), Color("04161369"), Color.TRANSPARENT, 8)
 	var texture = _face()
 	if texture: draw_texture_rect(texture, Rect2(0, 0, 109, 158), false)
-	# Keep the original black/red JOKER lettering visible; do not paint over
-	# it with translated labels or a replacement corner background.
+	# Both decks bake vertical black/red JOKER into their corner strips.
 	if chosen:
 		_box(Rect2(0, 0, 109, 158), Color.TRANSPARENT, Color("e5c982"), 6, 3)
 	elif interactive and _hovered and not disabled:

@@ -141,6 +141,14 @@ func set_voice_profile(value: String) -> void:
 
 func set_card_theme(value) -> void:
 	card_theme = CardThemes.normalize(value)
+	_cancel_drag()
+	_update_card_theme(self)
+
+func _update_card_theme(node: Node) -> void:
+	# A preview has its own explicit theme, independent of the current table.
+	if node == theme_preview: return
+	if node is CardFace: node.theme_id = card_theme
+	for child in node.get_children(): _update_card_theme(child)
 
 func set_hint(cards: Array) -> void:
 	if not _can_act() or str(view.get("phase", "")) != "playing": return
@@ -290,6 +298,7 @@ func _draw_self() -> void:
 
 func _card(parent: Node, id: int, at: Vector2, dimensions: Vector2, interactive: bool = false) -> CardFace:
 	var card = CardFace.new()
+	card.theme_id = card_theme
 	card.card_id = id
 	card.position = at
 	card.size = dimensions
@@ -593,21 +602,20 @@ func _draw_card_themes(preview_id: String) -> void:
 	_label(panel, Rect2(44, 29, 896, 59), "牌面风格", 35, Kit.TEXT)
 	_button(panel, Rect2(970, 32, 66, 51), "×", _finish_card_themes)
 	_button(panel, Rect2(44, 105, 482, 57), "传统扑克牌 · 使用中" if card_theme == "traditional" else "传统扑克牌", _draw_card_themes.bind("traditional"), theme_preview_id == "traditional")
-	_button(panel, Rect2(544, 105, 492, 57), "国风青玉 · 预览", _draw_card_themes.bind("guofeng"), theme_preview_id == "guofeng")
+	_button(panel, Rect2(544, 105, 492, 57), "国风青玉 · 使用中" if card_theme == "guofeng" else "国风青玉", _draw_card_themes.bind("guofeng"), theme_preview_id == "guofeng")
 	theme_preview = null
 	if theme_preview_id == "traditional":
-		_label(panel, Rect2(44, 174, 992, 40), "标准花色点阵 · 双头人物 · 原版 JOKER", 25, Kit.MUTED, true)
-		_draw_group(panel, [40, 36, 32, 52, 53], Rect2(66, 242, 948, 270), 155, 179)
-		_label(panel, Rect2(44, 538, 992, 47), "当前可用。牌面设置不改变牌值、玩法或已选手牌。", 23, Kit.MUTED, true)
+		_label(panel, Rect2(44, 174, 992, 40), "标准花色点阵 · 双头人物 · 竖排 JOKER", 25, Kit.MUTED, true)
 	else:
-		_label(panel, Rect2(44, 174, 992, 40), "专属插画准备中，暂不可启用", 25, Kit.ACCENT, true)
-		theme_preview = ThemePreview.new()
-		theme_preview.position = Vector2(44, 222)
-		theme_preview.size = Vector2(992, 300)
-		panel.add_child(theme_preview)
-		_label(panel, Rect2(44, 538, 992, 47), "保留标准角标，人物与 JOKER 专属插画完成后开放切换。", 23, Kit.MUTED, true)
+		_label(panel, Rect2(44, 174, 992, 40), "青玉双头人物 · 黑红双王 · 回纹牌背", 25, Kit.ACCENT, true)
+	theme_preview = ThemePreview.new()
+	theme_preview.theme_id = theme_preview_id
+	theme_preview.position = Vector2(44, 222)
+	theme_preview.size = Vector2(992, 300)
+	panel.add_child(theme_preview)
+	_label(panel, Rect2(44, 538, 992, 47), "切换后立即生效，并记住你的选择。已选手牌保留。", 23, Kit.MUTED, true)
 	_button(panel, Rect2(44, 630, 362, 62), "返回牌桌", _finish_card_themes)
-	theme_apply_button = _button(panel, Rect2(424, 630, 612, 62), "使用传统牌面" if CardThemes.available(theme_preview_id) else "等待插画完成", _apply_preview_theme, true)
+	theme_apply_button = _button(panel, Rect2(424, 630, 612, 62), "使用" + str(CardThemes.info(theme_preview_id).name), _apply_preview_theme, true)
 	theme_apply_button.disabled = not CardThemes.available(theme_preview_id)
 
 func _apply_preview_theme() -> void:

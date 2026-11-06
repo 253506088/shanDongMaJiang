@@ -3,7 +3,7 @@
 Development: python tools/import_doudizhu_cards.py --download (needs Pillow)
 Offline verification: python tools/import_doudizhu_cards.py --verify
 Downloads stay in memory. Runtime PNGs, exact SVG source and license/attribution
-are retained in assets/. Upstream letters are rasterized, not system fonts.
+are retained in assets/. JOKER uses the bundled Noto Sans SC Bold font.
 """
 from __future__ import annotations
 import argparse
@@ -22,6 +22,39 @@ REPOSITORY = "https://github.com/htdebeer/SVG-cards"
 COMMIT = "6d88bf9c594997b82bc5668ab0877a4e9b717665"
 RAW_ROOT = f"https://raw.githubusercontent.com/htdebeer/SVG-cards/{COMMIT}/"
 PAPER_RGB = (246, 241, 231)
+
+def vertical_joker(card, red: bool):
+    """Keep the illustration and replace horizontal text with upright columns."""
+    from PIL import Image, ImageDraw, ImageFont
+    column = Image.new("RGBA", card.size)
+    font = ImageFont.truetype(str(ROOT / "assets/fonts/NotoSansSC-Bold.ttf"), 30)
+    ink = "#ae2924" if red else "#17211f"
+    for index, letter in enumerate("JOKER"):
+        ImageDraw.Draw(column).text((31, 16 + index * 32), letter, font=font, fill=ink, anchor="mt")
+    card.paste(PAPER_RGB + (255,), (12, 10, 112, 66))
+    card.paste(PAPER_RGB + (255,), (226, 423, 326, 479))
+    card.alpha_composite(column)
+    card.alpha_composite(column.transpose(Image.Transpose.ROTATE_180))
+    return card
+
+JOKER_CHANGE = "Horizontal JOKER replaced by upright Noto Sans SC Bold letters stacked in the top-left and inverted bottom-right corners; illustration preserved"
+
+def restyle_jokers() -> None:
+    from PIL import Image
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    for entry in manifest["cards"]:
+        if entry["key"] not in ("52", "53") or JOKER_CHANGE in entry["modifications"]: continue
+        path = ROOT / entry["path"]
+        if digest(path.read_bytes()) != entry["sha256"]: raise RuntimeError("Unexpected source pixels")
+        with Image.open(path) as opened: card = vertical_joker(opened.convert("RGBA"), entry["key"] == "53")
+        card.save(path, compress_level=9)
+        data = path.read_bytes()
+        entry.update(sha256=digest(data), bytes=len(data))
+        entry["modifications"].append(JOKER_CHANGE)
+    manifest["processing"] = "Traditional pips and double-headed court art preserved; warm tone and small joker grayscale. JOKER printed vertically using bundled Noto Sans SC Bold in opposite corners, without Chinese overlays."
+    manifest["joker_layout_updated"] = "2026-11-06"
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    verify()
 
 def catalog() -> list[tuple[str, str]]:
     suits = ["spade", "heart", "club", "diamond"]
@@ -66,6 +99,7 @@ def download() -> None:
         if key == "52": rgb = ImageOps.grayscale(rgb).convert("RGB")
         rgb = ImageChops.multiply(rgb, Image.new("RGB", card.size, PAPER_RGB))
         card = rgb.convert("RGBA"); card.putalpha(alpha)
+        if key in ("52", "53"): card = vertical_joker(card, key == "53")
         output = io.BytesIO(); card.save(output, format="PNG", optimize=False, compress_level=9)
         rendered = output.getvalue()
         target = OUTPUT / (key + ".png"); target.write_bytes(rendered)
@@ -80,13 +114,15 @@ def download() -> None:
         }
     with ThreadPoolExecutor(max_workers=6) as workers:
         entries = list(workers.map(make_card, catalog()))
+    for entry in entries:
+        if entry["key"] in ("52", "53"): entry["modifications"].append(JOKER_CHANGE)
     manifest = {
         "format_version": 1, "imported_date": "2026-11-05", "repository": REPOSITORY, "commit": COMMIT,
         "upstream_deck": "SVG-cards 4.0.2 / David Bellot and Huub de Beer",
         "license": "LGPL-2.1 (upstream repository license; SVG header preserved unchanged)",
         "copyright": ["Copyright (C) 2005 David Bellot", "Copyright (C) 2016, 2017 Huub de Beer"],
         **source_files,
-        "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Original black/red JOKER lettering is preserved without a runtime translated overlay. PNG indices are rasterized, not runtime system-font text.",
+        "processing": "Traditional pips and double-headed court art preserved; warm tone and small joker grayscale. JOKER printed vertically using bundled Noto Sans SC Bold in opposite corners, without Chinese overlays.",
         "cards": entries,
     }
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -113,7 +149,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--vertical-jokers", action="store_true", help="Update existing verified PNGs offline")
     args = parser.parse_args()
     if args.verify: verify()
+    elif args.vertical_jokers: restyle_jokers()
     elif args.download: download()
     else: parser.error("Choose --download or --verify")

@@ -1,0 +1,607 @@
+{
+  "format_version": 1,
+  "prepared_date": "2026-11-06",
+  "origin": "User-delivered generated artwork following docs/doudizhu-guofeng-art-prompts.md; generation model not supplied.",
+  "source_archive": "artifacts/art-delivery-doudizhu-guofeng-2026-11-06/raw",
+  "external_backup": "D:\\code\\my\\2\\山东麻将-美术备份\\art-delivery-doudizhu-guofeng-2026-11-06\\raw",
+  "sources": [
+    {
+      "name": "guofeng-back-jade.jpg",
+      "bytes": 794836,
+      "sha256": "44aaa6185f28311d991728c458bcfaf95f5e29fc6de6261fa3e839e4c5551429"
+    },
+    {
+      "name": "guofeng-back-jade.png",
+      "bytes": 1651443,
+      "sha256": "a69a9e5425727b48eb8c9fed188393bb6cb7943db01d45ad66e0dca42331c73e"
+    },
+    {
+      "name": "guofeng-j-young.jpg",
+      "bytes": 685827,
+      "sha256": "bd6a3ca96b110d866c330cb17ecd6ed23d41a54ed4b60d77f0b36f6ffe43d692"
+    },
+    {
+      "name": "guofeng-j-young.png",
+      "bytes": 1428298,
+      "sha256": "7dc9011b63e1b0c32a026e961dcf5672af4bc1cb93d1e8784090fe2da6ff1a26"
+    },
+    {
+      "name": "guofeng-joker-black.jpg",
+      "bytes": 679404,
+      "sha256": "db94a54d7f8035cbcbf48a475de2ccbc1b73fd7c1208a0b5caf9a9b339403e94"
+    },
+    {
+      "name": "guofeng-joker-black.png",
+      "bytes": 1444874,
+      "sha256": "b36330ba5c9f7a1ba3c1824c66a15e5686ae7a88f210cc8c504eaa3472f397ae"
+    },
+    {
+      "name": "guofeng-joker-red.jpg",
+      "bytes": 717134,
+      "sha256": "a0adfbe51e73541dfaf60bc2ac3162e41c9dc9d3093d39637102a2038316660b"
+    },
+    {
+      "name": "guofeng-joker-red.png",
+      "bytes": 1532959,
+      "sha256": "4f0350eb668dffc80904999d31b6c714c85b0ca86b4e916182b612e3fd300429"
+    },
+    {
+      "name": "guofeng-k-elder.jpg",
+      "bytes": 684436,
+      "sha256": "8bc3dcbbe3d51f5c3ac8a0314094b517a5a6a0ca2a9c48c4cf2fb496f2eb7eed"
+    },
+    {
+      "name": "guofeng-k-elder.png",
+      "bytes": 1574552,
+      "sha256": "6ebf207ffdc7c042a330f535163e3f412a33b5af34d59180f2dba88de16e55ed"
+    },
+    {
+      "name": "guofeng-q-scholar.jpg",
+      "bytes": 663212,
+      "sha256": "b31d57019ee91dc4812d1d08a707ad5baa027c0266698cc1080eabe962544c04"
+    },
+    {
+      "name": "guofeng-q-scholar.png",
+      "bytes": 1565845,
+      "sha256": "92dc6aac1722e852abc908d5f4c6b4bc45d8edb968dd2ae7728d7befdf387d81"
+    }
+  ],
+  "font": {
+    "path": "assets/fonts/NotoSansSC-Bold.ttf",
+    "sha256": "fd1db9de54a91c5e42129c625eb1dc608adf63885edea5cd420f62c7d2ddf996",
+    "license": "SIL OFL 1.1; assets/fonts/OFL-NotoSansSC.txt"
+  },
+  "processing": {
+    "tool": "tools/prepare_doudizhu_guofeng.py",
+    "court_crops": {
+      "j-young": [
+        62,
+        85,
+        798,
+        1115
+      ],
+      "q-scholar": [
+        62,
+        85,
+        798,
+        1115
+      ],
+      "k-elder": [
+        62,
+        85,
+        798,
+        1115
+      ],
+      "joker-black": [
+        64,
+        76,
+        800,
+        1246
+      ],
+      "joker-red": [
+        64,
+        76,
+        800,
+        1246
+      ]
+    },
+    "notes": "Native 848x1264 paintings; warm paper matching; portraits scaled proportionally, paired by 180-degree rotation at the waist. Code-drawn standard indices and pips; stacked upright JOKER letters in opposite corners. Back repeats rotated upper half. 2x composition, Lanczos downsample to 338x490."
+  },
+  "cards": [
+    {
+      "key": "00",
+      "path": "assets/doudizhu/guofeng/00.png",
+      "sha256": "f5fcb7abcdb008a548311ce2ea99fe742e5b3a014705b2c18a8508b393440d12",
+      "bytes": 17188,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "01",
+      "path": "assets/doudizhu/guofeng/01.png",
+      "sha256": "35856d514a63cd4af9c8e66a73b1cd66c75228c2c3ebe34141ae4d4a467def85",
+      "bytes": 15377,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "02",
+      "path": "assets/doudizhu/guofeng/02.png",
+      "sha256": "230e37a31e0574f3440e3a67d1af79dc33d321a5395f77dfdae7bac2eb1bf6f5",
+      "bytes": 17753,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "03",
+      "path": "assets/doudizhu/guofeng/03.png",
+      "sha256": "fe0b8eb286b1f65d15980360a60598f4154733b059ae9ba7d093c11df0ace631",
+      "bytes": 15098,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "04",
+      "path": "assets/doudizhu/guofeng/04.png",
+      "sha256": "a9fb85457ec304fac271bc8b104bd8d9041ebd67c89efcca805af6ef3a252290",
+      "bytes": 13205,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "05",
+      "path": "assets/doudizhu/guofeng/05.png",
+      "sha256": "871bb0946a9d723cd0c213ee42b4722b23a5ffb441e4cba370fab93945043615",
+      "bytes": 11739,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "06",
+      "path": "assets/doudizhu/guofeng/06.png",
+      "sha256": "41f4508725d50cfcc7c9ad1032984252beb244d87bf8e3abc6c713f6f8c1039f",
+      "bytes": 13645,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "07",
+      "path": "assets/doudizhu/guofeng/07.png",
+      "sha256": "457426e5ae0d593ddb557352918fba0efd8e9cf41deb1ef6df77b6f42da97f07",
+      "bytes": 11526,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "08",
+      "path": "assets/doudizhu/guofeng/08.png",
+      "sha256": "988ecd7663d0528153a26868fb3600738bedce4c799b4d0566edb487c64fc3f9",
+      "bytes": 16794,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "09",
+      "path": "assets/doudizhu/guofeng/09.png",
+      "sha256": "da3f605e285163297e96c07765f3fef45a4427872be559a1913a4904b6b49ead",
+      "bytes": 14970,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "10",
+      "path": "assets/doudizhu/guofeng/10.png",
+      "sha256": "d65460977dfdddb0ea18372a40973d6705c5cbb95ace33f616e2d8f478c1eb4f",
+      "bytes": 17360,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "11",
+      "path": "assets/doudizhu/guofeng/11.png",
+      "sha256": "0a9c8382189ec0e9b861dcc9993ba50dabacc364e110b512a5c365a93cea2222",
+      "bytes": 14674,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "12",
+      "path": "assets/doudizhu/guofeng/12.png",
+      "sha256": "7f5874524dbd9ca5fa810d00bc41c414f537f0c88f1c7a0de3fb14fc9d457580",
+      "bytes": 17889,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "13",
+      "path": "assets/doudizhu/guofeng/13.png",
+      "sha256": "9a4d32df3819ea7a3d06d08436195abf5031a5c585666e26e7b6748711fa3df5",
+      "bytes": 16014,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "14",
+      "path": "assets/doudizhu/guofeng/14.png",
+      "sha256": "d791a1427a791e247f096a8f39a65c962fa84950e0300abf159a9ec33b7c64f6",
+      "bytes": 18462,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "15",
+      "path": "assets/doudizhu/guofeng/15.png",
+      "sha256": "8aec3a4bd3277860f391415a9451003304f143c294968e15b6c261fc7d0cae11",
+      "bytes": 15698,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "16",
+      "path": "assets/doudizhu/guofeng/16.png",
+      "sha256": "ff11c927e8693e5004fc8317c536e10bc1d7397bd151fc24bb4249d325533c35",
+      "bytes": 17491,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "17",
+      "path": "assets/doudizhu/guofeng/17.png",
+      "sha256": "1a4284a1243716c9ef07a2c79712c154adcac995d41d7f951c0ae8be05ec6997",
+      "bytes": 15439,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "18",
+      "path": "assets/doudizhu/guofeng/18.png",
+      "sha256": "49fa92a2027e5317717c3a415353c14dae2d5f5eb88fa8628e15bc1b44b14b8d",
+      "bytes": 18173,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "19",
+      "path": "assets/doudizhu/guofeng/19.png",
+      "sha256": "68f651e92bb8e0938bf74c96339ffa1b9575a4217f9b74afee4303d98f9498df",
+      "bytes": 15040,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "20",
+      "path": "assets/doudizhu/guofeng/20.png",
+      "sha256": "2a63ba237b46b31f618436bf3c8586625672de89f3d7a73cc1fc4e77bcdbcf76",
+      "bytes": 22185,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "21",
+      "path": "assets/doudizhu/guofeng/21.png",
+      "sha256": "55614250599e6c298c612ef33c66724eec626429f3e00428e0a32e9c13e3796e",
+      "bytes": 19626,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "22",
+      "path": "assets/doudizhu/guofeng/22.png",
+      "sha256": "992be55475af6b038a5a54560d22d2db642eb5b005369d1a8401b97808238685",
+      "bytes": 22998,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "23",
+      "path": "assets/doudizhu/guofeng/23.png",
+      "sha256": "6ec85d60df7bb84302a381491af223d8ec43601221d818ca3f8a4940ae7ddb86",
+      "bytes": 19245,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "24",
+      "path": "assets/doudizhu/guofeng/24.png",
+      "sha256": "8354e5f9858ea14f21ee7ef17f4797df4a56298e9ee8a23b73f07bb00ac1c9f4",
+      "bytes": 22115,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "25",
+      "path": "assets/doudizhu/guofeng/25.png",
+      "sha256": "8c30d05a903db117f7aa247680463ffa47dee70c51d41a49d8a4815483874885",
+      "bytes": 19551,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "26",
+      "path": "assets/doudizhu/guofeng/26.png",
+      "sha256": "c18ca08d19da329f4a513d938f45c6eeef4f740a0555fbf03a65fba85a93c6de",
+      "bytes": 22846,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "27",
+      "path": "assets/doudizhu/guofeng/27.png",
+      "sha256": "b1772c95c849023d1b9c05858cdd29ca4363c2841af8186c9c6f70527cfd5d36",
+      "bytes": 19179,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "28",
+      "path": "assets/doudizhu/guofeng/28.png",
+      "sha256": "21a47fbd5256c72cc968f89b97ae21f4f347cd2c66e7f225c1a3f71b7d65c660",
+      "bytes": 25122,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "29",
+      "path": "assets/doudizhu/guofeng/29.png",
+      "sha256": "243aa8e67b74b8c6872534e682c472541fe563aadf1e3be9ad8e690eaaf4e714",
+      "bytes": 22074,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "30",
+      "path": "assets/doudizhu/guofeng/30.png",
+      "sha256": "8197918a923c7f96a6beac6d93ef110560c34d7921b2c06b9ae4ee9538d7a42b",
+      "bytes": 25916,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "31",
+      "path": "assets/doudizhu/guofeng/31.png",
+      "sha256": "203c31f0df267cd5f74674fdf7f574898dc590e880a60e85bca23a9bd1b08a84",
+      "bytes": 21750,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "32",
+      "path": "assets/doudizhu/guofeng/32.png",
+      "sha256": "7071267eebbf316026b13459407af9928410480df5346790ed3d2619539d48f2",
+      "bytes": 138671,
+      "width": 338,
+      "height": 490,
+      "painting": "j-young"
+    },
+    {
+      "key": "33",
+      "path": "assets/doudizhu/guofeng/33.png",
+      "sha256": "bd5b38974d63877d3775566f3c13199726cc30824bc58c26ad008a521edcd40a",
+      "bytes": 138029,
+      "width": 338,
+      "height": 490,
+      "painting": "j-young"
+    },
+    {
+      "key": "34",
+      "path": "assets/doudizhu/guofeng/34.png",
+      "sha256": "55d7a7d9f59d50a18f9df850c7bbf7fddddf077794cd48f0013c097c5133144a",
+      "bytes": 138794,
+      "width": 338,
+      "height": 490,
+      "painting": "j-young"
+    },
+    {
+      "key": "35",
+      "path": "assets/doudizhu/guofeng/35.png",
+      "sha256": "f988dcae39e0a1b727d103f2199034aa99977656363466866dc367a1340574f0",
+      "bytes": 138031,
+      "width": 338,
+      "height": 490,
+      "painting": "j-young"
+    },
+    {
+      "key": "36",
+      "path": "assets/doudizhu/guofeng/36.png",
+      "sha256": "580287ce03b82719bc11016b7ddec2fd76b98979b6be7718d8e63d44aa30a902",
+      "bytes": 148837,
+      "width": 338,
+      "height": 490,
+      "painting": "q-scholar"
+    },
+    {
+      "key": "37",
+      "path": "assets/doudizhu/guofeng/37.png",
+      "sha256": "b2a3cda798191b4fa7361209190e1b8d3fed08dc6204abc9314c1fd7a8dd9204",
+      "bytes": 147865,
+      "width": 338,
+      "height": 490,
+      "painting": "q-scholar"
+    },
+    {
+      "key": "38",
+      "path": "assets/doudizhu/guofeng/38.png",
+      "sha256": "9699c8d1915caeeaac9f6ed630a40c8967264291fe6cfb7f621ba57cddd34b37",
+      "bytes": 148964,
+      "width": 338,
+      "height": 490,
+      "painting": "q-scholar"
+    },
+    {
+      "key": "39",
+      "path": "assets/doudizhu/guofeng/39.png",
+      "sha256": "40311ca68baa8f6a87421bb48c473fcfa9db64f6e53e12061d0803389a23082b",
+      "bytes": 147852,
+      "width": 338,
+      "height": 490,
+      "painting": "q-scholar"
+    },
+    {
+      "key": "40",
+      "path": "assets/doudizhu/guofeng/40.png",
+      "sha256": "fb1173ce99a89e4e1895584a6fcdc6401ca41baeeeda58e945b9d8cb8e58b3eb",
+      "bytes": 141505,
+      "width": 338,
+      "height": 490,
+      "painting": "k-elder"
+    },
+    {
+      "key": "41",
+      "path": "assets/doudizhu/guofeng/41.png",
+      "sha256": "d3337128f29d11e8b6dc2a3459ca1625976bfd68ca5ed3827d7ec9f96c4756d9",
+      "bytes": 140690,
+      "width": 338,
+      "height": 490,
+      "painting": "k-elder"
+    },
+    {
+      "key": "42",
+      "path": "assets/doudizhu/guofeng/42.png",
+      "sha256": "27f490e57ba1402b515a06c492dd5b7a62cc5622b2825b0b00994aebf1972d4f",
+      "bytes": 141648,
+      "width": 338,
+      "height": 490,
+      "painting": "k-elder"
+    },
+    {
+      "key": "43",
+      "path": "assets/doudizhu/guofeng/43.png",
+      "sha256": "e00b40ab043a5bc909637d6ff5e424da4a3bc07fd4f246a19adac18c4cc4e093",
+      "bytes": 140730,
+      "width": 338,
+      "height": 490,
+      "painting": "k-elder"
+    },
+    {
+      "key": "44",
+      "path": "assets/doudizhu/guofeng/44.png",
+      "sha256": "b213808e12b584715f5f29c1772262a21a2afedd4e58cd7437ac83197a37eb3a",
+      "bytes": 13552,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "45",
+      "path": "assets/doudizhu/guofeng/45.png",
+      "sha256": "685d113e5373a05711fdc75c28ac706b46b0c897504fcd54d61d7637888b54c3",
+      "bytes": 11988,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "46",
+      "path": "assets/doudizhu/guofeng/46.png",
+      "sha256": "e4628ae140d07e07985dddfc22879b28d12e2642d22ee7e6a680446c1217c8e0",
+      "bytes": 13668,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "47",
+      "path": "assets/doudizhu/guofeng/47.png",
+      "sha256": "d4c9a07629f86ccd669957ca8a710a1563d380c136f55a37d1eb56e92be47dc5",
+      "bytes": 11930,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "48",
+      "path": "assets/doudizhu/guofeng/48.png",
+      "sha256": "89e7bda1d640926574044b0b6f67dee73a4d93b4a0b8ecb91b7054f6e3f8f3e7",
+      "bytes": 14126,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "49",
+      "path": "assets/doudizhu/guofeng/49.png",
+      "sha256": "746e478025db0731a78f102c1c149cab7e76741fc4bebb73629d908e2ff1070b",
+      "bytes": 12592,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "50",
+      "path": "assets/doudizhu/guofeng/50.png",
+      "sha256": "d2bde27255c567376f0044789df582c2f13a3eec5d02b66640abf344646c4073",
+      "bytes": 14554,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "51",
+      "path": "assets/doudizhu/guofeng/51.png",
+      "sha256": "f2a8da742d7f4a8350240b15d0ee0d97a6214e11e14ce4acf060f9444cd64db0",
+      "bytes": 12424,
+      "width": 338,
+      "height": 490,
+      "painting": null
+    },
+    {
+      "key": "52",
+      "path": "assets/doudizhu/guofeng/52.png",
+      "sha256": "8e495618a6e5e7ba16bc73b30199f0a6e0b1498205d77d9fe6515496b828d6de",
+      "bytes": 163182,
+      "width": 338,
+      "height": 490,
+      "painting": "joker-black"
+    },
+    {
+      "key": "53",
+      "path": "assets/doudizhu/guofeng/53.png",
+      "sha256": "2ff5af1a154ba40ed335b50a7b2fbcea2cb435ae42479fa5016312172f608557",
+      "bytes": 163878,
+      "width": 338,
+      "height": 490,
+      "painting": "joker-red"
+    },
+    {
+      "key": "back",
+      "path": "assets/doudizhu/guofeng/back.png",
+      "sha256": "557f69d793c4dcb6f08cb374e1927c5183a3141adcaace5df0a2546d070d1e58",
+      "bytes": 277366,
+      "width": 338,
+      "height": 490,
+      "painting": "back-jade"
+    }
+  ]
+}

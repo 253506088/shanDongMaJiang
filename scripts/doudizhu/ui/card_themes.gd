@@ -7,12 +7,14 @@ const CATALOG = [
 	{
 		"id": "traditional", "name": "传统扑克牌", "available": true,
 		"status": "已可使用", "preview_only": false,
-		"description": "标准花色点阵与双头 J / Q / K 人物。"
+		"description": "标准花色点阵与双头 J / Q / K 人物。",
+		"art_root": "res://assets/doudizhu/cards/"
 	},
 	{
-		"id": "guofeng", "name": "国风青玉", "available": false,
-		"status": "等待专属插画", "preview_only": true,
-		"description": "保留标准角标，定制人物、JOKER 与牌背。"
+		"id": "guofeng", "name": "国风青玉", "available": true,
+		"status": "已可使用", "preview_only": false,
+		"description": "青玉双头人物、黑红 JOKER 与回纹牌背。",
+		"art_root": "res://assets/doudizhu/guofeng/"
 	}
 ]
 
@@ -32,3 +34,6 @@ static func info(id: String) -> Dictionary:
 	for theme in CATALOG:
 		if theme.id == id: return theme.duplicate(true)
 	return CATALOG[0].duplicate(true)
+
+static func art_root(id: String) -> String:
+	return str(info(normalize(id)).art_root)

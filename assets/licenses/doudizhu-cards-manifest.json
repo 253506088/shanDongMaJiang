@@ -24,7 +24,7 @@
     "path": "assets/licenses/doudizhu-cards-upstream-README.md",
     "sha256": "010e1a4c29eb848196806862f22a890440f69076413d047a2e69bb923f9f6d2e"
   },
-  "processing": "Upstream 2x PNGs preserve traditional pips and double-headed court art. Warm tone; small joker grayscale. Original black/red JOKER lettering is preserved without a runtime translated overlay. PNG indices are rasterized, not runtime system-font text.",
+  "processing": "Traditional pips and double-headed court art preserved; warm tone and small joker grayscale. JOKER printed vertically using bundled Noto Sans SC Bold in opposite corners, without Chinese overlays.",
   "cards": [
     {
       "key": "00",
@@ -760,13 +760,14 @@
       "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/joker_black.png",
       "source_sha256": "4c6e42330b2e5677982ad3b2d6aef50ec60faeb2b4684725ccc6c5c38853a28c",
       "path": "assets/doudizhu/cards/52.png",
-      "sha256": "9436c6a2c1c7bdb98dcad011e7faafb83b1c3a3c2893da6b4785ed02f58683b8",
-      "bytes": 55541,
+      "sha256": "228951c36f602bc990e9402b03fea2e0028f710db9594f02adf7ad0f12441e59",
+      "bytes": 54685,
       "width": 338,
       "height": 489,
       "modifications": [
         "RGB multiplication by #f6f1e7; alpha unchanged",
-        "Small joker illustration desaturated to distinguish it from the large joker"
+        "Small joker illustration desaturated to distinguish it from the large joker",
+        "Horizontal JOKER replaced by upright Noto Sans SC Bold letters stacked in the top-left and inverted bottom-right corners; illustration preserved"
       ]
     },
     {
@@ -775,12 +776,13 @@
       "source_url": "https://raw.githubusercontent.com/htdebeer/SVG-cards/6d88bf9c594997b82bc5668ab0877a4e9b717665/png/2x/joker_red.png",
       "source_sha256": "921ede64fa5e16f492e6a49bf60eba7ee328aefe1220358196610c12d248f423",
       "path": "assets/doudizhu/cards/53.png",
-      "sha256": "77c320ceeb0daaea8afbedd90a5f3eeab8ff14be6c5467ca888e773517de6052",
-      "bytes": 56648,
+      "sha256": "708ea37386b87f0df60f9ee11f1d9c84981114320cec0aeef3dee1b641b61c6b",
+      "bytes": 55976,
       "width": 338,
       "height": 489,
       "modifications": [
-        "RGB multiplication by #f6f1e7; alpha unchanged"
+        "RGB multiplication by #f6f1e7; alpha unchanged",
+        "Horizontal JOKER replaced by upright Noto Sans SC Bold letters stacked in the top-left and inverted bottom-right corners; illustration preserved"
       ]
     },
     {
@@ -797,5 +799,6 @@
         "RGB multiplication by #f6f1e7; alpha unchanged"
       ]
     }
-  ]
+  ],
+  "joker_layout_updated": "2026-11-06"
 }

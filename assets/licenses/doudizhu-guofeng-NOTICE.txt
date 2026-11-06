@@ -1,0 +1,15 @@
+Guofeng Dou Dizhu card artwork, delivered by the user on 2026-11-06.
+Six generated paintings follow docs/doudizhu-guofeng-art-prompts.md.
+The delivery did not specify a generation model or independent license text.
+This is user-supplied artwork, not the LGPL traditional SVG-cards deck, nor
+Lotus artwork. Do not infer those assets' licenses for these paintings.
+
+Preparation: tools/prepare_doudizhu_guofeng.py. Native 848x1264 paintings;
+proportional crop and resize, warm paper matching, waist-level 180-degree
+court pairs and symmetric back. Standard pips are drawn by the project.
+All rank indices and vertical JOKER letters use bundled Noto Sans SC Bold
+under SIL OFL 1.1, included in assets/fonts/OFL-NotoSansSC.txt and licenses.txt.
+Runtime textures: assets/doudizhu/guofeng/ (54 faces and one back).
+Source hashes, backup path, crop rectangles and output hashes are recorded
+in doudizhu-guofeng-manifest.json. Original PNG/JPG files remain in the local
+delivery archive and a separately verified backup; they are not caches.

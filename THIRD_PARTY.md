@@ -16,7 +16,7 @@
 
 完整LGPL、署名、原始SVG及其原始许可头、上游README和逐图SHA-256清单保存在 `assets/licenses/doudizhu-cards-*`，同时随游戏包分发。`doudizhu-cards-source.svg.txt` 是原始SVG的原字节副本，去掉末尾`.txt`可编辑；`tools/import_doudizhu_cards.py` 提供确定性的下载／处理／校验方法。具体来源和修改见 `docs/doudizhu-card-art.md`。
 
-0.6.1的国风主题预览由本项目代码绘制边框、云纹、折扇与明确待制作的插画槽，使用已有Noto字体；它不是已交付的国风人物插画，也不作为可用主题启用。待用户交付的专属素材需另行记录来源及处理。
+0.7.0接入用户按提示词交付的J／Q／K、黑红JOKER及青玉牌背，生成模型及独立许可文本未随交付提供，如实记录为用户提供的生成素材；不将传统牌组的LGPL、莲花MIT或其他素材许可套用到它们。`assets/licenses/doudizhu-guofeng-manifest.json` 记录12份原图与备份的SHA-256、裁切和55张运行图；`tools/prepare_doudizhu_guofeng.py` 可从本地原图重建。牌值和点阵由程序绘制，字形来自已随包提供OFL许可的Noto Sans SC Bold。两套牌面均使用粗体英文JOKER竖排角标；传统牌面只调整原横排文字区域，保留插画，其修改后图片仍按LGPL提供。
 
 ## 山东麻将规则和 AI 的移植
 

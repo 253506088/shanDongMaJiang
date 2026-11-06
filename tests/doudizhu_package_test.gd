@@ -1,5 +1,6 @@
 extends SceneTree
-## Run as an external --script with the exported EXE so res:// is the PCK.
+## Run EXE with --path <build/windows> --main-pack <absolute EXE> and
+## --script <absolute test path>. Keep res:// bound to the PCK, not local sources.
 var failures: Array = []
 var checks = 0
 
@@ -13,7 +14,7 @@ func check(value: bool, message: String) -> void:
 		printerr("DDZ PACKAGE FAIL: ", message)
 
 func run() -> void:
-	check(str(ProjectSettings.get_setting("application/config/version")) == "0.6.1", "package version")
+	check(str(ProjectSettings.get_setting("application/config/version")) == "0.7.0", "package version")
 	check(not FileAccess.file_exists("res://tests/doudizhu_package_test.gd"), "development tests are excluded")
 	check(not FileAccess.file_exists("res://tools/import_doudizhu_audio.py"), "voice generator is excluded")
 	check(FileAccess.file_exists("res://assets/licenses/doudizhu-voice-manifest.json"), "voice provenance ships with package")
@@ -43,8 +44,23 @@ func run() -> void:
 	check(app.doudizhu.table.recorder.counts.size() == 15 and app.doudizhu.table.recorder.total == 37, "packaged recorder includes undealt bottom without exposing hidden hands")
 	app.doudizhu.table.show_card_themes()
 	app.doudizhu.table._draw_card_themes("guofeng")
-	check(app.doudizhu.table.theme_apply_button.disabled and is_instance_valid(app.doudizhu.table.theme_preview), "packaged guofeng preview is present but locked pending art")
-	check(not app.doudizhu.set_card_theme("guofeng"), "packaged settings cannot bypass pending art")
+	check(not app.doudizhu.table.theme_apply_button.disabled and is_instance_valid(app.doudizhu.table.theme_preview), "packaged guofeng deck is available")
+	check(app.doudizhu.set_card_theme("guofeng"), "packaged mode accepts delivered deck")
+	check(app.doudizhu.table.hand_cards.all(func(card): return "guofeng/" in card._face().resource_path), "packaged hand uses chosen textures")
+	for id in range(54):
+		check(ResourceLoader.exists("res://assets/doudizhu/guofeng/%02d.png" % id), "every guofeng face ships")
+	check(ResourceLoader.exists("res://assets/doudizhu/guofeng/back.png"), "guofeng back ships")
+	check(FileAccess.file_exists("res://assets/licenses/doudizhu-guofeng-manifest.json"), "guofeng provenance ships")
+	check(not FileAccess.file_exists("res://artifacts/art-delivery-doudizhu-guofeng-2026-11-06/raw/guofeng-j-young.png"), "original archive stays out of package")
+	app.doudizhu.table._finish_card_themes()
+	app.doudizhu.session.paused = true
+	var capture_args = OS.get_cmdline_user_args()
+	var capture_index = capture_args.find("--capture-dir")
+	if DisplayServer.get_name() != "headless" and capture_index >= 0 and capture_index + 1 < capture_args.size():
+		for frame in range(4): await process_frame
+		RenderingServer.force_draw(false)
+		var path = capture_args[capture_index + 1].path_join("package-guofeng.png")
+		check(root.get_texture().get_image().save_png(path) == OK, "capture actual exported Guofeng table")
 	app.doudizhu.table.pause_menu()
 	check(app.doudizhu.voice.clips.size() == 60, "all sixty offline voice clips load from PCK")
 	app.doudizhu.set_voice_profile("female")
