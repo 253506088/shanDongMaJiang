@@ -8,7 +8,7 @@ foreach ($suite in @('characters_test', 'characters_session_test', 'characters_u
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script "res://tests/$suite.gd" -- --qa
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
-foreach ($suite in @('poker_low_hand_test', 'bluff_core_test', 'bluff_ai_test', 'bluff_recorder_test', 'bluff_session_test', 'bluff_ui_test', 'bluff_audio_test')) {
+foreach ($suite in @('poker_low_hand_test', 'bluff_core_test', 'bluff_ai_test', 'bluff_strategy_test', 'bluff_recorder_test', 'bluff_session_test', 'bluff_ui_test', 'bluff_audio_test')) {
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script "res://tests/$suite.gd" -- --qa
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

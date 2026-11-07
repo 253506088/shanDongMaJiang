@@ -33,6 +33,11 @@ build/
 # artifacts/field-mutation-2026-11-07/. Track source tests, fixed replay fixtures
 # and reviewed verification notes; installers and local captures stay excluded.
 artifacts/
+# Bluff 0.10.1 strategy comparison, full-suite logs and package captures use
+# artifacts/bluff-strategy-2026-11-07/. Retain final QA evidence locally;
+# keep reproducible source tests and reviewed results in Git. The temporary
+# archived baseline under tmp/bluff-strategy-2026-11-07/ is disposable after QA;
+# this run's cleanup was blocked before execution, so it remains local only.
 # User-delivered character originals, two explicitly temporary meme stand-ins,
 # and original generation prompts. Keep this folder and its verified external
 # backup; these are not caches. Curated circular PNGs and the replacement map

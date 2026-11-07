@@ -14,7 +14,7 @@ func check(value: bool, message: String) -> void:
 		printerr("DDZ PACKAGE FAIL: ", message)
 
 func run() -> void:
-	check(str(ProjectSettings.get_setting("application/config/version")) == "0.10.0", "package version")
+	check(str(ProjectSettings.get_setting("application/config/version")) == "0.10.1", "package version")
 	check(not FileAccess.file_exists("res://tests/doudizhu_package_test.gd"), "development tests are excluded")
 	check(not FileAccess.file_exists("res://tools/import_doudizhu_audio.py"), "voice generator is excluded")
 	check(FileAccess.file_exists("res://assets/licenses/doudizhu-voice-manifest.json"), "voice provenance ships with package")
