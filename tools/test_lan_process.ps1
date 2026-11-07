@@ -1,8 +1,8 @@
 param([string]$Package = '', [string]$OutputDir = 'artifacts/lan-process')
 $ErrorActionPreference = 'Stop'
 $projectDir = Split-Path $PSScriptRoot -Parent
-if (-not $Package) { $Package = Join-Path $projectDir 'build/windows/QingyuMahjong.exe' }
-if (-not (Test-Path -LiteralPath $Package)) { throw 'Build the Windows package first.' }
+if (-not $Package) { $Package = Join-Path $projectDir 'build/windows-lan/QingyuMahjong.exe' }
+if (-not (Test-Path -LiteralPath $Package)) { throw 'Build the Windows LAN package first: tools/build.ps1 -Target windows -EnableLan' }
 if (-not [System.IO.Path]::IsPathRooted($OutputDir)) { $OutputDir = Join-Path $projectDir $OutputDir }
 # A fresh directory avoids treating previous completion files as new evidence.
 $runDirectory = Join-Path $OutputDir ([Guid]::NewGuid().ToString('N'))

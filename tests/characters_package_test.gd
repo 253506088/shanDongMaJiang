@@ -26,7 +26,7 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
 	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=true;app.preferences_path=directory+"preferences.json";root.add_child(app)
 	app.session.set_process(false);app.session.storage_root=directory;app.muted=true
-	check(ProjectSettings.get_setting("application/config/version")=="0.10.1","package version current")
+	check(ProjectSettings.get_setting("application/config/version")=="0.10.2","package version current")
 	check(app.character_id==Characters.DEFAULT,"packaged app defaults to male role")
 	check(not FileAccess.file_exists("res://头像生成/avatar_02_male_18.jpg") and not FileAccess.file_exists("res://tools/prepare_character_art.py"),"raw images and preparation scripts excluded")
 	for id in Characters.IDS:

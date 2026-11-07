@@ -710,3 +710,30 @@ Windows首轮导出已产生完整0.10.0程序，但默认EXE被仍在运行的0
 EXE旁290,304字节原生DLL继续保留。麻将存档v1／v2／v3／v4、重放含义、LAN／发现协议5、斗地主规则策略及两张待补头像状态均未改变。旧Windows入口已直接覆盖更新，没有遗留另一个版本的EXE。
 
 源码、策略测试、独立对照脚本、版本与本记录入Git；安装包、截图、日志由既有build／artifacts规则排除，并补充`.gitignore`说明。本轮只尝试清理已确认生成的`tmp/bluff-strategy-2026-11-07/legacy_ai.gd`（8,203字节）和初轮`artifacts/bluff-strategy-2026-11-07/cross-play.json`（701字节），保留最终报告。自动审批在执行前以`blocked by policy`拒绝，没有提供更具体原因；合计8,904字节暂留本机且不入Git，未换工具绕过。Android签名临时目录已自动清理，原始美术、备份和最终验收产物保留。
+
+## 2026-11-08 打包联机选项与菜单（0.10.2）
+
+用户要求打包时可选是否支持局域网，默认否；并报告安卓第2项出现CMD命令错误。现在BAT只含ASCII启动命令，中文菜单集中在带UTF-8 BOM的`tools/package_menu.ps1`，兼容Windows PowerShell 5。交互选平台后回车默认单机，`y`启用联机；显式指定平台时默认单机，追加`-EnableLan`才启用。此次本机修改前的菜单退出用例未复现原报错，因此不把编码原因写成已经定位的唯一根因；新入口已经通过实际CMD调用检查。
+
+普通导出预设使用`offline`特性，联机预设使用`lan`特性；`BuildFeatures`同时约束大厅／关于说明、UDP发现、ENet建房／加入／重连。单机包保留三种本地游戏；源码开发仍能跑联机测试。预设成对保留相同资源和版本，仅能力、输出目录及Android网络权限不同，三对预设一致性检查通过。单机与联机资源代码共用，未把此开关描述成裁剪Godot引擎网络模块。
+
+麻将顺序疑问经后续交流和成品截图核对：本家东在下方时，北在左、南在右、西在上，正常座位轮转已经是东→南→西→北，北后接东。本轮没有反转规则或交换风位；存档v1／v2／v3／v4、重放、场地和LAN／发现协议5均未改动。
+
+| 检查 | 结果 |
+| --- | --- |
+| CMD／PowerShell菜单 | `tools/test_package_menu.ps1` **10项、0失败**，纳入`tools/test.ps1`。实际运行ASCII BAT及PowerShell 5菜单，覆盖安卓选项、退出、回车默认否、选择联机、非法输入重试、全部平台、命令行默认／显式联机、失败码传递和停止后续平台；仅构建器用隔离桩替代 |
+| 全项目回归 | `tools/test.ps1` **退出码0，全部功能断言通过**。包括麻将39,516、场地6,917、突变1,333、UX33,377、LAN264及所有角色／扑克／存档重放专项。`full-tests.log`保留诊断，完整标准输出在执行记录；仍有退出时2／4／6个资源未释放诊断，无SCRIPT ERROR，不将通过描述成日志完全干净 |
+| Windows真实成品 | 实际运行两个导出EXE，1440×810与960×540共**4组、70项、0失败**。检查单机隐藏联机入口、直接调用也不能建立UDP／ENet、联机特性保留、三种本地游戏可进入、中央风位。已查看单机大厅／关于／麻将及联机大厅／关于截图，布局与文案无截断，成品日志无脚本／退出资源错误 |
+| 四进程联机成品 | `tools/test_lan_process.ps1`默认改用`build/windows-lan/`。**4个独立导出进程通过**：完成一局、续到第2局，四席与积分一致。仅本机回环验收，不等于手机热点／跨设备验收 |
+| Android两种成品 | 通过真实`打包游戏.bat android`及`android -EnableLan`分别构建，均为**0.10.2／versionCode16**；独立apksigner验证v2／v3签名通过。aapt实查单机APK没有uses-permission，联机APK只有`INTERNET`、`ACCESS_NETWORK_STATE`、`ACCESS_WIFI_STATE`三项。APK有预期特性且未夹带tests／tools／tmp／artifacts；min SDK24、target35、arm64-v8a／x86_64 |
+
+成品UI复核入口为`tests/build_features_package_test.gd`，使用实际EXE、`--path build/windows`（联机改为windows-lan）和绝对脚本路径，传`-- --qa --capture-dir <目录>`；联机另加`--expect-lan`。全程只运行自己的测试窗口和程序内方法，没有控制系统鼠标、键盘、焦点或其他桌面窗口。没有做手机实机安装、触摸手感、语音自然度或macOS／iOS运行验收。
+
+| 本机成品 | 字节数 | SHA-256 |
+| --- | ---: | --- |
+| `build/windows/QingyuMahjong.exe`（默认单机入口） | 121,275,072 | `02ed108f9248d01ba53cedaf8388048fa4b91df0b668a1b3a14a1c819f575513` |
+| `build/windows-lan/QingyuMahjong.exe` | 121,275,072 | `bea29ac5f296440e07375d069905691c37a162858d5f0c38e400afe5cdba050d` |
+| `build/android/qingyu-mahjong-debug.apk` | 79,705,793 | `1715691699984a1ec989c6595042dbe33cf5f414ce731b6838d5fad790439de5` |
+| `build/android-lan/qingyu-mahjong-debug.apk` | 79,705,793 | `074a283a95f3d10102aa662b900fd40238191d68387c2a3120c93a0a8bed9dac` |
+
+两个Windows目录均保留290,304字节原生DLL，默认启动已更新为0.10.2单机包。构建／菜单源码、运行特性门禁、预设、测试及本记录入Git；安装包和`artifacts/build-options-2026-11-08/`最终截图／日志保留本地并由`.gitignore`排除。本轮菜单隔离目录和Android签名临时目录已自动清理；原有原图、备份、先前任务临时目录未动。

@@ -35,7 +35,7 @@ func run() -> void:
 	app.muted=true;app.session.set_process(false)
 	save_directory="user://qa-mutation-package-%d-%d/"%[OS.get_process_id(),Time.get_ticks_msec()]
 	app.session.storage_root=save_directory
-	check(ProjectSettings.get_setting("application/config/version")=="0.10.1","exported version is current")
+	check(ProjectSettings.get_setting("application/config/version")=="0.10.2","exported version is current")
 	check(not FileAccess.file_exists("res://tests/field_mutation_test.gd") and not FileAccess.file_exists("res://tests/fixtures/replay-field-v3.json"),"tests and reference saves stay outside package")
 	check(FieldRules.IDS.size()==17 and FieldRules.MUTATION_POOL.size()==13,"package has expanded catalog and limited personal pool")
 	var script=load("res://scripts/core/game_engine.gd")

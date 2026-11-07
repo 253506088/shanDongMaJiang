@@ -198,8 +198,9 @@ func _show_lobby() -> void:
 	UI.button(options,Rect2(589,180,102,42),"说明",_show_field_catalog)
 	UI.button(lobby,Rect2(105,726,279,66),"入 座 开 局   →",func(): _start_game(true),true)
 	if session.has_save(): UI.button(lobby,Rect2(402,726,221,66),"继续上次牌局",_resume)
-	UI.button(lobby,Rect2(641,726,183,66),"附近同桌",_show_lan_browser)
-	UI.label(lobby,Rect2(105,839,1000,24),"麻将单机 / 附近同桌   ·   斗地主单机   ·   唬牌单机",14,UI.MUTED)
+	if BuildFeatures.lan_enabled():
+		UI.button(lobby,Rect2(641,726,183,66),"附近同桌",_show_lan_browser)
+	UI.label(lobby,Rect2(105,839,1000,24),_games_description(),14,UI.MUTED)
 	UI.button(lobby,Rect2(1426,829,120,42),"关于",_about)
 
 func _open_doudizhu() -> void:
@@ -247,6 +248,9 @@ func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callab
 func _is_lan() -> bool:
 	return session is LanSession
 
+func _games_description() -> String:
+	return ("麻将单机 / 附近同桌" if BuildFeatures.lan_enabled() else "麻将单机") + "   ·   斗地主单机   ·   唬牌单机"
+
 func _replace_session(next: LocalSession) -> void:
 	var previous = session
 	var previous_speed = previous.speed
@@ -293,6 +297,7 @@ func _make_lan_screen() -> void:
 	lan_lobby.leave_requested.connect(_confirm_leave_lan)
 
 func _show_lan_browser() -> void:
+	if not BuildFeatures.lan_enabled(): return
 	if _is_lan(): _leave_lan(false)
 	session.paused = true
 	_make_lan_screen()
@@ -301,6 +306,7 @@ func _show_lan_browser() -> void:
 		lan_lobby.set_status("附近房间搜索暂不可用，仍可输入房主地址加入。")
 
 func _host_lan(settings: Dictionary, player_name: String) -> void:
+	if not BuildFeatures.lan_enabled(): return
 	lan_player_name = player_name
 	discovery.stop(); _replace_session(LanSession.new())
 	var error = (session as LanSession).host_room(settings,player_name)
@@ -312,6 +318,7 @@ func _host_lan(settings: Dictionary, player_name: String) -> void:
 		_toast("房间已创建，附近搜索暂不可用；牌友仍可输入房主地址加入。")
 
 func _join_lan(address: String, player_name: String, port: int = 32141) -> void:
+	if not BuildFeatures.lan_enabled(): return
 	lan_player_name = player_name; lan_address = address+(":%d"%port if port != 32141 else "")
 	discovery.stop(); _replace_session(LanSession.new())
 	lan_lobby.set_busy(true,"正在连接房主…")
@@ -1409,7 +1416,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n山东麻将 / 附近同桌 · 单机斗地主 / 唬牌\n\n麻将规则和牌面参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n"+_games_description()+"\n\n麻将规则和牌面参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 

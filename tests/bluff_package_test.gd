@@ -20,7 +20,7 @@ func capture(name: String) -> void:
 	check(root.get_texture().get_image().save_png(args[index + 1].path_join(name + ".png")) == OK, "actual package screenshot " + name)
 
 func run() -> void:
-	check(ProjectSettings.get_setting("application/config/version") == "0.10.1", "package version 0.10.1")
+	check(ProjectSettings.get_setting("application/config/version") == "0.10.2", "package version 0.10.2")
 	check(not FileAccess.file_exists("res://tests/bluff_package_test.gd") and not FileAccess.file_exists("res://tools/generate_bluff_audio.py"), "tests and generation tools excluded")
 	for file in ["bluff-voice-manifest.json", "bluff-voice-NOTICE.txt", "doudizhu-Apache-2.0.txt", "doudizhu-cards-source.svg.txt", "doudizhu-guofeng-manifest.json"]:
 		check(FileAccess.file_exists("res://assets/licenses/" + file), "license/provenance ships: " + file)

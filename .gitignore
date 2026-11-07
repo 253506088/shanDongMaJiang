@@ -2,6 +2,9 @@
 .godot/
 # Rebuildable Windows/Android/macOS packages; keep export presets and tools.
 build/
+# Offline and LAN variants use build/<platform>/ and build/<platform>-lan/.
+# Build-option/menu regression evidence lives in artifacts/build-options-2026-11-08/;
+# temporary menu-test sandboxes under tmp/package-menu-test-* clean themselves.
 # Windows motion bridge DLL, objects, linker outputs: rebuilt by
 # tools/build_native.ps1 from native/windows sources; exported copies ship in
 # build/windows beside the EXE. They are generated binaries, not source assets.

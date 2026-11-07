@@ -1,6 +1,7 @@
 param([string]$Godot = $env:GODOT_BIN)
 $ErrorActionPreference = 'Stop'
 $projectDir = Split-Path $PSScriptRoot -Parent
+& "$PSScriptRoot/test_package_menu.ps1"
 # Let the importer complete its asynchronous editor work before shutdown.
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --import --frame-delay 800
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -1,12 +1,19 @@
-param([ValidateSet('windows','android','macos')][string]$Target='windows',[string]$Godot=$env:GODOT_BIN)
+param(
+    [ValidateSet('windows','android','macos')][string]$Target='windows',
+    [string]$Godot=$env:GODOT_BIN,
+    [switch]$EnableLan
+)
 $ErrorActionPreference='Stop'
 $projectDir=Split-Path $PSScriptRoot -Parent
 $presets=@{windows='Windows Desktop';android='Android';macos='macOS'}
 $files=@{windows='QingyuMahjong.exe';android='qingyu-mahjong-debug.apk';macos='QingyuMahjong.zip'}
-$targetDir=Join-Path $projectDir "build/$Target"
+$variant = if ($EnableLan) { "$Target-lan" } else { $Target }
+$preset = $presets[$Target] + $(if ($EnableLan) { ' LAN' } else { '' })
+$targetDir=Join-Path $projectDir "build/$variant"
 New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
 Set-Content -LiteralPath (Join-Path $projectDir 'build/.gdignore') -Value ''
 $outputFile=Join-Path $targetDir $files[$Target]
+Write-Output "LAN support: $([bool]$EnableLan); preset: $preset"
 if ($Target -eq 'macos') {
     # Godot's macOS exporter also validates the installed standard template.
     $macTemplate=Join-Path $projectDir 'tmp/export_templates/macos.zip'
@@ -30,7 +37,7 @@ if ($Target -eq 'android') {
     try {
         $env:TEMP = $androidTempDirectory
         $env:TMP = $androidTempDirectory
-        & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-debug $presets[$Target] $outputFile
+        & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-debug $preset $outputFile
     } finally {
         $env:TEMP = $previousTemp
         $env:TMP = $previousTmp
@@ -49,7 +56,7 @@ if ($Target -eq 'android') {
         }
     }
 } else {
-    & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-release $presets[$Target] $outputFile
+    & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --export-release $preset $outputFile
 }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 # Use .NET directly: a BAT starts Windows PowerShell, whose module path can

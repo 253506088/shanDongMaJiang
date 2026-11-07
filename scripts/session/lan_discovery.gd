@@ -22,6 +22,7 @@ var replies: Dictionary = {}
 
 static func local_addresses() -> Array:
 	var addresses: Array = []
+	if not BuildFeatures.lan_enabled(): return addresses
 	for address in IP.get_local_addresses():
 		if is_lan_ipv4(address) and not addresses.has(address): addresses.append(address)
 	return addresses
@@ -33,6 +34,7 @@ static func is_lan_ipv4(address: String) -> bool:
 	return int(octets[0]) == 10 or (int(octets[0]) == 172 and int(octets[1]) >= 16 and int(octets[1]) <= 31) or (int(octets[0]) == 192 and int(octets[1]) == 168) or (int(octets[0]) == 169 and int(octets[1]) == 254)
 
 func start_browser() -> Error:
+	if not BuildFeatures.lan_enabled(): return ERR_UNAVAILABLE
 	stop()
 	socket = PacketPeerUDP.new()
 	var error = socket.bind(0, "0.0.0.0")
@@ -43,6 +45,7 @@ func start_browser() -> Error:
 	return OK
 
 func start_host(room: Dictionary) -> Error:
+	if not BuildFeatures.lan_enabled(): return ERR_UNAVAILABLE
 	stop()
 	socket = PacketPeerUDP.new()
 	var error = socket.bind(discovery_port, "0.0.0.0")

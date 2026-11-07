@@ -1,5 +1,7 @@
 # 山东麻将 · 青玉台
 
+0.10.2 新增**打包时选择局域网支持，默认关闭**。菜单选平台后回车生成单机包，选择 `y` 或命令行追加 `-EnableLan` 生成联机包；两种包分目录保存，Android单机包不申请网络权限。安卓菜单由PowerShell正确显示，详情见下方「打包」。
+
 0.10.1 重做**唬牌出牌评估**：参照麻将牌效的候选比较方式，综合声明可信度、甩牌收益、剩余牌形和收堆代价，避免盲目随机报大数量；保留合理诈唬、公开记忆和原有节奏。算法只读取本席信息，详见[人机决策](docs/bluff-ai.md)。
 
 Godot 4.5.1 项目，游戏主体使用 GDScript，Windows 附带一个小型原生窗口模块。支持单机和同一 Wi-Fi／手机热点下的局域网同桌：庭院茶室、深青绿织物与暖木牌桌、3D 麻将、山东玩法、机器人补位、结算和牌谱导出。
@@ -36,7 +38,7 @@ Godot 标准版和 Mono 版均可，项目不含 C#，不需要 .NET SDK。本�
 
 斗地主中，电脑和触屏均可逐张点选手牌；鼠标也可按住左键连续划选，划过未选牌时选中、划过已选牌时取消，同一次拖动每张只切换一次。最后按「出牌」统一确认，点空白清空选择。「提示」只预选建议，不自动出牌；「不要」跳过跟牌，领出时不能不要。顶部「记牌器」可收起，统计自己手牌之外尚未打出的牌，叫分时包含未揭底牌，不读取机器人暗手。「男声报牌／女声报牌」可点击切换并保存选择。牌桌中央完整显示当前要压的牌，长的对手上一手可以点开查看。`Esc`／手机返回可暂停；退出后下次重新发牌，不写入麻将的续玩存档。玩法与采用的地方细则见 [斗地主规则](docs/doudizhu-rules.md)，素材见 [传统牌面来源](docs/doudizhu-card-art.md) 和 [规则与语音来源](docs/doudizhu-sources.md)。
 
-多人同桌：大厅点 **附近同桌**，房主选择规则并创建房间，其他人在自动发现列表加入、准备，房主开始。支持安卓与 Windows 使用同一协议混玩，1–4 真人，不足四位自动补机器人；也可输入房主地址加入。详细用法与首版边界见 [附近同桌](docs/lan-play.md)，跨设备实机体验尚待验收。
+多人同桌：安装打包时启用局域网的版本，大厅点 **附近同桌**，房主选择规则并创建房间，其他人在自动发现列表加入、准备，房主开始。支持安卓与 Windows 使用同一协议混玩，1–4 真人，不足四位自动补机器人；也可输入房主地址加入。详细用法与首版边界见 [附近同桌](docs/lan-play.md)，跨设备实机体验尚待验收。
 
 电脑端可在 **设置 → 显示模式** 切换窗口／无边框全屏，也可按 `F11` 或 `Alt+Enter`。全屏选择会保存，退出全屏恢复原窗口位置、大小或最大化状态。Windows 拖动、缩放期间暂停更新游戏画面，由系统处理窗口边框，松手后统一刷新；实现和验证见 [桌面窗口与渲染优化](docs/window-performance.md)。
 
@@ -91,7 +93,7 @@ powershell -File tools/test_ui.ps1
 
 `tools/test.ps1` 同时无界面检查明搂听口、信息隔离、跨局清理，以及连续尺寸变化仅更新一次场景渲染目标。窗口卡顿的定向复核使用 `tests/desktop_review.gd`：单个 30 FPS 测试窗口，按 F8 结束，120 秒自动退出；只在修改与无界面检查完成后单独运行，不连续打扰工作桌面。
 
-局域网回归也纳入 `tools/test.ps1`。重建 Windows 包后可运行 `tools/test_lan_process.ps1`，用四个独立的无界面发布程序完成一局、续到第二局并核对积分与四个座位；该脚本不打开可见游戏窗口，不代表跨设备或无线网络验收。
+局域网回归也纳入 `tools/test.ps1`。运行 `tools/build.ps1 -Target windows -EnableLan` 重建联机包后，可运行 `tools/test_lan_process.ps1`，用四个独立的无界面发布程序完成一局、续到第二局并核对积分与四个座位；该脚本不打开可见游戏窗口，不代表跨设备或无线网络验收。
 
 允许启动游戏和普通可见测试窗口、读取测试生成的截图；禁止接管电脑、控制系统鼠标键盘或操纵其他桌面窗口。测试脚本只向自己的Godot视口分发事件。`desktop_review.gd` 仍为手动入口，不自动运行；当前窗口拖动手感尚未完成受控验收。
 
@@ -103,7 +105,11 @@ node tools/generate_reference.mjs 'D:\code\my\2\开源麻将\lianhuaguangdongmah
 
 ## 打包
 
-双击根目录的 **打包游戏.bat**，选择 Windows、Android、macOS 或全部打包。结束后会显示结果并保留窗口，产物位于 `build/` 下的对应平台文件夹。命令行也可使用 `打包游戏.bat windows`、`打包游戏.bat android`、`打包游戏.bat macos` 或 `打包游戏.bat all`；自动化运行时设置 `MAHJONG_NO_PAUSE=1` 可跳过结束等待。
+双击根目录的 **打包游戏.bat**，先选择 Windows、Android、macOS 或全部打包，再选择是否支持局域网联机，**默认否，直接回车生成单机包**。选择 `y` 才包含可用的「附近同桌」。结束后显示结果并保留窗口；菜单由 UTF-8 PowerShell 脚本显示，BAT 只保留 ASCII 命令。
+
+命令行使用 `打包游戏.bat windows`、`打包游戏.bat android`、`打包游戏.bat macos` 或 `打包游戏.bat all`，默认单机且不再询问；追加 `-EnableLan` 生成联机包，例如 `打包游戏.bat android -EnableLan`。自动化运行时设置 `MAHJONG_NO_PAUSE=1` 可跳过结束等待。
+
+单机包保存在 `build/windows/`、`build/android/`、`build/macos/`；联机包保存在对应的 `build/windows-lan/`、`build/android-lan/`、`build/macos-lan/`，互不覆盖。单机包隐藏大厅及关于页的联机入口／说明，并在 UDP 发现、ENet 建房、加入和重连入口禁用联网；Android 单机包不申请网络三项权限。源码运行保留联机能力以便开发测试。Godot 导出面板中的普通预设也默认单机，名称带 `LAN` 的预设才启用联机。
 
 首先运行 `python tools/fetch_templates.py` 下载 Godot 4.5.1 官方模板到被忽略的 `tmp/export_templates/`。脚本只提取所需 ZIP 条目并校验 CRC，不必下载所有平台的完整包。
 
@@ -115,9 +121,11 @@ Windows 源码运行／打包会先增量编译 `native/windows/` 的窗口模�
 powershell -File tools/build.ps1 -Target windows
 powershell -File tools/build.ps1 -Target android
 powershell -File tools/build.ps1 -Target macos
+# 联机版（Windows、Android、macOS 均支持此选项）：
+powershell -File tools/build.ps1 -Target windows -EnableLan
 ```
 
-- Windows：本地输出 `build/windows/QingyuMahjong.exe`，内嵌 PCK。
+- Windows：单机输出 `build/windows/QingyuMahjong.exe`，联机输出 `build/windows-lan/QingyuMahjong.exe`，均内嵌 PCK；分发时保留各自目录中的 DLL。
 - Android：需要 JDK 17 和 Android SDK，输出调试 APK；正式发布需独立正式签名和发布流程。
 - Android 签名临时文件使用项目下 `tmp/android-export/` 的独立子目录；成功或失败后自动清理本次临时文件并恢复环境，避免签名副本占满系统盘。
 - macOS：导出预设已提供，未签名包需在 Mac 上验证并按发布渠道签名／公证。

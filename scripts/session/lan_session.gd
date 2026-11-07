@@ -89,6 +89,7 @@ static func _valid_field_settings(settings: Dictionary) -> bool:
 	return selection is String and (selection == "random" or selection in FieldRules.IDS)
 
 func host_room(settings: Dictionary, player_name: String = "房主", port: int = GAME_PORT) -> Error:
+	if not BuildFeatures.lan_enabled(): return ERR_UNAVAILABLE
 	leave_room()
 	if port < 1024 or port > 65535: return ERR_INVALID_PARAMETER
 	# An explicit replacement room takes precedence over the old listener's
@@ -124,6 +125,7 @@ func host_room(settings: Dictionary, player_name: String = "房主", port: int =
 	return OK
 
 func join_room(address: String, player_name: String = "牌友", port: int = GAME_PORT) -> Error:
+	if not BuildFeatures.lan_enabled(): return ERR_UNAVAILABLE
 	leave_room()
 	_address = address.strip_edges(); _port = port; _player_name = _safe_name(player_name, "牌友")
 	_token = ""; _remembered_room = ""
@@ -135,6 +137,7 @@ func reconnect_room() -> Error:
 	return _connect_client()
 
 func _connect_client() -> Error:
+	if not BuildFeatures.lan_enabled(): return ERR_UNAVAILABLE
 	if not _address.is_valid_ip_address() or ":" in _address or _port < 1024 or _port > 65535:
 		notice.emit("请输入房主的局域网 IPv4 地址，例如 192.168.1.10。")
 		return ERR_INVALID_PARAMETER
