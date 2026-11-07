@@ -29,6 +29,9 @@ build/
 # Poker 0.8.3 low-hand/consent QA uses artifacts/poker-low-hand-2026-11-07/.
 # Keep final evidence locally; source tests, eight new runtime WAVs and their
 # provenance manifests belong in Git. Packages remain under ignored build/.
+# Mutation 0.9 QA captures, native-exit diagnostics and package checks live in
+# artifacts/field-mutation-2026-11-07/. Track source tests, fixed replay fixtures
+# and reviewed verification notes; installers and local captures stay excluded.
 artifacts/
 # Superseded procedural cloth/floor previews are reproducible with
 # tools/make_table_texture.py. Keep local copies for design comparison;

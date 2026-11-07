@@ -52,10 +52,10 @@ func _test_opening() -> void:
 	for seed_value in range(1, 257):
 		engine.start({"field_rules": true}, seed_value)
 		seen[engine.state.field.id] = true
-	check(seen.size() == 16, "random draw can select all 16 fields")
+	check(seen.size() == 17, "random draw can select all 17 fields")
 	for id in FieldRules.IDS:
 		engine = game(id)
-		check(engine.state.field.id == id and engine.snapshot().version == 3, "field opening " + id)
+		check(engine.state.field.id == id and engine.snapshot().version == (4 if id == "mutation" else 3), "field opening " + id)
 		replay(engine, "opening " + id)
 		if id == "no_honors":
 			var counts = Tiles.counts(engine.opening.wall)

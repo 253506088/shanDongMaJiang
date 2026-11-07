@@ -1,7 +1,7 @@
 param(
     [string]$Godot = $env:GODOT_BIN,
     [string[]]$Resolutions = @('1440x810', '960x540'),
-    [ValidateSet('ui_smoke', 'ux_smoke', 'touch_smoke', 'waits_smoke', 'table_art_smoke', 'window_smoke', 'render_performance', 'opponent_waits', 'doudizhu_ui_test', 'bluff_ui_test')]
+    [ValidateSet('ui_smoke', 'ux_smoke', 'touch_smoke', 'waits_smoke', 'table_art_smoke', 'window_smoke', 'render_performance', 'opponent_waits', 'doudizhu_ui_test', 'bluff_ui_test', 'field_mutation_ui_test')]
     [string[]]$Suites = @('ui_smoke', 'ux_smoke', 'touch_smoke', 'waits_smoke', 'table_art_smoke'),
     [switch]$AllowDesktopChanges,
     [string]$OutputDir = 'artifacts/ui-verification'

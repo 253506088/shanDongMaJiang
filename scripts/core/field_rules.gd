@@ -2,8 +2,12 @@ class_name FieldRules
 extends RefCounted
 ## Optional round modifiers. Regional rules remain the base ruleset.
 
-const IDS = ["ouroboros", "diamond_finger", "honor_sequences", "rebirth", "transparent", "tolerance", "reclaim", "wildcard", "astrology_wall", "astrology_waits", "angels_gift", "no_honors", "single_wait", "exchange", "chosen", "chosen_head"]
+const LEGACY_IDS = ["ouroboros", "diamond_finger", "honor_sequences", "rebirth", "transparent", "tolerance", "reclaim", "wildcard", "astrology_wall", "astrology_waits", "angels_gift", "no_honors", "single_wait", "exchange", "chosen", "chosen_head"]
+const IDS = ["ouroboros", "diamond_finger", "honor_sequences", "rebirth", "transparent", "tolerance", "reclaim", "wildcard", "astrology_wall", "astrology_waits", "angels_gift", "no_honors", "single_wait", "exchange", "chosen", "chosen_head", "mutation"]
+# Explicit personal-rule pool: never add a whole-table modifier implicitly.
+const MUTATION_POOL = ["ouroboros", "diamond_finger", "honor_sequences", "rebirth", "tolerance", "reclaim", "wildcard", "astrology_wall", "astrology_waits", "angels_gift", "single_wait", "chosen", "chosen_head"]
 const CATALOG = {
+	"mutation": ["突变", "四人各获一种不同规则，仅对获得者生效。", "每局从13种个人规则中随机、不重复地分配给四位玩家，每人一种。排除无字天书、瓦西子麻将和换牌。能力、特殊吃牌、听牌与胡牌判定、加番各归获得者；例如只有获得天使的施舍者可以使用三选一。分配结果公开，私下查看的牌仍仅本人可见；每局重新分配，存档续玩保留原分配。", false],
 	"ouroboros": ["衔尾蛇", "数牌首尾相接，顺子可以跨过九与一。", "万、筒、条各自按一至九首尾循环。除普通顺子外，八九一、九一二也可组成顺子，用于吃牌与胡牌。不同花色不能混搭；关闭吃牌时仍不能吃。", false],
 	"diamond_finger": ["大力金刚指", "将一张手牌变为白板，每人每局一次。", "在自己的出牌回合，选择一张手牌变为白板；其他玩家看不到被替换的牌。每人每局限用一次，报听或明搂后不能使用。已有白板杠时，再获得白板仍可续杠并再取一次杠头补牌；听牌后的续杠仍须保持原听口。", true],
 	"honor_sequences": ["东南西北中", "东、南、西、北、中，三种不同牌也成顺子。", "东、南、西、北、红中这五种牌中，任意三种不同牌可组成顺子，用于吃牌与胡牌。例如东南西、东中西、北中南。发财和白板不参与；关闭吃牌时仍不能吃。", false],
@@ -30,6 +34,24 @@ static func info(id: String) -> Dictionary:
 
 static func all() -> Array:
 	return IDS.map(func(id): return info(id))
+
+static func valid_assignment(value) -> bool:
+	if not value is Array or value.size() != 4: return false
+	var seen: Array = []
+	for id in value:
+		if not id is String or id not in MUTATION_POOL or id in seen: return false
+		seen.append(id)
+	return true
+
+static func for_seat(field: Dictionary, seat: int) -> String:
+	var id = str(field.get("id", ""))
+	if id != "mutation": return id
+	var assigned = field.get("seat_rules", [])
+	if seat < 0 or seat >= 4 or not valid_assignment(assigned): return ""
+	return assigned[seat]
+
+static func contains(field: Dictionary, id: String) -> bool:
+	return field.get("id", "") == id or (field.get("id", "") == "mutation" and id in field.get("seat_rules", []))
 
 static func normalize(settings: Dictionary) -> Dictionary:
 	var result = settings.duplicate(true)

@@ -14,7 +14,7 @@ foreach ($suite in @('doudizhu_core_test', 'doudizhu_recorder_test', 'doudizhu_s
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script "res://tests/$suite.gd" -- --qa
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
-foreach ($suite in @('field_rules_test', 'field_flow_test', 'field_engine_test', 'field_session_test', 'field_ui_test', 'field_review_test')) {
+foreach ($suite in @('field_rules_test', 'field_flow_test', 'field_engine_test', 'field_mutation_test', 'field_mutation_session_test', 'field_mutation_ui_test', 'field_session_test', 'field_ui_test', 'field_review_test')) {
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script "res://tests/$suite.gd" -- --qa
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

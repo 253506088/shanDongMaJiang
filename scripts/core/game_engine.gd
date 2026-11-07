@@ -6,12 +6,13 @@ extends RefCounted
 const VERSION = 1
 const LEGACY_FIELD_VERSION = 2
 const FIELD_VERSION = 3
+const MUTATION_VERSION = 4
 var state: Dictionary = {}
 var journal: Array = []
 var opening: Dictionary = {}
 var rng = RandomNumberGenerator.new()
 
-func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1, scores: Array = [], initial_wall: Array = [], field_override: String = "", replay_version: int = 0) -> void:
+func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1, scores: Array = [], initial_wall: Array = [], field_override: String = "", replay_version: int = 0, seat_rules_override: Array = []) -> void:
 	rng.seed = game_seed if game_seed != 0 else int(Time.get_unix_time_from_system())
 	var config = {"jiang": "258", "chi": true, "ai": "efficiency", "rounds": 4, "takeover": false}
 	config.merge(settings, true)
@@ -24,7 +25,13 @@ func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1,
 	field_rng.seed = rng.seed ^ (round_number * 104729)
 	var field_id = ""
 	if config.get("field_rules", false):
-		field_id = FieldRules.IDS[field_rng.randi_range(0, FieldRules.IDS.size() - 1)]
+		# Keep the v2/v3 random stream intact for chosen tiles and transparency.
+		# Selecting from the expanded catalog uses an independent stream.
+		field_id = FieldRules.LEGACY_IDS[field_rng.randi_range(0, FieldRules.LEGACY_IDS.size() - 1)]
+		if replay_version not in [LEGACY_FIELD_VERSION, FIELD_VERSION]:
+			var selection_rng = RandomNumberGenerator.new()
+			selection_rng.seed = field_rng.seed ^ 730201
+			field_id = FieldRules.IDS[selection_rng.randi_range(0, FieldRules.IDS.size() - 1)]
 		var selected_field = FieldRules.selection(config)
 		if selected_field in FieldRules.IDS: field_id = selected_field
 		if field_override in FieldRules.IDS: field_id = field_override
@@ -49,7 +56,15 @@ func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1,
 		state.version = LEGACY_FIELD_VERSION if replay_version == LEGACY_FIELD_VERSION else FIELD_VERSION
 		state.field = {"id": field_id, "tile_totals": Tiles.counts(wall)}
 		opening.field_id = field_id
-		if field_id == "chosen":
+		if field_id == "mutation":
+			state.version = MUTATION_VERSION
+			var pool = FieldRules.MUTATION_POOL.duplicate()
+			var assigned: Array = []
+			for _seat in range(4): assigned.append(pool.pop_at(field_rng.randi_range(0, pool.size() - 1)))
+			if FieldRules.valid_assignment(seat_rules_override): assigned = seat_rules_override.duplicate()
+			state.field.seat_rules = assigned
+			opening.seat_rules = assigned.duplicate()
+		if FieldRules.contains(state.field, "chosen"):
 			var choices = range(27)
 			state.field.chosen_tiles = []
 			for _i in range(3): state.field.chosen_tiles.append(choices.pop_at(field_rng.randi_range(0, choices.size() - 1)))
@@ -70,7 +85,7 @@ func start(settings: Dictionary = {}, game_seed: int = 0, round_number: int = 1,
 		var player = {"seat": seat, "name": ["我", "听松", "观澜", "知秋"][seat], "score": scores[seat] if scores.size() == 4 else 2000, "hand": [], "melds": [], "discards": [], "bao": false, "ming": false, "passed_hu": false, "passed_peng": [], "drawn": -1}
 		if not field_id.is_empty():
 			player.merge({"field_used": false, "field_private": {}, "revealed_hand": false, "last_draw_head": -1})
-		if field_id == "angels_gift" and state.version >= FIELD_VERSION:
+		if FieldRules.for_seat(state.get("field", {}), seat) == "angels_gift" and state.version >= FIELD_VERSION:
 			player.gift_ready = false
 			player.gift_draw_slot = -1
 		if field_id == "transparent": player.hidden = []
@@ -109,21 +124,22 @@ func _opening_options() -> void:
 		if Rules.flower_count(p.melds) == 8:
 			_settle(p.seat, {"self_draw": true, "tile": p.melds.back().tile})
 			return
-	if _winning(dealer.hand, dealer.melds):
+	if _winning(dealer.hand, dealer.melds, state.dealer):
 		_settle(state.dealer, {"self_draw": true, "tianhu": true, "tile": dealer.hand.back()})
 	else: _turn_options()
 
 func _luan() -> bool:
 	return state.settings.jiang == "luan"
 
-func _field_id() -> String:
-	return state.get("field", {}).get("id", "")
+func _field_id(seat: int = -1) -> String:
+	var field: Dictionary = state.get("field", {})
+	return str(field.get("id", "")) if seat < 0 else FieldRules.for_seat(field, seat)
 
-func _winning(hand: Array, melds: Array) -> bool:
-	return Rules.winning(hand, melds, _luan(), _field_id())
+func _winning(hand: Array, melds: Array, seat: int = -1) -> bool:
+	return Rules.winning(hand, melds, _luan(), _field_id(seat))
 
-func _waits(hand: Array, melds: Array) -> Array:
-	return Rules.waits(hand, melds, _luan(), _field_id())
+func _waits(hand: Array, melds: Array, seat: int = -1) -> Array:
+	return Rules.waits(hand, melds, _luan(), _field_id(seat))
 
 func _hand_add(p: Dictionary, tile: int, hidden: bool = false) -> void:
 	p.hand.append(tile)
@@ -174,13 +190,13 @@ func _turn_options() -> void:
 	state.pending = []
 	var p = state.players[state.current]
 	var locked = p.bao or p.ming
-	if locked and _winning(p.hand, p.melds): _option("win")
+	if locked and _winning(p.hand, p.melds, p.seat): _option("win")
 	var c = Tiles.counts(p.hand)
 	if not locked:
 		for tile in range(34):
 			if c[tile] >= 4: _option("angang", {"tile": tile})
 		for i in range(p.melds.size()):
-			if _can_extend(p.melds[i]) and c[p.melds[i].tile] > 0: _option("bugang", {"meld_index": i, "tile": p.melds[i].tile})
+			if _can_extend(p.melds[i], p.seat) and c[p.melds[i].tile] > 0: _option("bugang", {"meld_index": i, "tile": p.melds[i].tile})
 	var waits_by_tile = {}
 	for i in range(p.hand.size()):
 		if locked and i != p.drawn: continue
@@ -189,7 +205,7 @@ func _turn_options() -> void:
 			var tile = p.hand[i]
 			if not waits_by_tile.has(tile):
 				var after = p.hand.duplicate(); after.remove_at(i)
-				waits_by_tile[tile] = _waits(after, p.melds)
+				waits_by_tile[tile] = _waits(after, p.melds, p.seat)
 			if not waits_by_tile[tile].is_empty():
 				if not p.get("revealed_hand", false): _option("bao", {"index": i, "tile": tile, "waits": waits_by_tile[tile]})
 				_option("ming", {"index": i, "tile": tile, "waits": waits_by_tile[tile]})
@@ -200,17 +216,17 @@ func _turn_options() -> void:
 			if c[tile] >= 4 and _locked_kong_preserves_waits(p, tile):
 				_option("angang", {"tile": tile})
 		for i in range(p.melds.size()):
-			if _can_extend(p.melds[i]) and c[p.melds[i].tile] > 0 and _locked_kong_preserves_waits(p, p.melds[i].tile, i):
+			if _can_extend(p.melds[i], p.seat) and c[p.melds[i].tile] > 0 and _locked_kong_preserves_waits(p, p.melds[i].tile, i):
 				_option("bugang", {"meld_index": i, "tile": p.melds[i].tile})
 	_field_options(p)
 
-func _can_extend(meld: Dictionary) -> bool:
-	return meld.type == "peng" or (_field_id() in ["diamond_finger", "no_honors"] and meld.type in ["gang", "angang"])
+func _can_extend(meld: Dictionary, seat: int = -1) -> bool:
+	return meld.type == "peng" or (_field_id(seat) in ["diamond_finger", "no_honors"] and meld.type in ["gang", "angang"])
 
 func _locked_kong_preserves_waits(p: Dictionary, tile: int, meld_index: int = -1) -> bool:
 	if p.drawn < 0 or p.drawn >= p.hand.size() or p.hand[p.drawn] != tile: return false
 	var before = p.hand.duplicate(); before.remove_at(p.drawn)
-	var waits_before = _waits(before, p.melds)
+	var waits_before = _waits(before, p.melds, p.seat)
 	if waits_before.is_empty(): return false
 	var after = p.hand.duplicate()
 	var melds = p.melds.duplicate(true)
@@ -220,16 +236,16 @@ func _locked_kong_preserves_waits(p: Dictionary, tile: int, meld_index: int = -1
 	else:
 		for _i in range(4): after.erase(tile)
 		melds.append({"type":"angang", "tile":tile, "tiles":[tile,tile,tile,tile]})
-	return waits_before == _waits(after, melds)
+	return waits_before == _waits(after, melds, p.seat)
 
 func _external_kong_preserves_waits(p: Dictionary, meld_index: int) -> bool:
 	if not p.bao and not p.ming: return true
-	var before = _waits(p.hand, p.melds)
+	var before = _waits(p.hand, p.melds, p.seat)
 	if before.is_empty(): return false
 	var melds = p.melds.duplicate(true)
 	melds[meld_index].type = "gang"
 	melds[meld_index].tiles.append(melds[meld_index].tile)
-	return before == _waits(p.hand, melds)
+	return before == _waits(p.hand, melds, p.seat)
 
 func decision_seat() -> int:
 	if state.is_empty() or state.phase == "settled": return -1
@@ -301,7 +317,7 @@ func _discard(seat: int, index: int) -> void:
 		for distance in range(1, 4):
 			var candidate = (seat + distance) % 4
 			var other = state.players[candidate]
-			if not other.ming and not other.get("revealed_hand", false) and not other.passed_hu and _winning(other.hand + [tile], other.melds) and (_field_id() != "single_wait" or _waits(other.hand, other.melds).size() == 1):
+			if not other.ming and not other.get("revealed_hand", false) and not other.passed_hu and _winning(other.hand + [tile], other.melds, candidate) and (_field_id(candidate) != "single_wait" or _waits(other.hand, other.melds, candidate).size() == 1):
 				_settle(candidate, {"dihu": true, "source": seat, "tile": tile})
 				return
 	_begin_claims(seat, tile)
@@ -314,7 +330,7 @@ func _begin_claims(from: int, tile: int, robbed: bool = false) -> void:
 	for distance in range(1, 4):
 		var seat = (from + distance) % 4
 		var p = state.players[seat]
-		if p.bao and not p.ming and not p.get("revealed_hand", false) and not p.passed_hu and _winning(p.hand + [tile], p.melds): state.claim_queue.append(seat)
+		if p.bao and not p.ming and not p.get("revealed_hand", false) and not p.passed_hu and _winning(p.hand + [tile], p.melds, seat): state.claim_queue.append(seat)
 	_offer_next_claim()
 
 func _offer_next_claim() -> void:
@@ -325,7 +341,7 @@ func _offer_next_claim() -> void:
 		state.claim_seat = seat
 		if state.claim_stage in ["ron", "rob"]: _option("win", {"tile": state.claim_tile})
 		elif state.claim_stage == "meld":
-			if _field_id() == "tolerance" and not state.wall.is_empty():
+			if _field_id(seat) == "tolerance" and not state.wall.is_empty():
 				for i in range(p.melds.size()):
 					if p.melds[i].type == "peng" and p.melds[i].tile == state.claim_tile and _external_kong_preserves_waits(p, i):
 						_option("tolerance_gang", {"tile": state.claim_tile, "meld_index": i})
@@ -338,7 +354,7 @@ func _offer_next_claim() -> void:
 			if count >= 2 and state.claim_tile not in p.passed_peng: _option("peng", {"tile": state.claim_tile})
 		elif state.claim_stage == "chi":
 			if p.bao or p.ming or not state.settings.chi: continue
-			for tiles in Rules.chi(p.hand, state.claim_tile, _field_id()): _option("chi", {"tile": state.claim_tile, "tiles": tiles})
+			for tiles in Rules.chi(p.hand, state.claim_tile, _field_id(seat)): _option("chi", {"tile": state.claim_tile, "tiles": tiles})
 		if not state.pending.is_empty():
 			_option("pass")
 			return
@@ -388,7 +404,7 @@ func _draw(seat: int, reason: String = "normal", skip_gift: bool = false) -> voi
 	if owner.has("last_draw_head"): owner.last_draw_head = state.gang_head if reason == "kong" else -1
 	# v2 logs keep their original decision IDs and before-draw choice. New games
 	# draw normally and offer the ability only after the player sees that tile.
-	if state.version == LEGACY_FIELD_VERSION and reason == "normal" and not skip_gift and _field_id() == "angels_gift" and not owner.field_used and not owner.bao and not owner.ming and state.wall.size() >= 4:
+	if state.version == LEGACY_FIELD_VERSION and reason == "normal" and not skip_gift and _field_id(seat) == "angels_gift" and not owner.field_used and not owner.bao and not owner.ming and state.wall.size() >= 4:
 		state.current = seat; state.phase = "draw_choice"; state.pending = []
 		_option("draw_normal"); _option("field_gift")
 		return
@@ -428,9 +444,9 @@ func _draw(seat: int, reason: String = "normal", skip_gift: bool = false) -> voi
 		return
 
 func _field_options(p: Dictionary) -> void:
-	if _field_id().is_empty() or p.get("field_used", false): return
+	if _field_id(p.seat).is_empty() or p.get("field_used", false): return
 	var locked = p.bao or p.ming
-	match _field_id():
+	match _field_id(p.seat):
 		"angels_gift":
 			if not locked and p.get("gift_ready", false) and p.drawn >= 0 and p.drawn < p.hand.size() and state.wall.size() >= 3:
 				_option("field_gift")
@@ -478,7 +494,7 @@ func _field_submit(seat: int, move: Dictionary) -> void:
 			var hand = target.hand.duplicate()
 			if target.drawn >= 0 and hand.size() % 3 == 2: hand.remove_at(target.drawn)
 			p.field_private.peek_target = move.target
-			p.field_private.peek_waits = _waits(hand, target.melds)
+			p.field_private.peek_waits = _waits(hand, target.melds, target.seat)
 			p.field_used = true; _turn_options()
 		"field_gift":
 			p.field_used = true
@@ -567,8 +583,8 @@ func _settle(seat: int, flags: Dictionary) -> void:
 	var hand = p.hand.duplicate()
 	if not self_draw: hand.append(flags.tile)
 	flags.merge({"luan": _luan(), "bao": p.bao, "ming": p.ming or p.get("revealed_hand", false), "haidi": self_draw and state.last_normal == seat})
-	if not _field_id().is_empty():
-		flags.field_id = _field_id()
+	if not _field_id(seat).is_empty():
+		flags.field_id = _field_id(seat)
 		flags.field_bonus = _field_bonuses(seat, hand, flags)
 	var result = Rules.evaluate(hand, p.melds, flags)
 	assert(not result.is_empty(), "Invalid authoritative win")
@@ -591,7 +607,7 @@ func _scores_as_ming(p: Dictionary) -> bool:
 
 func _field_bonuses(seat: int, hand: Array, flags: Dictionary) -> Array:
 	var bonuses = []
-	match _field_id():
+	match _field_id(seat):
 		"single_wait": bonuses.append("听单张")
 		"chosen":
 			var targets = state.field.chosen_tiles
@@ -601,9 +617,11 @@ func _field_bonuses(seat: int, hand: Array, flags: Dictionary) -> Array:
 			var player = state.players[seat]
 			if flags.get("self_draw", false) and player.get("last_draw_head", -1) >= 0: target = player.last_draw_head
 			if flags.tile == target or (flags.get("tianhu", false) and target in hand): bonuses.append("天选·杠头")
-		"astrology_waits":
-			var source = flags.get("source", -1)
-			if source >= 0 and state.players[source].field_private.get("peek_target", -1) == seat: bonuses.append("占星·点炮")
+	# Astrology belongs to the player who used it, even when the winner owns
+	# a different mutation rule. Its original dealing-in penalty still applies.
+	var source = flags.get("source", -1)
+	if source >= 0 and _field_id(source) == "astrology_waits" and state.players[source].field_private.get("peek_target", -1) == seat:
+		bonuses.append("占星·点炮")
 	return bonuses
 
 func view(seat: int) -> Dictionary:
@@ -659,7 +677,7 @@ func snapshot() -> Dictionary:
 
 func restore(data: Dictionary) -> bool:
 	var version = data.get("version", 0)
-	if not (version is int or version is float) or version != int(version) or int(version) not in [VERSION, LEGACY_FIELD_VERSION, FIELD_VERSION] or not data.get("state", {}) is Dictionary: return false
+	if not (version is int or version is float) or version != int(version) or int(version) not in [VERSION, LEGACY_FIELD_VERSION, FIELD_VERSION, MUTATION_VERSION] or not data.get("state", {}) is Dictionary: return false
 	var saved_rng = data.get("rng_state", "1")
 	if not saved_rng is String or not saved_rng.is_valid_int(): return false
 	var candidate = data.get("state", {})
@@ -688,9 +706,12 @@ func restore(data: Dictionary) -> bool:
 		if not (tile is int or tile is float) or tile != int(tile) or tile < 0 or tile >= 42: return false
 	var amounts = Tiles.counts(initial.wall)
 	var field_id = str(initial.get("field_id", ""))
-	if int(data.version) in [LEGACY_FIELD_VERSION, FIELD_VERSION]:
+	if int(data.version) in [LEGACY_FIELD_VERSION, FIELD_VERSION, MUTATION_VERSION]:
 		if field_id not in FieldRules.IDS or initial.get("settings", {}).get("field_rules", false) != true: return false
 	elif not field_id.is_empty() or initial.get("settings", {}).get("field_rules", false): return false
+	if int(version) == MUTATION_VERSION:
+		if field_id != "mutation" or not FieldRules.valid_assignment(initial.get("seat_rules")): return false
+	elif field_id == "mutation" or initial.has("seat_rules"): return false
 	if int(version) >= FIELD_VERSION:
 		var configured_field = FieldRules.selection(initial.settings)
 		if configured_field != "random" and configured_field != field_id: return false
@@ -706,7 +727,7 @@ func restore(data: Dictionary) -> bool:
 		for key in ["seat", "revision"]:
 			if not (entry[key] is int or entry[key] is float) or entry[key] != int(entry[key]): return false
 	var check = GameEngine.new()
-	check.start(initial.settings, int(initial.seed), int(initial.round), initial.scores, initial.wall, field_id, int(version))
+	check.start(initial.settings, int(initial.seed), int(initial.round), initial.scores, initial.wall, field_id, int(version), initial.get("seat_rules", []))
 	check.state.dice = initial.get("dice", [1,1]).map(func(n): return int(n))
 	check.opening.dice = check.state.dice.duplicate()
 	for entry in data.get("journal", []):

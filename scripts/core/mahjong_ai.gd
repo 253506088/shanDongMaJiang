@@ -203,7 +203,7 @@ func _field_choice(view: Dictionary, seat: int, visible: Array) -> Dictionary:
 	var moves: Array = view.pending
 	var p: Dictionary = view.players[seat]
 	var field: Dictionary = view.get("field", {})
-	var field_id = str(field.get("id", ""))
+	var field_id = FieldRules.for_seat(field, seat)
 	var luan = view.settings.jiang == "luan"
 	var totals: Array = field.get("tile_totals", [])
 	if view.phase == "exchange":
@@ -285,7 +285,7 @@ func choose(view: Dictionary, seat: int, random_value: float = 1.0) -> Dictionar
 		if move.kind == "win": return move
 	var p: Dictionary = view.players[seat]
 	var field: Dictionary = view.get("field", {})
-	var field_id = str(field.get("id", ""))
+	var field_id = FieldRules.for_seat(field, seat)
 	var visible = _visible_tiles(view, seat)
 	if not field_id.is_empty():
 		var field_move = _field_choice(view, seat, visible)

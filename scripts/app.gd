@@ -425,9 +425,11 @@ func _build_hud() -> void:
 		state_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		var score = UI.label(panel,Rect2(78,33,92,31),"2000",24,UI.TABLE_TEXT)
 		var info = UI.label(panel,Rect2(14,68,150,22),"",15,UI.TABLE_MUTED)
+		var personal_rule=UI.label(panel,Rect2(10,92,156,25),"",17,UI.GOLD)
+		personal_rule.name="PersonalField";personal_rule.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;personal_rule.visible=false
 		var turn_dot=UI.panel(panel,Rect2(160,10,5,5),UI.TABLE_GOLD,Color.TRANSPARENT,3)
 		turn_dot.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		players_ui.append({"panel":panel,"state":state_label,"score":score,"info":info,"name":name_label,"turn":turn_dot})
+		players_ui.append({"panel":panel,"state":state_label,"score":score,"info":info,"name":name_label,"turn":turn_dot,"field":personal_rule})
 	var recent = UI.table_panel(hud,Rect2(28,224,152,126))
 	recent_panel=recent
 	last_actor_label = UI.label(recent,Rect2(6,7,140,23),"等待出牌",15,UI.TABLE_MUTED); last_actor_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
@@ -478,7 +480,7 @@ func _changed(new_view: Dictionary) -> void:
 	if field_button.visible:
 		var rule = FieldRules.info(_field_id())
 		var ability = " · 已用" if view.players[0].get("field_used",false) else (" · 可用" if _field_moves().size()>0 else "")
-		field_button.text = "场地 · "+str(rule.name)+ability
+		field_button.text = ("突变 · " if _mutation() else "场地 · ")+str(rule.name)+ability
 		field_button.tooltip_text = str(rule.summary)+"\n点击查看规则、能力与本局信息。"
 		if _field_id()=="no_honors":
 			var additions=_no_honors_additions()
@@ -491,6 +493,10 @@ func _changed(new_view: Dictionary) -> void:
 		var p = view.players[seat]; var info = players_ui[seat]
 		info.name.text = str(p.name); info.panel.tooltip_text = str(p.name)
 		info.score.text = str(p.score)
+		info.field.visible = _mutation()
+		info.field.text = str(FieldRules.info(_field_id(seat)).name) if _mutation() else ""
+		info.panel.size.y = 120 if _mutation() else 92
+		if _mutation(): info.panel.tooltip_text += " · " + info.field.text
 		info.state.text = "庄" if seat==view.dealer else ""
 		var flowers=Rules.flower_count(p.melds)
 		var state_text="明搂" if p.ming else ("已听" if p.bao else ("亮手 · 未听" if p.get("revealed_hand",false) else ""))
@@ -812,7 +818,7 @@ func _show_waits() -> void:
 			elif base.size()%3==2 and p.drawn>=0: base.remove_at(p.drawn)
 			var score=_wait_score(base,tile)
 			UI.label(body,Rect2(x-3,ty+59,62,22),"%d 番" % score.get("multiplier",1),15,UI.GOLD)
-			UI.label(body,Rect2(x-3,ty+81,62,22),("≤" if _field_id()=="diamond_finger" else "")+"%d 张" % _visible_remaining(tile),15,UI.MUTED)
+			UI.label(body,Rect2(x-3,ty+81,62,22),("≤" if _has_field("diamond_finger") else "")+"%d 张" % _visible_remaining(tile),15,UI.MUTED)
 		y += maxf(112,ceil(row.waits.size()/12.0)*103+15)
 	if rows.is_empty():
 		UI.label(body,Rect2(0,25,950,90),"当前没有听口。选择「牌效提示」可查看出牌建议。",23,UI.MUTED)
@@ -848,9 +854,9 @@ func _opponent_waits(seat: int) -> Array:
 	if not p.ming or p.hand.is_empty():return []
 	var base=p.hand.duplicate()
 	if base.size()%3==2 and p.drawn>=0 and p.drawn<base.size():base.remove_at(p.drawn)
-	var signature=var_to_str([base,p.melds,view.settings.jiang,_field_id()])
+	var signature=var_to_str([base,p.melds,view.settings.jiang,_field_id(seat)])
 	if not opponent_waits_cache.has(seat) or opponent_waits_cache[seat].signature!=signature:
-		opponent_waits_cache[seat]={"signature":signature,"tiles":Rules.waits(base,p.melds,view.settings.jiang=="luan",_field_id())}
+		opponent_waits_cache[seat]={"signature":signature,"tiles":Rules.waits(base,p.melds,view.settings.jiang=="luan",_field_id(seat))}
 	var entries: Array=[]
 	for tile in opponent_waits_cache[seat].tiles:
 		entries.append({"tile":tile,"remaining":_visible_remaining(tile)})
@@ -881,7 +887,7 @@ func _draw_opponent_waits() -> void:
 		var height=body_height+46
 		# The top/right cards occupy separate columns outside the physical table.
 		# Leave the lower-right lane for the local player's existing wait panel.
-		var position={1:Vector2(1396,374-height),2:Vector2(1242,208),3:Vector2(28,488)}[seat]
+		var position={1:Vector2(1396,374-height),2:Vector2(1242,236 if _mutation() else 208),3:Vector2(28,516 if _mutation() else 488)}[seat]
 		var panel=UI.table_panel(hud,Rect2(position,Vector2(width,height)))
 		panel.name="OpponentWaits%d"%seat;panel.set_meta("entries",entries)
 		opponent_waits_panels[seat]=panel
@@ -901,7 +907,7 @@ func _draw_opponent_waits() -> void:
 			if entry.remaining==0:face.modulate.a=0.45
 		if entries.is_empty():UI.label(body,Rect2(0,3,width-38,48),"听口更新中",17,UI.TABLE_MUTED)
 		scroll.set_deferred("scroll_vertical",scroll_position)
-	public_tiles_button.position.y=opponent_waits_panels[3].get_rect().end.y+10 if opponent_waits_panels.has(3) else 500
+	public_tiles_button.position.y=opponent_waits_panels[3].get_rect().end.y+10 if opponent_waits_panels.has(3) else (516 if _mutation() else 500)
 
 func _draw_waits_panel() -> void:
 	var scroll_position=0
@@ -1006,17 +1012,23 @@ func _pause() -> void:
 	UI.button(modal,Rect2(44,212,552,57),"继续对局",_close_modal,true)
 	UI.button(modal,Rect2(44,286,552,51),"保存并返回大厅",_show_lobby)
 
-func _field_id() -> String:
-	return str(view.get("field",{}).get("id",""))
+func _field_id(seat: int = 0) -> String:
+	return FieldRules.for_seat(view.get("field",{}),seat)
+
+func _mutation() -> bool:
+	return view.get("field",{}).get("id","")=="mutation"
+
+func _has_field(id: String) -> bool:
+	return FieldRules.contains(view.get("field",{}),id)
 
 func _field_moves() -> Array:
 	return view.get("pending",[]).filter(func(move): return str(move.kind).begins_with("field_") and move.kind not in ["field_exchange","field_gift_pick"])
 
 func _remaining_note() -> String:
-	return "未见余张为数量上限：变白前的牌种保密，未见牌也可能在别人手中。" if _field_id()=="diamond_finger" else "未见的牌也可能在其他玩家手中。"
+	return "未见余张为数量上限：变白前的牌种保密，未见牌也可能在别人手中。" if _has_field("diamond_finger") else "未见的牌也可能在其他玩家手中。"
 
 func _remaining_prefix() -> String:
-	return "至多" if _field_id()=="diamond_finger" else "未见"
+	return "至多" if _has_field("diamond_finger") else "未见"
 
 func _field_action_name(kind: String) -> String:
 	return {"field_transform":"大力金刚指 · 变白板","field_rebirth":"新生 · 撤听亮手","field_reclaim":"上架 · 撤回副露","field_peek_wall":"占星Ⅰ · 看四张","field_peek_waits":"占星Ⅱ · 看听口","field_gift":"天使的施舍 · 三选一"}.get(kind,"场地能力")
@@ -1038,10 +1050,13 @@ func _show_field_selector(settings: Dictionary, apply_selection: Callable) -> vo
 			if enabled:next.field_selection="random"
 			_close_modal();apply_selection.call(FieldRules.normalize(next)),settings.get("field_rules",false)==enabled and (not enabled or FieldRules.selection(settings)=="random"))
 	UI.label(modal,Rect2(42,196,996,28),"指定一种场地",20,UI.GOLD,true)
+	var choices=ScrollContainer.new();choices.name="FieldChoices";choices.position=Vector2(42,236);choices.size=Vector2(996,512)
+	choices.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;modal.add_child(choices)
+	var grid=Control.new();grid.custom_minimum_size=Vector2(976,ceili(FieldRules.IDS.size()/4.0)*128);choices.add_child(grid)
 	for i in range(FieldRules.IDS.size()):
 		var id=str(FieldRules.IDS[i]);var rule=FieldRules.info(id)
 		var chosen=settings.get("field_rules",false) and FieldRules.selection(settings)==id
-		var card=UI.button(modal,Rect2(42+(i%4)*251,236+(i/4)*128,237,116),"",func():
+		var card=UI.button(grid,Rect2((i%4)*244,(i/4)*128,232,116),"",func():
 			var next=settings.duplicate(true);next.field_rules=true;next.field_selection=id
 			_close_modal();apply_selection.call(FieldRules.normalize(next)),chosen)
 		card.set_meta("field_selection",id)
@@ -1070,7 +1085,7 @@ func _show_field_catalog() -> void:
 	body.custom_minimum_size.y=ceil(FieldRules.IDS.size()/2.0)*161
 
 func _show_current_field() -> void:
-	if not _field_id().is_empty(): _show_field_detail(_field_id(),true)
+	if not _field_id().is_empty(): _show_field_detail("mutation" if _mutation() else _field_id(),true)
 
 func _show_field_detail(id: String, current: bool) -> void:
 	var rule=FieldRules.info(id)
@@ -1079,7 +1094,7 @@ func _show_field_detail(id: String, current: bool) -> void:
 	# while a LAN table continues taking turns; a new round still closes it.
 	modal.set_meta("field_action",current and id!="no_honors")
 	var subtitle="规则说明 · 可指定，也可每局随机"
-	if current:subtitle="本局场地 · 每位玩家拥有独立次数" if rule.get("active",false) else "本局场地 · 全体玩家共同遵守"
+	if current:subtitle="本局突变 · 四人规则独立，效果仅归获得者" if _mutation() else ("本局场地 · 每位玩家拥有独立次数" if rule.get("active",false) else "本局场地 · 全体玩家共同遵守")
 	UI.label(modal,Rect2(42,81,956,28),subtitle,18,UI.GOLD)
 	var body=_field_scroll(598)
 	var description_text=str(rule.description)
@@ -1088,6 +1103,17 @@ func _show_field_detail(id: String, current: bool) -> void:
 	var description=UI.label(body,Rect2(0,0,934,148),description_text,22,UI.TEXT)
 	description.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var y=164.0
+	if current and _mutation():
+		var assignments=Control.new();assignments.name="MutationAssignments";assignments.position=Vector2(0,y);body.add_child(assignments)
+		for seat in range(4):
+			var assigned=_field_id(seat)
+			var row=UI.button(assignments,Rect2(0,seat*53,934,45),str(view.players[seat].name)+" · "+str(FieldRules.info(assigned).name)+(" · 本人规则" if seat==0 else ""),func():_show_field_detail(assigned,false),seat==0)
+			row.set_meta("field_seat",seat);row.set_meta("field_id",assigned)
+		y+=226
+		id=_field_id();rule=FieldRules.info(id)
+		UI.label(body,Rect2(0,y,934,34),"你的规则 · "+str(rule.name),24,UI.GOLD);y+=44
+		var personal=UI.label(body,Rect2(0,y,934,172),str(rule.description),21,UI.TEXT)
+		personal.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;y+=184
 	if current:
 		var p: Dictionary=view.players[0]
 		if id=="no_honors": y=_draw_no_honors_additions(body,y)
@@ -1095,7 +1121,9 @@ func _show_field_detail(id: String, current: bool) -> void:
 			UI.label(body,Rect2(0,y,934,35),"你的本局次数：已使用" if p.get("field_used",false) else "你的本局次数：剩余 1 次",22,UI.GOLD,true); y+=49
 		var chosen: Array=view.get("field",{}).get("chosen_tiles",[])
 		if not chosen.is_empty():
-			UI.label(body,Rect2(0,y,934,31),"本局天选牌",21,UI.GOLD); y+=39
+			var chosen_title="本局天选牌"
+			if _mutation(): chosen_title=str(view.players[view.field.seat_rules.find("chosen")].name)+"的天选牌 · 仅该玩家胡牌加番"
+			UI.label(body,Rect2(0,y,934,31),chosen_title,21,UI.GOLD); y+=39
 			y=_field_tile_row(body,chosen,y)
 		if id=="chosen_head":
 			UI.label(body,Rect2(0,y,934,31),"当前公开杠头",21,UI.GOLD); y+=39

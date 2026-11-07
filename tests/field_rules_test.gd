@@ -11,7 +11,7 @@ func _initialize() -> void:
 
 func run() -> void:
 	var started = Time.get_ticks_msec()
-	check(FieldRules.IDS.size() == 16, "sixteen independent field rules")
+	check(FieldRules.IDS.size() == 17, "seventeen field rules")
 	check(not FieldRules.normalize({}).field_rules, "field rules default off")
 	check(not FieldRules.normalize({"field_rules":"true"}).field_rules, "field toggle rejects wrong JSON type")
 	for id in FieldRules.IDS:

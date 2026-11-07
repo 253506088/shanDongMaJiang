@@ -7,7 +7,7 @@ signal room_changed(room: Dictionary)
 signal connection_closed(reason: String)
 
 const GAME_PORT = 32141
-const PROTOCOL = 3
+const PROTOCOL = 4
 const APP_ID = "qingyu-shandong-lan"
 const MAX_PACKET = 65536
 const HEARTBEAT_SECONDS = 2.0
@@ -369,6 +369,10 @@ func _valid_view(value: Dictionary) -> bool:
 	for private_key in ["wall", "journal", "claim_queue", "wall_hidden", "exchange_picks", "gift_slots"]:
 		if value.has(private_key): return false
 	if not value.get("settings") is Dictionary or not _valid_field_settings(value.settings): return false
+	var field = value.get("field", {})
+	if not field is Dictionary: return false
+	if field.get("id", "") == "mutation":
+		if not value.settings.get("field_rules", false) or not FieldRules.valid_assignment(field.get("seat_rules")): return false
 	if value.get("phase") not in ["turn", "claim", "settled", "draw_choice", "gift_choice", "exchange"] or not value.get("revision") is int or not value.get("round") is int: return false
 	if not value.get("players") is Array or value.players.size() != 4 or not value.get("pending") is Array: return false
 	for player in value.players:
