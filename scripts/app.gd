@@ -1416,7 +1416,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n"+_games_description()+"\n\n麻将规则和牌面参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n"+_games_description()+"\n\n麻将规则、牌面与语音沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n扑克男女声：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 

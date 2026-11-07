@@ -4,21 +4,16 @@ extends AudioStreamPlayer
 var queue: Array = []
 var clips: Dictionary = {}
 var last_key = ""
-var gender_clips: Dictionary = {}
 
 func _ready() -> void:
 	volume_db = -3
-	for tile in range(34): clips[str(tile)] = load("res://assets/audio/characters/male/%02d.wav" % tile)
-	for action in ["chi","peng","gang","hu","zimo"]: clips[action] = load("res://assets/audio/characters/male/%s.wav" % action)
+	# Mahjong uses the predecessor's unchanged recordings for every character.
+	for tile in range(34): clips[str(tile)] = load("res://assets/audio/voice/%02d.mp3" % tile)
+	for action in ["chi","peng","gang","hu","zimo"]: clips[action] = load("res://assets/audio/voice/%s.mp3" % action)
 	finished.connect(_next)
 
-func clip_for(profile: String, id: String) -> AudioStream:
-	if profile == "male": return clips.get(id)
-	var key = profile + "/" + id
-	if not gender_clips.has(key):
-		var file = "%02d" % int(id) if id.is_valid_int() else id
-		gender_clips[key] = load("res://assets/audio/characters/%s/%s.wav" % [profile, file])
-	return gender_clips[key]
+func clip_for(id: String) -> AudioStream:
+	return clips.get(id)
 
 func calls(view: Dictionary) -> Array:
 	var event: Dictionary = view.get("event", {})
@@ -41,7 +36,7 @@ func announce(view: Dictionary, silent: bool) -> float:
 	if silent: stop_all(); return 0
 	var speech = calls(view)
 	for call in speech:
-		queue.append(clip_for(Characters.voice_for(view, call.seat), call.key))
+		queue.append(clip_for(call.key))
 	var duration = maxf(0,stream.get_length()-get_playback_position()) if playing else 0.0
 	for clip in queue: duration += clip.get_length()
 	if not playing: _next()

@@ -9,7 +9,7 @@ func _ready() -> void:
 	var panel = UI.panel(self, Rect2(240, 90, 1120, 720), Color("12372ffb"), UI.GOLD, 24)
 	UI.label(panel, Rect2(38, 25, 940, 52), "选择角色", 34, UI.GOLD)
 	UI.button(panel, Rect2(1014, 27, 67, 48), "×", func():dismissed.emit())
-	UI.label(panel, Rect2(38, 85, 1044, 42), "四男四女 · 男角色用男声，女角色用女声 · 选择自动保存", 22, UI.TEXT)
+	UI.label(panel, Rect2(38, 85, 1044, 42), "麻将沿用莲花原声 · 斗地主、唬牌按角色性别播报 · 选择自动保存", 22, UI.TEXT)
 	for index in range(8):
 		var id = Characters.IDS[index]; var character = Characters.info(id)
 		var x = 38 + (index % 4) * 263; var y = 149 + (index / 4) * 229
@@ -19,10 +19,10 @@ func _ready() -> void:
 		var ink = Color("342e21") if id == current_id else UI.TEXT
 		var title = UI.label(card, Rect2(10, 115, 230, 35), character.name + (" · 已选" if id == current_id else ""), 23, ink, true)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var subtitle = ("女声" if character.gender == "female" else "男声") + (" · 头像待交付" if not ResourceLoader.exists(character.avatar) else (" · 临时头像" if character.temporary else ""))
+		var subtitle = ("女角色" if character.gender == "female" else "男角色") + (" · 头像待交付" if not ResourceLoader.exists(character.avatar) else (" · 临时头像" if character.temporary else ""))
 		var detail = UI.label(card, Rect2(9, 158, 232, 35), subtitle, 17, ink)
 		detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	UI.label(panel, Rect2(38, 640, 1044, 42), "角色只决定形象与声音，不影响打牌。同桌可选相同角色，以边框颜色区分。", 20, UI.MUTED)
+	UI.label(panel, Rect2(38, 640, 1044, 42), "角色不影响打牌。同桌可选相同角色，以边框颜色区分。", 20, UI.MUTED)
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed: accept_event()

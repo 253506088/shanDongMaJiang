@@ -26,18 +26,27 @@ func run() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
 	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=true;app.preferences_path=directory+"preferences.json";root.add_child(app)
 	app.session.set_process(false);app.session.storage_root=directory;app.muted=true
-	check(ProjectSettings.get_setting("application/config/version")=="0.10.2","package version current")
-	check(app.character_id==Characters.DEFAULT,"packaged app defaults to male role")
+	check(ProjectSettings.get_setting("application/config/version")=="0.10.3","package version current")
+	check(app.character_id=="female_03" and app.character_button.text=="角色 · 望舒","packaged app defaults to Wangshu")
 	check(not FileAccess.file_exists("res://头像生成/avatar_02_male_18.jpg") and not FileAccess.file_exists("res://tools/prepare_character_art.py"),"raw images and preparation scripts excluded")
 	for id in Characters.IDS:
 		var avatar=load(Characters.info(id).avatar) as Texture2D
 		check(avatar!=null and avatar.get_size()==Vector2(512,512),"packaged avatar decodes: "+id)
 	var manifest=JSON.parse_string(FileAccess.get_file_as_string("res://assets/licenses/character-art-manifest.json"))
 	check(manifest.pending_replacements.has("female_03") and manifest.pending_replacements.has("male_04"),"package retains explicit pending replacement map")
-	for gender in ["male","female"]:
-		for value in range(34):check(app.voice.clip_for(gender,str(value))!=null,"packaged tile call exists in each gender")
-		for action in ["chi","peng","gang","hu","zimo"]:check(app.voice.clip_for(gender,action)!=null,"packaged action call exists in each gender")
-	check(FileAccess.file_exists("res://assets/licenses/mahjong-character-voice-manifest.json"),"speech provenance ships")
+	for value in range(34):
+		var clip=app.voice.clip_for(str(value))
+		check(clip is AudioStreamMP3 and clip.resource_path=="res://assets/audio/voice/%02d.mp3"%value,"packaged Mahjong tile uses Lotus MP3")
+	for action in ["chi","peng","gang","hu","zimo"]:
+		check(app.voice.clip_for(action).resource_path=="res://assets/audio/voice/%s.mp3"%action,"packaged Mahjong action uses Lotus MP3")
+	check(FileAccess.file_exists("res://assets/licenses/lotus-assets.json"),"original speech provenance ships")
+	check(not ResourceLoader.exists("res://assets/audio/characters/male/00.wav") and not ResourceLoader.exists("res://assets/audio/characters/female/00.wav"),"inactive synthesized Mahjong voices excluded from package")
+	AudioServer.set_bus_mute(0,true)
+	for id in Characters.IDS:
+		app.voice.stop_all()
+		app.voice.announce({"round":1,"revision":Characters.IDS.find(id)+1,"characters":[id],"event":{"kind":"discard","tile":27,"seat":0}},false)
+		check(app.voice.stream==app.voice.clip_for("27"),"packaged Mahjong keeps original voice for every role")
+	app.voice.stop_all()
 	app._show_character_picker();await capture("package-eight-roles");app._close_character_picker()
 	app.qa_mode=false;app._set_character("female_02");app.qa_mode=true
 	var prefs=JSON.parse_string(FileAccess.get_file_as_string(app.preferences_path))

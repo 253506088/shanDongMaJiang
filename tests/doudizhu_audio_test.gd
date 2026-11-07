@@ -161,6 +161,9 @@ func _test_result_panel() -> void:
 	var previous = _silence(3.0)
 	var last_card = _silence(1.0)
 	var spring = _silence(0.75)
+	# Inject timing fixtures into the actual actor's voice bank. The default
+	# character can change; the result-panel test must not assume a male actor.
+	mode.voice.set_profile(Characters.voice_for(mode.session.current_view(), 0))
 	mode.voice.stop_all()
 	mode.voice.clips = {"single_4": previous, "single_3": last_card, "spring": spring}
 	mode.voice.announce(_view(mode.session.round_id, 999, _play("single", 4)), false)

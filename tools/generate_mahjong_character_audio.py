@@ -79,7 +79,7 @@ def generate(packages, model):
         "model": source["model"], "generation": {"runtime": "sherpa-onnx", "runtime_version": sherpa_onnx.__version__,
         "profiles": PROFILES, "speed": 1.0, "format": "mono PCM16 24000 Hz",
         "processing": "trim <0.003 silence; retain 50ms/120ms; -2dBFS peak, max gain 4; 5ms fades"},
-        "notes": "Offline generated speech, not human recordings. Each event uses its speaker's character gender. Legacy Lotus MP3s retained separately.",
+        "notes": "Inactive since 0.10.3 at user request: Mahjong uses the original Lotus MP3 recordings for every character. These generated WAVs remain as historical source assets and are excluded from exports. Poker gender voices are unchanged.",
         "clips": clips}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 

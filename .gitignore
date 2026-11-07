@@ -5,6 +5,11 @@ build/
 # Offline and LAN variants use build/<platform>/ and build/<platform>-lan/.
 # Build-option/menu regression evidence lives in artifacts/build-options-2026-11-08/;
 # temporary menu-test sandboxes under tmp/package-menu-test-* clean themselves.
+# Restored Mahjong voice QA logs/screenshots use artifacts/mahjong-voice-2026-11-08/.
+# Superseded copies remain after automatic approval blocked their cleanup;
+# final evidence uses ui-final/, package-*-final/ and full-tests-release.log.
+# Keep original MP3s and historical generated WAV sources tracked; exclude the
+# inactive assets/audio/characters/* from export presets, not from source control.
 # Windows motion bridge DLL, objects, linker outputs: rebuilt by
 # tools/build_native.ps1 from native/windows sources; exported copies ship in
 # build/windows beside the EXE. They are generated binaries, not source assets.

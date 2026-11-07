@@ -25,7 +25,13 @@ function Run-Menu([string]$Arguments, [string]$InputText, [string]$FailTarget = 
         $errors = $process.StandardError.ReadToEndAsync()
         $process.StandardInput.Write($InputText)
         $process.StandardInput.Close()
-        if (-not $process.WaitForExit(15000)) { $process.Kill(); throw 'Menu test timed out.' }
+        if (-not $process.WaitForExit(15000)) {
+            # CMD owns a PowerShell child. Retire only this probe's process
+            # tree, otherwise the child can keep the scratch directory open.
+            & "$env:SystemRoot/System32/taskkill.exe" /PID $process.Id /T /F | Out-Null
+            $process.WaitForExit(3000) | Out-Null
+            throw 'Menu test timed out.'
+        }
         return @{ code=$process.ExitCode; text=$output.Result; errors=$errors.Result }
     } finally { $process.Dispose() }
 }
@@ -45,6 +51,8 @@ exit 0
     Check ([BitConverter]::ToString($menuBytes[0..2]) -eq 'EF-BB-BF') 'Windows PowerShell needs a UTF-8 BOM for this menu.'
     $result = Run-Menu '' "0`r`n"
     Check ($result.code -eq 0 -and $result.text.Contains('2. Android') -and -not $result.text.Contains('BUILD:') -and $result.errors -eq '') 'Menu displays Android and exits without CMD errors.'
+    $result = Run-Menu '' ''
+    Check ($result.code -ne 0 -and -not $result.text.Contains('BUILD:')) 'Closed redirected input cancels instead of looping forever.'
     $result = Run-Menu '' "2`r`n`r`n"
     Check ($result.code -eq 0 -and $result.text.Contains('BUILD:android:False') -and $result.errors -eq '') 'Interactive Android defaults to offline.'
     $result = Run-Menu '' "1`r`ny`r`n"

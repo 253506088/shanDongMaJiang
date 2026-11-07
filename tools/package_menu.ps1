@@ -3,6 +3,13 @@
     [switch]$EnableLan
 )
 $ErrorActionPreference = 'Stop'
+function Read-MenuLine([string]$Prompt) {
+    if ([Console]::IsInputRedirected) {
+        Write-Host $Prompt
+        return [Console]::ReadLine()
+    }
+    return Read-Host $Prompt
+}
 try {
     if (-not $Target) {
         Write-Host ''
@@ -16,11 +23,17 @@ try {
         Write-Host ''
         Write-Host '产物保存在本目录的 build 文件夹。'
         Write-Host 'iOS 需要在 Mac 上使用 Xcode 打包。'
-        do { $choice = Read-Host '请选择 [1/2/3/4/0]' } while ($choice -notin @('1','2','3','4','0'))
+        do {
+            $choice = Read-MenuLine '请选择 [1/2/3/4/0]'
+            if ($null -eq $choice) { throw '未收到平台选择，已取消打包。' }
+        } while ($choice -notin @('1','2','3','4','0'))
         if ($choice -eq '0') { exit 0 }
         $Target = @{ '1'='windows'; '2'='android'; '3'='macos'; '4'='all' }[$choice]
         if (-not $EnableLan) {
-            do { $answer = Read-Host '是否支持局域网联机？[y/N，直接回车为否]' } while ($answer -notin @('','y','n','yes','no'))
+            do {
+                $answer = Read-MenuLine '是否支持局域网联机？[y/N，直接回车为否]'
+                if ($null -eq $answer) { throw '未收到联机选项，已取消打包。' }
+            } while ($answer -notin @('','y','n','yes','no'))
             $EnableLan = $answer -in @('y','yes')
         }
     }

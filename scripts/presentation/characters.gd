@@ -1,10 +1,10 @@
 class_name Characters
 extends RefCounted
 ## Presentation metadata only. Never part of rules, shuffle, scoring or replay.
-const DEFAULT = "male_01"
+const DEFAULT = "female_03"
 const IDS = ["male_01", "male_02", "male_03", "male_04", "female_01", "female_02", "female_03", "female_04"]
 const NAMES = ["听松", "知秋", "怀竹", "行舟", "清和", "观澜", "望舒", "映雪"]
-const DEFAULT_SEATS = ["male_01", "male_02", "female_02", "male_03", "female_03", "female_04"]
+const DEFAULT_SEATS = [DEFAULT, "male_02", "female_02", "male_03", "female_03", "female_04"]
 const COLORS = [Color("e8bd6a"), Color("69c6ed"), Color("de8aca"), Color("8cd59a"), Color("e99572"), Color("aaa0ef")]
 const NORMAL_BORDER = Color("dbc596")
 

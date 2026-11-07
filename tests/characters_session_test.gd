@@ -19,26 +19,33 @@ func preferences() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
 	var path=directory+"preferences.json"
 	var file=FileAccess.open(path,FileAccess.WRITE)
-	file.store_string(JSON.stringify({"doudizhu_voice":"female","bluff_settings":{"voice":"female","players":5,"theme":"guofeng"},"muted":true,"config":{"jiang":"luan","chi":false,"field_rules":true,"field_selection":"mutation"}}));file.close()
+	file.store_string(JSON.stringify({"doudizhu_voice":"male","bluff_settings":{"voice":"male","players":5,"theme":"guofeng"},"muted":true,"config":{"jiang":"luan","chi":false,"field_rules":true,"field_selection":"mutation"}}));file.close()
 	var app=load("res://scenes/main.tscn").instantiate();app.qa_mode=false;app.preferences_path=path;root.add_child(app)
-	check(app.character_id==Characters.DEFAULT,"legacy female voice preference does not choose a female role by itself")
+	check(app.character_id=="female_03" and app.session.character_id=="female_03","missing role uses Wangshu regardless of legacy voice preference")
 	check(app.config.jiang=="luan" and not app.config.chi and app.config.field_selection=="mutation","loading role preference preserves unrelated game settings")
+	app._open_doudizhu();app.doudizhu.session.set_process(false)
+	check(app.doudizhu.session.current_view().characters[0]=="female_03" and Characters.voice_for(app.doudizhu.session.current_view(),0)=="female","fresh Dou Dizhu uses Wangshu and female voice")
+	app._show_lobby();await process_frame
+	app._open_bluff()
+	check(app.bluff.character_id=="female_03" and app.bluff.table.character_id=="female_03","fresh bluff setup uses Wangshu")
+	app._show_lobby();await process_frame
 	check(app._set_character("female_03"),"temporary-avatar female role can be selected normally")
+	check(app._set_character("male_02"),"an explicit role choice can replace the new default")
 	var saved=JSON.parse_string(FileAccess.get_file_as_string(path))
-	check(saved.character_id=="female_03" and not saved.has("doudizhu_voice") and not saved.bluff_settings.has("voice"),"only character ID persists; manual voice preferences removed")
+	check(saved.character_id=="male_02" and not saved.has("doudizhu_voice") and not saved.bluff_settings.has("voice"),"only character ID persists; manual voice preferences removed")
 	check(saved.bluff_settings.players==5 and saved.bluff_settings.theme=="guofeng" and saved.muted,"existing non-voice preferences retained")
 	app.free();await process_frame
 	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=false;app.preferences_path=path;root.add_child(app)
-	check(app.character_id=="female_03" and app.session.character_id=="female_03","a fresh app restores selected role")
+	check(app.character_id=="male_02" and app.session.character_id=="male_02","saved role overrides the Wangshu default on restart")
 	app._open_doudizhu();app.doudizhu.session.set_process(false)
-	check(app.doudizhu.session.current_view().characters[0]=="female_03" and Characters.voice_for(app.doudizhu.session.current_view(),0)=="female","DDZ receives cached gender role")
+	check(app.doudizhu.session.current_view().characters[0]=="male_02" and Characters.voice_for(app.doudizhu.session.current_view(),0)=="male","DDZ receives cached gender role")
 	app._show_lobby();await process_frame
 	app._open_bluff()
-	check(app.bluff.character_id=="female_03" and app.bluff.table.character_id=="female_03","bluff setup receives same cached role")
+	check(app.bluff.character_id=="male_02" and app.bluff.table.character_id=="male_02","bluff setup receives same cached role")
 	app.free();await process_frame
 	saved.character_id="invalid";file=FileAccess.open(path,FileAccess.WRITE);file.store_string(JSON.stringify(saved));file.close()
 	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=false;app.preferences_path=path;root.add_child(app)
-	check(app.character_id==Characters.DEFAULT,"corrupt role ID recovers to male default")
+	check(app.character_id=="female_03","corrupt role ID recovers to Wangshu default")
 	app.free();await process_frame
 	var before=FileAccess.get_file_as_bytes(path)
 	app=load("res://scenes/main.tscn").instantiate();app.qa_mode=true;app.preferences_path=path;root.add_child(app)

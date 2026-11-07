@@ -32,7 +32,7 @@ func run() -> void:
 	save_directory="user://qa-characters-ui-%d-%d/"%[OS.get_process_id(),Time.get_ticks_msec()]
 	app.session.storage_root=save_directory;app.preferences_path=save_directory+"preferences.json"
 	await pause_frames(4)
-	expect(app.character_id==Characters.DEFAULT and Characters.info(app.character_id).gender=="male","first start defaults to male role")
+	expect(app.character_id=="female_03" and app.character_button.text=="角色 · 望舒","first start defaults to Wangshu")
 	await click_control(app.character_button);await pause_frames(3)
 	expect(is_instance_valid(app.character_picker),"lobby opens role picker")
 	for id in Characters.IDS:expect(tagged(app.character_picker,"character_id",id)!=null,"all eight roles selectable")

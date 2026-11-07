@@ -13,7 +13,8 @@ func catalog_and_views() -> void:
 	check(Characters.IDS.size()==8,"eight stable character IDs")
 	check(Characters.IDS.filter(func(id):return Characters.info(id).gender=="male").size()==4,"four male characters")
 	check(Characters.IDS.filter(func(id):return Characters.info(id).gender=="female").size()==4,"four female characters")
-	check(Characters.info(Characters.DEFAULT).gender=="male","fresh preference defaults male")
+	check(Characters.DEFAULT=="female_03" and Characters.info(Characters.DEFAULT).name=="望舒","fresh preference defaults to Wangshu")
+	check(Characters.default_for_seat(0)=="female_03","fallback local portrait also defaults to Wangshu")
 	for bad in [null,1,true,[],{},"", "missing", "../portrait.png"]:
 		check(Characters.normalize(bad)==Characters.DEFAULT,"invalid character falls back safely")
 	for id in Characters.IDS:
@@ -55,21 +56,34 @@ func audio_routing() -> void:
 	AudioServer.set_bus_mute(0,true)
 	var ids=["male_01","female_01","male_02","female_02"]
 	var voice=load("res://scripts/ui/tile_voice.gd").new();root.add_child(voice)
-	for gender in ["male","female"]:
-		for id in range(34):
-			var clip=voice.clip_for(gender,str(id))
-			check(clip!=null and clip.get_length()>.15 and ("/"+gender+"/") in clip.resource_path,"tile voice has matching gender resource")
-		for key in ["chi","peng","gang","hu","zimo"]:check(voice.clip_for(gender,key)!=null,"action voice has both genders")
-	var view={"round":1,"revision":1,"characters":ids,"event":{"kind":"discard","tile":0,"seat":0}}
+	for id in range(34):
+		var clip=voice.clip_for(str(id))
+		check(clip is AudioStreamMP3 and clip.get_length()>.15 and clip.resource_path=="res://assets/audio/voice/%02d.mp3"%id,"Mahjong tile uses original Lotus recording")
+	for key in ["chi","peng","gang","hu","zimo"]:
+		var clip=voice.clip_for(key)
+		check(clip is AudioStreamMP3 and clip.get_length()>.15 and clip.resource_path=="res://assets/audio/voice/%s.mp3"%key,"Mahjong action uses original Lotus recording")
+	var view={"round":1,"revision":1,"characters":ids.duplicate(),"event":{"kind":"discard","tile":0,"seat":0}}
 	voice.announce(view,false);var first=voice.stream
 	await process_frame
 	view.revision=2;view.event.seat=1
 	voice.announce(view,false)
-	check(voice.stream==first and "/male/" in first.resource_path and voice.queue.size()==1 and "/female/" in voice.queue[0].resource_path,"female call queues behind male without stopping him")
+	check(voice.stream==first and first==voice.clip_for("0") and voice.queue==[first],"male and female Mahjong actors queue the same original recording without interruption")
+	view.characters[1]="male_03"
 	check(voice.announce(view,false)==0 and voice.queue.size()==1,"same event never repeats after role refresh")
 	voice.stop_all()
 	view.revision=3;view.event={"kind":"win","seat":1};view.result={"win_type":"dihu"};view.last_discard={"revision":3,"tile":0,"seat":0}
 	check(voice.calls(view).map(func(call):return call.seat)==[0,1],"discarder and winner retain distinct speaking identities")
+	voice.announce(view,false)
+	check(voice.stream==voice.clip_for("0") and voice.queue==[voice.clip_for("hu")],"discard and win keep original audio order")
+	voice.stop_all();view.revision=4;view.result.win_type="self-draw"
+	voice.announce(view,false)
+	check(voice.stream==voice.clip_for("zimo"),"self-draw uses Lotus self-draw call")
+	for id in Characters.IDS:
+		voice.stop_all();view.revision+=1;view.characters[0]=id;view.event={"kind":"discard","tile":27,"seat":0}
+		voice.announce(view,false)
+		check(voice.stream==voice.clip_for("27"),"all eight Mahjong roles keep the same original East voice")
+	view.revision+=1;voice.announce(view,true)
+	check(voice.stream==null and voice.queue.is_empty() and not voice.playing,"Mahjong mute clears original voice queue")
 	voice.free()
 	var ddz=load("res://scripts/doudizhu/audio/voice.gd").new();root.add_child(ddz)
 	var poker={"round_id":1,"deal":1,"revision":1,"characters":ids.slice(0,3),"phase":"playing","event":{"type":"play","seat":0,"remaining":3,"combo":{"kind":"single","main":3}}}

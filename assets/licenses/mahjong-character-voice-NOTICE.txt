@@ -12,7 +12,7 @@ Pinned model revision, hashes, phrases, processing and individual WAV hashes:
 mahjong-character-voice-manifest.json.
 
 Generator: tools/generate_mahjong_character_audio.py (development only).
-The game ships WAV files and chooses gender from each event's character.
-It uses no microphone, system voice or network synthesis service.
+Since 0.10.3 these WAVs are inactive historical source assets, excluded from exports.
+Mahjong now uses the original Lotus MP3 recordings regardless of character gender.
 These are model-generated voices, not a commercial-game recording pack or
 human voice acting. Legacy Lotus MP3 assets and provenance remain separate.

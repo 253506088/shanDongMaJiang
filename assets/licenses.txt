@@ -1486,4 +1486,4 @@ J/Q/K由单向人物按腰线裁切制作双头，双王单向，青玉牌背保
 八角色与麻将男女声（2026-11-07）
 --------------------------------
 运行头像来自用户交付，6张正式图及2张明确临时使用的表情包；不宣称已核实为开源素材。对应ID、待替换文件、原图和处理哈希见 character-art-manifest.json / character-art-NOTICE.txt。
-麻将新增78段（男女各39段）Kokoro / sherpa-onnx开放模型生成的离线报牌，随实际发言角色选择性别；完整Apache-2.0许可与模型来源沿用，逐文件信息见 mahjong-character-voice-manifest.json / mahjong-character-voice-NOTICE.txt。
+麻将0.10.0曾生成78段（男女各39段）Kokoro / sherpa-onnx离线报牌，0.10.3起停用并排除安装包，源文件与历史来源清单保留。当前所有麻将角色统一使用上述39段莲花原MP3；斗地主与唬牌仍按角色性别播报。历史合成语音信息见 mahjong-character-voice-manifest.json / mahjong-character-voice-NOTICE.txt。
