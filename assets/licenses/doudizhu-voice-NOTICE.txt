@@ -1,6 +1,6 @@
 Dou Dizhu offline speech — provenance notice
 
-The 120 WAV clips in assets/doudizhu/audio were generated for this project from
+The 126 WAV clips in assets/doudizhu/audio were generated for this project from
 the project's short Chinese card/action phrases. They are synthesized audio,
 not a repackaged commercial-game recording library or a human recording pack.
 
@@ -13,7 +13,7 @@ A copy of the upstream model card is doudizhu-Kokoro-model-card.md.
 
 Offline inference: sherpa-onnx 1.12.40, CPU, Kokoro v1.1 int8 ONNX conversion.
 Profiles: male = zm_010 (speaker ID 59), female = zf_001 (speaker ID 3).
-Each profile contains all 60 card/action calls. Speed: 1.0; mono 24 kHz PCM16 WAV.
+Each profile contains all 63 card/action calls. Speed: 1.0; mono 24 kHz PCM16 WAV.
 The user selected both short-call previews for configurable in-game playback.
 Male WAVs keep the original audio/ paths; female WAVs are in audio/female/.
 Ordinary single cards now announce the rank directly instead of "one card".
@@ -29,3 +29,5 @@ The generated audio is trimmed, peak-normalized and faded at its endpoints.
 Only the generated PCM WAV files are runtime dependencies. The model weights,
 ONNX synthesizer and Python development dependencies are not distributed with
 the game. No operating-system voice, network connection or microphone is used.
+
+2026-11-07: added remaining 3/2/1 card notices in both voices; old clips retained.

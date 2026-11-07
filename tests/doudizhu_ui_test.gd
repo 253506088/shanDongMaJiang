@@ -379,6 +379,15 @@ func run() -> void:
 	check(table._paused and table._modal_kind == "pause", "back from rules returns to pause")
 	table.pause_menu()
 	check(not table._paused, "back from pause resumes")
+	for remaining in [3, 2, 1]:
+		state = fixture("playing", 40 + remaining)
+		state.hand = [44, 48, 52].slice(0, remaining); state.hand_counts = [remaining, 3, 2]
+		table.set_view(state)
+		var labels = table.content.get_children().filter(func(node): return node is Label and node.text.begins_with("我就剩"))
+		check(labels.size() == 3 and labels.any(func(node): return node.text == TableScript.remaining_text(remaining)), "all low seats show exact remaining-card notice")
+		table._toggle_card(state.hand[0])
+		check(not table.play_button.disabled and not table._paused and table._modal_kind.is_empty(), "DDZ low-card notices do not block normal play")
+		await capture("ddz-remaining-%d" % remaining)
 	state = fixture("finished", 30)
 	state.turn = -1; state.multiplier = 8; state.bomb_count = 2
 	state.hand = []; state.hand_counts = [0, 5, 4]

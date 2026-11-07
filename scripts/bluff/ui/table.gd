@@ -36,6 +36,8 @@ var round_history: Control
 var round_rows: Array = []
 var recorder: Control
 var notice = ""
+var report_labels: Array = []
+var permission_buttons: Array = []
 var drag_active = false
 var drag_seen: Dictionary = {}
 var drag_regions: Array = []
@@ -90,7 +92,9 @@ func face(parent: Node, id: int, rect: Rect2, back: bool = false) -> Control:
 
 func set_view(next: Dictionary) -> void:
 	if next.get("revision", -1) != view.get("revision", -1) or next.get("round_id", -1) != view.get("round_id", -1):
-		selected.clear(); submitted = -1; notice = ""; cancel_drag()
+		var permission_update = next.get("round_id", -1) == view.get("round_id", -1) and next.get("hand", []) == view.get("hand", []) and next.get("event", {}).get("type", "") in ["request_challenge", "challenge_permission"]
+		if not permission_update: selected.clear()
+		submitted = -1; notice = ""; cancel_drag()
 		if not modal_kind.is_empty(): close_modal()
 	view = next.duplicate(true)
 	if not view.get("last", {}).is_empty(): declared = view.rank
@@ -103,6 +107,7 @@ func render() -> void:
 	play_button = null; pass_button = null; challenge_button = null; selection_label = null
 	review_label = null; round_history = null; round_rows.clear()
 	recorder = null
+	report_labels.clear(); permission_buttons.clear()
 	button(content, Rect2(53, 31, 124, 51), "返回" if view.is_empty() else "暂停", func(): exit_requested.emit() if view.is_empty() else pause_menu())
 	button(content, Rect2(189, 31, 124, 51), "玩法", show_rules)
 	button(content, Rect2(325, 31, 175, 51), "国风青玉" if settings.theme == "guofeng" else "传统牌面", toggle_theme)
@@ -141,11 +146,13 @@ func draw_compact_table() -> void:
 		var width = 1450.0 / view.config.players - 12
 		var active = view.phase == "playing" and view.turn == seat
 		panel(content, Rect2(x, 133, width, 98), Color("102c28ed"), Kit.ACCENT if active else Kit.LINE, 16)
-		label(content, Rect2(x + 12, 140, width - 24, 36), "%s · %d 张%s" % [NAMES[seat], view.hand_counts[seat], " · 行动" if active else ""], 23, Kit.ACCENT if active else Kit.TEXT)
+		label(content, Rect2(x + 12, 137, width - 24, 32), "%s · %d 张%s" % [NAMES[seat], view.hand_counts[seat], " · 行动" if active else ""], 23, Kit.ACCENT if active else Kit.TEXT)
+		if Rules.low_hand(view.hand_counts[seat]):
+			report_labels.append(label(content, Rect2(x + 12, 169, width - 24, 26), "报牌三张", 20, Kit.CORAL))
 		var counts: Array = []
 		for play in view.get("trick", []):
 			if play.seat == seat: counts.append(str(play.count))
-		var row = label(content, Rect2(x + 12, 185, width - 24, 32), NAMES[seat] + "  " + ("未出牌" if counts.is_empty() else " + ".join(counts) + " 张"), 20, Kit.MUTED)
+		var row = label(content, Rect2(x + 12, 197, width - 24, 26), NAMES[seat] + "  " + ("未出牌" if counts.is_empty() else " + ".join(counts) + " 张"), 20, Kit.MUTED)
 		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS; row.tooltip_text = row.text
 		round_rows.append(row)
 	draw_recorder(); recorder.position.y = 251
@@ -205,7 +212,9 @@ func draw_seats() -> void:
 		if seat in view.passed: status = "已过牌"
 		elif not view.last.is_empty() and view.last.seat == seat: status = "刚扣下 %d 张" % view.last.count
 		if view.hand_counts[seat] == 0: status = "已出完 · 待确认" if view.phase != "finished" else "已出完"
-		label(content, Rect2(at + Vector2(13, 79), Vector2(208, 25)), status, 17, Kit.MUTED, true)
+		var low = Rules.low_hand(view.hand_counts[seat])
+		var status_label = label(content, Rect2(at + Vector2(13, 79), Vector2(208, 25)), "报牌三张" if low else status, 20 if low else 17, Kit.CORAL if low else Kit.MUTED, true)
+		if low: report_labels.append(status_label)
 	label(content, Rect2(74, 134, 430, 36), "%d 人 · %d 副牌  /  %s" % [view.config.players, view.decks, "自由抢开" if view.config.challenge == "any" else "顺位质疑"], 19, Kit.MUTED)
 	button(content, Rect2(1370, 132, 160, 43), "牌局记录", show_history)
 
@@ -240,8 +249,11 @@ func draw_center() -> void:
 		label(content, Rect2(365, 454, 560, 62), "%s：%d 张 %s" % [NAMES[last.seat], last.count, Cards.label(view.rank)], 36, Kit.ACCENT, true)
 		var text = "只翻这一手 · 历史扣牌不翻"
 		if view.hand_counts[last.seat] == 0: text = "最后一手仍可开 · 跟牌即认可其出完"
+		if view.phase == "permission": text = permission_text()
+		elif view.event.get("type", "") == "challenge_permission" and not view.event.allow:
+			text = "%s不允许开牌 · 仍可跟牌或过牌" % NAMES[view.event.seat]
 		label(content, Rect2(365, 518, 560, 39), text, 21, Kit.MUTED, true)
-		label(content, Rect2(365, 558, 560, 33), "%d / %d 家已过牌" % [view.passed.size(), view.config.players - 1], 20, Kit.MUTED, true)
+		label(content, Rect2(365, 558, 560, 33), "答复前暂停行动 · 仅允许本次开牌" if view.phase == "permission" else "%d / %d 家已过牌" % [view.passed.size(), view.config.players - 1], 20, Kit.MUTED, true)
 		draw_round_history()
 	if last.is_empty() and view.event.get("type", "") == "dead":
 		label(content, Rect2(395, 469, 810, 42), "上一轮 %d 张已清理" % view.event.count, 23, Kit.MUTED, true)
@@ -342,7 +354,8 @@ func draw_hand() -> void:
 	var height = 164.0 if rows <= 2 else 140.0
 	var row_step = 176.0 if rows == 2 else (110.0 if rows == 3 else 74.0)
 	var top = 715.0 if rows == 1 else (516.0 if rows == 2 else 504.0)
-	label(hand_layer, Rect2(74, hand_header_y(), 460, 38), "我的手牌 · %d 张%s" % [hand.size(), " · %d 行" % rows if rows > 1 else ""], 23, Kit.TEXT)
+	var hand_label = label(hand_layer, Rect2(74, hand_header_y(), 460, 38), "我的手牌 · %d 张%s" % [hand.size(), " · 报牌三张" if Rules.low_hand(hand.size()) else (" · %d 行" % rows if rows > 1 else "")], 23, Kit.CORAL if Rules.low_hand(hand.size()) else Kit.TEXT)
+	if Rules.low_hand(hand.size()): report_labels.append(hand_label)
 	if not hand.is_empty():
 		var inspect = button(hand_layer, Rect2(1235, hand_header_y() - 2, 275, 40), "放大查看手牌", show_hand)
 		for style_name in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -378,10 +391,18 @@ func draw_actions() -> void:
 			button(action_layer, Rect2(360, 591, 168, 56), "清空选择", func(): selected.clear(); refresh_selection())
 		else:
 			label(action_layer, Rect2(399, 597, 480, 45), "等待%s表态…" % NAMES[view.turn], 25, Kit.MUTED, true)
-		if view.can_challenge:
-			challenge_button = button(action_layer, Rect2(540 if view.turn == 0 else 887, 591, 173 if view.turn == 0 else 313, 56), "开！质疑", func(): send({"type": "challenge"}))
+		if view.can_challenge or view.get("can_request_challenge", false):
+			challenge_button = button(action_layer, Rect2(540 if view.turn == 0 else 887, 591, 173 if view.turn == 0 else 313, 56), "申请开牌" if view.get("can_request_challenge", false) else "开！质疑", func(): send({"type": "challenge" if view.can_challenge else "request_challenge"}))
+			if view.get("can_request_challenge", false): challenge_button.tooltip_text = "%s已报牌三张，开其上家的上家须先征得允许。" % NAMES[view.challenge_approver]
 			challenge_button.add_theme_stylebox_override("normal", Kit.style(Color("573c30"), Kit.CORAL))
 		selection_label = label(hand_layer, Rect2(542, hand_header_y(), 658, 39), "", 20, Kit.ACCENT, true)
+	elif view.phase == "permission":
+		if compact_hand(): label(action_layer, Rect2(360, 534, 840, 44), permission_text(), 24, Kit.ACCENT, true)
+		if view.permission.approver == 0:
+			permission_buttons.append(button(action_layer, Rect2(480, 591, 300, 56), "不允许", func(): send({"type": "challenge_permission", "allow": false})))
+			permission_buttons.append(button(action_layer, Rect2(800, 591, 300, 56), "允许这次开牌", func(): send({"type": "challenge_permission", "allow": true}), true))
+		else:
+			label(action_layer, Rect2(399, 597, 801, 45), "等待%s选择允许或不允许…" % NAMES[view.permission.approver], 25, Kit.ACCENT, true)
 	elif view.phase == "review":
 		review_label = label(action_layer, Rect2(452, 602, 696, 43), "", 23, Kit.MUTED, true)
 		set_review_remaining(float(view.get("review_remaining", 4.0)))
@@ -389,6 +410,11 @@ func draw_actions() -> void:
 		button(action_layer, Rect2(525, 606, 265, 41), "返回入座", reset_setup)
 		button(action_layer, Rect2(808, 606, 265, 41), "再来一局", func(): start_requested.emit(Rules.options(settings)), true)
 	refresh_selection()
+
+func permission_text() -> String:
+	var request: Dictionary = view.get("permission", {})
+	if request.is_empty(): return ""
+	return "%s想开%s · %s决定是否允许" % [NAMES[request.caller], NAMES[request.target], "你" if request.approver == 0 else NAMES[request.approver]]
 
 func set_review_remaining(seconds: float) -> void:
 	if is_instance_valid(review_label):
@@ -408,6 +434,7 @@ func refresh_selection() -> void:
 		play_button.text = "扣下 %d 张 %s" % [selected.size(), Cards.label(declared)] if not selected.is_empty() else "选牌后扣下"
 	if is_instance_valid(pass_button): pass_button.disabled = not can or view.last.is_empty()
 	if is_instance_valid(challenge_button): challenge_button.disabled = paused or submitted == int(view.revision)
+	for b in permission_buttons: b.disabled = paused or submitted == int(view.revision)
 	if is_instance_valid(selection_label):
 		selection_label.text = notice if not notice.is_empty() else ("已选 %d 张 · 以宣称点数为准" % selected.size() if not selected.is_empty() else "点选／划选后确认 · 可真可假")
 
@@ -467,8 +494,12 @@ func pause_menu() -> void:
 func show_rules() -> void:
 	var window = open_modal("rules")
 	label(window, Rect2(55, 32, 960, 55), "唬牌 · 本桌玩法", 35, Kit.ACCENT)
-	var text = "01  入座与领出\n3 人一副牌，4–6 人两副牌，含大小王。猜拳决出先手；领出可选任意张牌，指定 A–K 任一点数。\n\n02  顺时针表态\n跟牌可选任意张数，必须沿用本轮点数；也可过牌或喊「开」。真假由你决定。\n\n03  只开最后一手，输家收走整堆\n有一张不符即为假，出牌者全收；全部符合则质疑者全收。大小王替代任意点数。\n质疑成功者领出；质疑失败则原出牌者领出。开牌停留约4秒后自动继续。\n\n04  全员过牌与最后一手\n出牌后其他所有人均过牌，整堆不翻面成为死牌，出牌者重新领出。\n最后一手仍可被质疑；有人跟牌、其余全过或开牌证实为真，才算出完获胜。"
-	label(window, Rect2(55, 112, 1090, 469), text, 23, Kit.TEXT)
+	var text = "01  入座与领出\n3 人一副牌，4–6 人两副牌，含大小王。猜拳决出先手；领出可选任意张牌，指定 A–K 任一点数。\n\n02  顺时针表态\n跟牌可选任意张数，必须沿用本轮点数；也可过牌或喊「开」。真假由你决定。\n\n03  只开最后一手，输家收走整堆\n有一张不符即为假，出牌者全收；全部符合则质疑者全收。大小王替代任意点数。\n质疑成功者领出；质疑失败则原出牌者领出。开牌停留约4秒后自动继续。\n\n04  全员过牌与最后一手\n出牌后其他所有人均过牌，整堆不翻面成为死牌，出牌者重新领出。\n最后一手仍可被质疑；有人跟牌、其余全过或开牌证实为真，才算出完获胜。\n\n05  报牌三张\n剩1–3张常驻提示「报牌三张」。你的上家要开他自己的上家，须先获你允许。\n答复前暂停行动；拒绝后仍可跟牌或过牌，同一手不能反复申请。顺位、自由抢开均适用。"
+	var scroll = ScrollContainer.new(); scroll.position = Vector2(55, 112); scroll.size = Vector2(1090, 469)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; window.add_child(scroll)
+	var rules_label = label(scroll, Rect2(), text, 23, Kit.TEXT)
+	rules_label.custom_minimum_size.x = 1045; rules_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rules_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label(window, Rect2(55, 607, 1090, 46), "本桌：" + ("任何人可抢开，以率先受理的有效操作为准。" if settings.challenge == "any" else "仅轮到的玩家可以质疑最近一手；过牌后由下一家决定。"), 23, Kit.ACCENT)
 
 func show_history() -> void:
@@ -486,7 +517,9 @@ func show_history() -> void:
 
 func event_text(event: Dictionary) -> String:
 	match event.type:
-		"play": return "%s  宣称 %d 张 %s%s" % [NAMES[event.seat], event.count, Cards.label(event.rank), " · 最后一手" if event.empty else ""]
+		"play": return "%s  宣称 %d 张 %s%s" % [NAMES[event.seat], event.count, Cards.label(event.rank), " · 最后一手" if event.empty else (" · 报牌三张" if event.get("report_seat", -1) >= 0 else "")]
+		"request_challenge": return "%s申请开%s · 等待%s允许" % [NAMES[event.caller], NAMES[event.target], NAMES[event.approver]]
+		"challenge_permission": return "%s%s%s开%s" % [NAMES[event.seat], "允许" if event.allow else "不允许", NAMES[event.caller], NAMES[event.target]]
 		"pass": return NAMES[event.seat] + "  过牌"
 		"challenge": return "%s 开 %s · %s · %s收回 %d 张" % [NAMES[event.caller], NAMES[event.seat], "全部为真" if event.truthful else "含有假牌", NAMES[event.loser], event.count]
 		"dead": return "%d 张成为死牌 · %s重新领出" % [event.count, NAMES[event.seat]]

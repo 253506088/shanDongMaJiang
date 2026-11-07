@@ -20,6 +20,10 @@ func fixture(hands: Array):
 	return game
 
 func act(game, seat: int, action: Dictionary) -> void:
+	if action.get("type", "") == "challenge" and game.can_request_challenge(seat):
+		check(game.act(seat, {"type": "request_challenge", "revision": game.state.revision}), "fixture requests permission")
+		check(game.act(game.state.permission.approver, {"type": "challenge_permission", "allow": true, "revision": game.state.revision}), "fixture grants permission")
+		return
 	action.revision = game.state.revision
 	check(game.act(seat, action), "fixture action accepted " + str(action))
 
@@ -137,7 +141,7 @@ func run() -> void:
 				if game.state.phase == "rps": act(game, 0, {"type": "rps", "gesture": random.randi_range(0, 2)})
 				elif game.state.phase == "review": act(game, 0, {"type": "continue"})
 				else:
-					var seat = game.state.turn
+					var seat = game.state.permission.approver if game.state.phase == "permission" else game.state.turn
 					check(game.act(seat, AI.choose(game.view(seat), random)), "new strategy generates legal moves")
 				if moves % 11 == 0: bounds(game)
 				moves += 1

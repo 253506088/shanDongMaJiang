@@ -125,9 +125,9 @@ func _check_voice_preferences() -> void:
 	check(app.doudizhu_card_theme == "guofeng", "new app restores delivered card theme")
 	app._open_doudizhu()
 	check(app.doudizhu.table.hand_cards.all(func(card): return "guofeng/" in card._face().resource_path), "new mode draws persisted theme from its first hand")
-	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 60, "new mode loads complete persisted voice")
+	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 63, "new mode loads complete persisted voice")
 	app.doudizhu.set_voice_profile("male")
-	check(app.doudizhu.voice.profile == "male" and app.doudizhu.voice.clips.size() == 60, "both complete voice catalogs can be selected")
+	check(app.doudizhu.voice.profile == "male" and app.doudizhu.voice.clips.size() == 63, "both complete voice catalogs can be selected")
 	preferences.doudizhu_card_theme = "missing"
 	var file = FileAccess.open(app.preferences_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(preferences))

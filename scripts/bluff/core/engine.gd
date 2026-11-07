@@ -30,7 +30,8 @@ func start(seed_value: int, settings: Dictionary = {}) -> void:
 	state = {"config": config, "decks": decks, "hands": hands, "stats": stats,
 		"phase": "rps", "revision": 0, "turn": -1, "contenders": range(count),
 		"rps_round": 0, "pile": [], "dead": [], "last": {}, "passed": [],
-		"rank": 0, "event": {}, "history": [], "trick": [], "winner": -1, "next_leader": -1}
+		"rank": 0, "event": {}, "history": [], "trick": [], "winner": -1, "next_leader": -1,
+		"permission": {}, "denied_callers": []}
 	state["recorder"] = Recorder.create(count)
 	state["knowledge"] = Knowledge.create(count)
 
@@ -44,11 +45,26 @@ func act(seat: int, action: Dictionary) -> bool:
 		if type != "continue" or seat != 0: return false
 		state.phase = "playing"; state.turn = state.next_leader
 		state.event = {"type": "lead", "seat": state.turn}
+	elif state.phase == "permission":
+		var request: Dictionary = state.permission
+		if type != "challenge_permission" or seat != request.approver or typeof(action.get("allow")) != TYPE_BOOL: return false
+		if state.last.get("revision", -1) != request.claim_revision: return false
+		state.phase = "playing"; state.permission = {}
+		state.event = {"type": "challenge_permission", "seat": seat, "caller": request.caller, "target": request.target, "allow": action.allow}
+		_record(state.event)
+		if action.allow: _challenge(request.caller)
+		else: state.denied_callers.append(request.caller)
 	elif state.phase == "playing":
 		if seat < 0 or seat >= state.config.players: return false
 		if type == "challenge":
 			if not can_challenge(seat): return false
 			_challenge(seat)
+		elif type == "request_challenge":
+			if not can_request_challenge(seat): return false
+			state.permission = {"caller": seat, "target": state.last.seat, "approver": challenge_approver(seat), "claim_revision": state.last.revision}
+			state.phase = "permission"
+			state.event = state.permission.duplicate(true); state.event["type"] = "request_challenge"
+			_record(state.event)
 		else:
 			if seat != state.turn: return false
 			if type == "play":
@@ -73,6 +89,22 @@ func act(seat: int, action: Dictionary) -> bool:
 	return true
 
 func can_challenge(seat: int) -> bool:
+	return _challenge_window(seat) and challenge_approver(seat) < 0
+
+func can_request_challenge(seat: int) -> bool:
+	return _challenge_window(seat) and challenge_approver(seat) >= 0 and seat not in state.denied_callers
+
+func challenge_approver(seat: int) -> int:
+	if state.is_empty() or state.last.is_empty() or seat < 0 or seat >= state.config.players: return -1
+	# Play proceeds C -> B -> A. Only B opening C requires low-hand A's consent.
+	var approver = (seat + 1) % state.config.players
+	if state.last.seat != posmod(seat - 1, state.config.players): return -1
+	return approver if low_hand(state.hands[approver].size()) else -1
+
+static func low_hand(count: int) -> bool:
+	return count >= 1 and count <= 3
+
+func _challenge_window(seat: int) -> bool:
 	return not state.is_empty() and state.phase == "playing" and not state.last.is_empty() and seat >= 0 and seat < state.config.players and seat != state.last.seat and (state.config.challenge == "any" or seat == state.turn)
 
 func _rps(human: int) -> void:
@@ -94,16 +126,18 @@ func _rps(human: int) -> void:
 	_record(state.event)
 
 func _play(seat: int, cards: Array, declared: int) -> void:
+	var was_low = low_hand(state.hands[seat].size())
 	if not state.last.is_empty(): Knowledge.responded(state.knowledge, seat, false)
 	Knowledge.sync_own(state.knowledge, seat, state.hands[seat])
 	Knowledge.played(state.knowledge, seat, cards, declared, state.hands[seat].size())
 	for id in cards: state.hands[seat].erase(id)
 	state.pile.append_array(cards)
 	state.last = {"seat": seat, "cards": cards.duplicate(), "rank": declared, "count": cards.size(), "revision": state.revision + 1}
-	state.rank = declared; state.passed.clear()
+	state.rank = declared; state.passed.clear(); state.denied_callers.clear()
 	state.turn = (seat + 1) % state.config.players
 	state.stats[seat].plays += 1
 	state.event = {"type": "play", "seat": seat, "rank": declared, "count": cards.size(), "empty": state.hands[seat].is_empty()}
+	if not was_low and low_hand(state.hands[seat].size()): state.event["report_seat"] = seat
 	state.trick.append(state.event.duplicate(true))
 	_record(state.event)
 
@@ -138,7 +172,9 @@ func _challenge(seat: int) -> void:
 		"cards": last.cards.duplicate(), "truthful": truthful, "loser": loser, "count": state.pile.size(), "leader": leader}
 	Knowledge.responded(state.knowledge, seat, true)
 	Knowledge.revealed(state.knowledge, last.seat, loser, last.cards, truthful)
+	var was_low = low_hand(state.hands[loser].size())
 	state.hands[loser].append_array(state.pile)
+	if not was_low and low_hand(state.hands[loser].size()): state.event["report_seat"] = loser
 	Knowledge.sync_own(state.knowledge, loser, state.hands[loser])
 	_reset_trick(leader)
 	_record(state.event)
@@ -146,6 +182,7 @@ func _challenge(seat: int) -> void:
 
 func _reset_trick(leader: int) -> void:
 	state.pile = []; state.last = {}; state.passed = []; state.trick = []; state.rank = 0
+	state.permission = {}; state.denied_callers = []
 	state.phase = "review"; state.turn = -1; state.next_leader = leader
 
 func _finish(seat: int, reason: String) -> void:
@@ -160,7 +197,7 @@ func _record(event: Dictionary) -> void:
 func view(seat: int) -> Dictionary:
 	if state.is_empty() or seat < 0 or seat >= state.config.players: return {}
 	var result = {}
-	for key in ["config", "decks", "phase", "revision", "turn", "contenders", "rps_round", "rank", "passed", "event", "winner", "next_leader", "stats", "history", "trick"]:
+	for key in ["config", "decks", "phase", "revision", "turn", "contenders", "rps_round", "rank", "passed", "event", "winner", "next_leader", "stats", "history", "trick", "permission"]:
 		result[key] = state[key]
 	result = result.duplicate(true)
 	result["seat"] = seat
@@ -169,6 +206,8 @@ func view(seat: int) -> Dictionary:
 	result["pile_count"] = state.pile.size(); result["dead_count"] = state.dead.size()
 	result["last"] = {} if state.last.is_empty() else {"seat": state.last.seat, "rank": state.last.rank, "count": state.last.count, "revision": state.last.revision}
 	result["can_challenge"] = can_challenge(seat)
+	result["can_request_challenge"] = can_request_challenge(seat)
+	result["challenge_approver"] = challenge_approver(seat)
 	result["finish_reason"] = state.get("finish_reason", "")
 	result["recorder"] = Recorder.view(state.recorder, seat)
 	result["memory"] = Knowledge.view(state.knowledge, seat, state.hands[seat])

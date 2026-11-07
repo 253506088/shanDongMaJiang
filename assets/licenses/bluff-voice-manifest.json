@@ -1,6 +1,7 @@
 {
   "format_version": 1,
   "generated_date": "2026-11-06",
+  "updated_date": "2026-11-07",
   "model": {
     "id": "hexgrad/Kokoro-82M-v1.1-zh",
     "revision": "01e7505bd6a7a2ac4975463114c3a7650a9f7218",
@@ -1295,6 +1296,16 @@
       "duration_seconds": 1.229708
     },
     {
+      "profile": "male",
+      "key": "report_three",
+      "text": "报牌三张",
+      "synthesis_text": "报牌三张。",
+      "path": "assets/bluff/audio/male/report_three.wav",
+      "sha256": "786d48bf7decab7753101fcfef6d3920e7edb690f7d3bc65d7da4118c28ceb36",
+      "bytes": 57424,
+      "duration_seconds": 1.195417
+    },
+    {
       "profile": "female",
       "key": "count_1",
       "text": "一张",
@@ -2563,6 +2574,16 @@
       "sha256": "bca292a496c85e6544759c4ce4668bf8aa61cd3b3f951e473173ca15bb205ae2",
       "bytes": 56768,
       "duration_seconds": 1.18175
+    },
+    {
+      "profile": "female",
+      "key": "report_three",
+      "text": "报牌三张",
+      "synthesis_text": "报牌三张。",
+      "path": "assets/bluff/audio/female/report_three.wav",
+      "sha256": "44c983b6e3a2b051403d34eb2a0d8e5088a5d22adc8f209ec6ed75a60cde0786",
+      "bytes": 54096,
+      "duration_seconds": 1.126083
     }
   ]
 }

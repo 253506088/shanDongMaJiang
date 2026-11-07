@@ -29,6 +29,7 @@ func keys(view: Dictionary) -> Array:
 		"pass": result = ["pass"]
 		"challenge": result = ["challenge", "truth" if event.truthful else "lie"]
 		"dead": result = ["dead"]
+	if event.get("report_seat", -1) >= 0 and view.get("phase", "") != "finished": result.append("report_three")
 	if view.get("phase", "") == "finished":
 		# Accepting a final declaration may retain its preceding play event.
 		if view.get("finish_reason", "") == "accepted": result = []

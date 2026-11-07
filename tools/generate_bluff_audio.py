@@ -31,6 +31,7 @@ def phrases() -> dict[str, str]:
     result = {f"count_{n}": ("两" if n == 2 else number(n)) + "张" for n in range(1, 109)}
     result.update({f"rank_{n}": text for n, text in zip(range(3, 16), ["三", "四", "五", "六", "七", "八", "九", "十", "勾", "圈", "凯", "尖", "二"])})
     result.update({"pass": "过", "challenge": "开", "truth": "全是真的", "lie": "有假牌", "dead": "全部过牌，移出牌堆", "win": "本局结束"})
+    result["report_three"] = "报牌三张"
     return result
 
 
@@ -38,7 +39,7 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def generate(packages: Path, model: Path) -> None:
+def generate(packages: Path, model: Path, only_missing: bool = False) -> None:
     sys.path.insert(0, str(packages.resolve()))
     import numpy as np
     import sherpa_onnx
@@ -54,12 +55,19 @@ def generate(packages: Path, model: Path) -> None:
         kokoro=kokoro, provider="cpu", num_threads=2), max_num_sentences=1)
     if not config.validate(): raise RuntimeError("Invalid TTS config")
     tts = sherpa_onnx.OfflineTts(config)
+    previous = json.loads(MANIFEST.read_text(encoding="utf-8")) if only_missing and MANIFEST.exists() else {}
+    existing = {(c["profile"], c["key"]): c for c in previous.get("clips", [])}
     clips = []
     for profile, speaker in PROFILES.items():
         directory = OUTPUT / profile
         directory.mkdir(parents=True, exist_ok=True)
         for key, text in phrases().items():
             spoken = text + ("！" if key in ["challenge", "win"] else "。")
+            old = existing.get((profile, key))
+            path = directory / (key + ".wav")
+            if old and old["text"] == text and old["synthesis_text"] == spoken and path.exists() and digest(path) == old["sha256"]:
+                clips.append(old)
+                continue
             audio = tts.generate(spoken, sid=speaker, speed=1.0)
             samples = np.asarray(audio.samples, dtype=np.float64)
             rate = audio.sample_rate
@@ -77,7 +85,7 @@ def generate(packages: Path, model: Path) -> None:
                 "path": path.relative_to(ROOT).as_posix(), "sha256": digest(path),
                 "bytes": path.stat().st_size, "duration_seconds": round(len(pcm) / rate, 6)})
             print(f"Generated {profile}/{key}: {len(pcm) / rate:.2f}s", flush=True)
-    metadata = {"format_version": 1, "generated_date": "2026-11-06", "model": source["model"],
+    metadata = {"format_version": 1, "generated_date": "2026-11-06", "updated_date": "2026-11-07", "model": source["model"],
         "generation": {"runtime": "sherpa-onnx", "runtime_version": sherpa_onnx.__version__,
             "profiles": PROFILES, "speed": 1.0, "format": "mono PCM16 24000 Hz",
             "processing": "trim <0.003 silence; retain 35ms/55ms; -2dBFS peak, max gain 4; 5ms fades"},
@@ -107,8 +115,9 @@ def verify() -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--only-missing", action="store_true", help="Preserve verified existing clips; synthesize new or changed phrases only")
     parser.add_argument("--packages-root", type=Path, default=ROOT / "tmp/ddz-audio-research-20261105/packages")
     parser.add_argument("--model-dir", type=Path, default=ROOT / "tmp/ddz-audio-research-20261105/kokoro-int8-multi-lang-v1_1")
     args = parser.parse_args()
-    if not args.verify: generate(args.packages_root, args.model_dir)
+    if not args.verify: generate(args.packages_root, args.model_dir, args.only_missing)
     verify()

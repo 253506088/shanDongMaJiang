@@ -51,7 +51,8 @@ func _test_assets(voice) -> void:
 		expected.append(kind)
 	for value in range(4): expected.append("bid_%d" % value)
 	for kind in ["pass", "redeal", "spring", "counter_spring"]: expected.append(kind)
-	check(expected.size() == 60 and voice.clips.size() == 60, "all 60 distinct voice keys are loaded")
+	for count in range(1, 4): expected.append("remaining_%d" % count)
+	check(expected.size() == 63 and voice.clips.size() == 63, "all 63 distinct voice keys are loaded")
 	for key in expected:
 		check(voice.clips.has(key), "voice exists: " + key)
 		if not voice.clips.has(key): continue
@@ -87,7 +88,7 @@ func _test_profile_switch(voice) -> void:
 	voice.announce(_view(81, 4, _play("pair", 4)), false)
 	var last_key = voice.last_key
 	voice.set_profile("female")
-	check(voice.profile == "female" and voice.clips.size() == 60, "female profile has a complete catalog")
+	check(voice.profile == "female" and voice.clips.size() == 63, "female profile has a complete catalog")
 	check(voice.clips["single_3"] != male_stream, "female uses a distinct recording")
 	check(not voice.playing and voice.queue.is_empty(), "switching voice stops the old speaker and queue")
 	check(voice.last_key == last_key and voice.announce(_view(81, 4, _play("pair", 4)), false) == 0, "voice switch does not replay a stale action")

@@ -1,6 +1,7 @@
 {
   "format_version": 2,
   "generated_date": "2026-11-05",
+  "updated_date": "2026-11-07",
   "method": "offline open-model speech synthesis",
   "model": {
     "id": "hexgrad/Kokoro-82M-v1.1-zh",
@@ -638,6 +639,36 @@
       "duration_seconds": 1.043625
     },
     {
+      "profile": "male",
+      "key": "remaining_3",
+      "text": "我就剩三张牌了",
+      "synthesis_text": "我就剩三张牌了。",
+      "path": "assets/doudizhu/audio/remaining_3.wav",
+      "sha256": "134ab3fc311d8a6b667b345584f42efd4b3efa6ad21f5806163de251ea130035",
+      "bytes": 91318,
+      "duration_seconds": 1.901542
+    },
+    {
+      "profile": "male",
+      "key": "remaining_2",
+      "text": "我就剩两张牌了",
+      "synthesis_text": "我就剩两张牌了。",
+      "path": "assets/doudizhu/audio/remaining_2.wav",
+      "sha256": "484ad4d70820fb243b73e6445337f800006aaf1bdc0977e2b7276d204e2db4b2",
+      "bytes": 90424,
+      "duration_seconds": 1.882917
+    },
+    {
+      "profile": "male",
+      "key": "remaining_1",
+      "text": "我就剩一张牌了",
+      "synthesis_text": "我就剩一张牌了。",
+      "path": "assets/doudizhu/audio/remaining_1.wav",
+      "sha256": "7737c3998c87cf98b63ff87c9b68316867cdb1f96f3d6d0cd2f2daa705c98922",
+      "bytes": 89394,
+      "duration_seconds": 1.861458
+    },
+    {
       "profile": "female",
       "key": "single_3",
       "text": "三",
@@ -1236,6 +1267,36 @@
       "sha256": "1b78955187e471df6cda321d3b36e11db4adf200722b70b93ccf5a4c534db4de",
       "bytes": 47666,
       "duration_seconds": 0.992125
+    },
+    {
+      "profile": "female",
+      "key": "remaining_3",
+      "text": "我就剩三张牌了",
+      "synthesis_text": "我就剩三张牌了。",
+      "path": "assets/doudizhu/audio/female/remaining_3.wav",
+      "sha256": "e52c2a8517e8028b0934945e3da2daa5cef14c1d3a7ec8465f49b9e5ce1f6ada",
+      "bytes": 87668,
+      "duration_seconds": 1.8255
+    },
+    {
+      "profile": "female",
+      "key": "remaining_2",
+      "text": "我就剩两张牌了",
+      "synthesis_text": "我就剩两张牌了。",
+      "path": "assets/doudizhu/audio/female/remaining_2.wav",
+      "sha256": "7bbd18dea46fb5f91adf09b4843206f694527017e4ae6d1c1fcdfec9f66fa84c",
+      "bytes": 86610,
+      "duration_seconds": 1.803458
+    },
+    {
+      "profile": "female",
+      "key": "remaining_1",
+      "text": "我就剩一张牌了",
+      "synthesis_text": "我就剩一张牌了。",
+      "path": "assets/doudizhu/audio/female/remaining_1.wav",
+      "sha256": "0f10b07be4bb9f66b329c1c835b9634e9a1c4a9ef087e236e28b60a29aee45d3",
+      "bytes": 87946,
+      "duration_seconds": 1.831292
     }
   ]
 }

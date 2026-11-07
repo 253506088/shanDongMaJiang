@@ -47,7 +47,7 @@ static func assessment(view: Dictionary) -> Dictionary:
 	return {"false_chance": clampf(doubt, 0.05, 0.90), "certain": false, "reason": "inference", "possible": possible}
 
 static func wants_challenge(view: Dictionary, rng: RandomNumberGenerator) -> bool:
-	if view.last.is_empty() or not view.get("can_challenge", true): return false
+	if view.last.is_empty() or not (view.get("can_challenge", true) or view.get("can_request_challenge", false)): return false
 	var evidence = assessment(view)
 	if evidence.certain: return evidence.false_chance > 0.5
 	var chance = float(evidence.false_chance)
@@ -64,7 +64,8 @@ static func shuffled(cards: Array, rng: RandomNumberGenerator) -> Array:
 	return result
 
 static func choose(view: Dictionary, rng: RandomNumberGenerator, check_call: bool = true) -> Dictionary:
-	if check_call and wants_challenge(view, rng): return {"revision": view.revision, "type": "challenge"}
+	if view.phase == "permission": return permission_response(view)
+	if check_call and wants_challenge(view, rng): return challenge_action(view)
 	var hand: Array = view.hand
 	var leading = view.last.is_empty()
 	var rank = int(view.rank)
@@ -123,3 +124,14 @@ static func choose(view: Dictionary, rng: RandomNumberGenerator, check_call: boo
 			if not wild.is_empty(): played.append(wild[rng.randi_range(0, wild.size() - 1)])
 	if played.is_empty(): return {"revision": view.revision, "type": "pass"}
 	return {"revision": view.revision, "type": "play", "cards": played, "rank": rank}
+
+static func challenge_action(view: Dictionary) -> Dictionary:
+	return {"revision": view.revision, "type": "challenge" if view.can_challenge else "request_challenge"}
+
+static func permission_response(view: Dictionary) -> Dictionary:
+	# The protected seat decides from its own information. A likely genuine
+	# claim may leave a path to follow and finish; clear evidence can justify opening.
+	var evidence = assessment(view)
+	var can_finish = view.hand.all(func(id): return Cards.matches(id, view.rank))
+	var allow = evidence.false_chance >= (0.85 if can_finish else 0.60)
+	return {"type": "challenge_permission", "allow": allow, "revision": view.revision}

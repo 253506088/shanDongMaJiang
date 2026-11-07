@@ -1,6 +1,6 @@
 Qingyu Bluff — generated offline speech, 2026-11-06
 
-254 PCM WAV clips (127 male + 127 female) generated with Kokoro-82M-v1.1-zh
+256 PCM WAV clips (128 male + 128 female) generated with Kokoro-82M-v1.1-zh
 and sherpa-onnx, using the pinned model identity and hashes recorded in
 bluff-voice-manifest.json. These are model-generated utterances, not recordings
 copied from a commercial game and not human voice acting.
@@ -14,3 +14,5 @@ doudizhu-Apache-2.0.txt; the pinned model card is doudizhu-Kokoro-model-card.md.
 Regeneration: tools/generate_bluff_audio.py (development only).
 The game uses local WAV files; it needs neither the model nor a network service.
 Playback concatenates the declared quantity and rank, never the hidden faces.
+
+2026-11-07: added the low-hand report in both voices; existing clips retained.

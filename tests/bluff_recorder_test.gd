@@ -14,6 +14,10 @@ func check(value: bool, message: String) -> void:
 	if not value: failures.append(message); printerr("BLUFF RECORDER FAIL: ", message)
 
 func act(game, seat: int, action: Dictionary) -> void:
+	if action.get("type", "") == "challenge" and game.can_request_challenge(seat):
+		check(game.act(seat, {"type": "request_challenge", "revision": game.state.revision}), "recorder fixture requests permission")
+		check(game.act(game.state.permission.approver, {"type": "challenge_permission", "allow": true, "revision": game.state.revision}), "recorder fixture grants permission")
+		return
 	action.revision = game.state.revision
 	check(game.act(seat, action), "recorder fixture action is legal")
 
@@ -73,8 +77,10 @@ func run() -> void:
 				if phase == "rps": action = {"type": "rps", "gesture": rng.randi_range(0, 2)}
 				elif phase == "review": action = {"type": "continue"}
 				else:
-					seat = game.state.turn; action = AI.choose(game.view(seat), rng)
+					seat = game.state.permission.approver if phase == "permission" else game.state.turn
+					action = AI.choose(game.view(seat), rng)
 				act(game, seat, action)
+				if phase == "permission" and game.state.event.type == "challenge": pending.clear()
 				if phase == "playing":
 					if action.type == "challenge": pending.clear()
 					elif action.type == "play" and game.state.phase != "finished": pending.append({"seat": seat, "cards": action.cards.duplicate()})

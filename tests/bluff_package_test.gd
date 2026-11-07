@@ -20,7 +20,7 @@ func capture(name: String) -> void:
 	check(root.get_texture().get_image().save_png(args[index + 1].path_join(name + ".png")) == OK, "actual package screenshot " + name)
 
 func run() -> void:
-	check(ProjectSettings.get_setting("application/config/version") == "0.8.2", "package version 0.8.2")
+	check(ProjectSettings.get_setting("application/config/version") == "0.8.3", "package version 0.8.3")
 	check(not FileAccess.file_exists("res://tests/bluff_package_test.gd") and not FileAccess.file_exists("res://tools/generate_bluff_audio.py"), "tests and generation tools excluded")
 	for file in ["bluff-voice-manifest.json", "bluff-voice-NOTICE.txt", "doudizhu-Apache-2.0.txt", "doudizhu-cards-source.svg.txt", "doudizhu-guofeng-manifest.json"]:
 		check(FileAccess.file_exists("res://assets/licenses/" + file), "license/provenance ships: " + file)
@@ -32,7 +32,7 @@ func run() -> void:
 		voice.set_profile(profile)
 		for count in range(1, 109): check(voice.clip("count_%d" % count) != null, "all quantities ship")
 		for rank in range(3, 16): check(voice.clip("rank_%d" % rank) != null, "all declared ranks ship")
-		for key in ["pass", "challenge", "truth", "lie", "dead", "win"]: check(voice.clip(key) != null, "event speech ships")
+		for key in ["pass", "challenge", "truth", "lie", "dead", "win", "report_three"]: check(voice.clip(key) != null, "event speech ships")
 	voice.free()
 	var ai = load("res://scripts/bluff/core/ai.gd")
 	var rng = RandomNumberGenerator.new(); rng.seed = 29117
@@ -45,7 +45,8 @@ func run() -> void:
 			if game.state.phase == "rps": action.merge({"type": "rps", "gesture": rng.randi_range(0, 2)})
 			elif game.state.phase == "review": action["type"] = "continue"
 			else:
-				seat = game.state.turn; action = ai.choose(game.view(seat), rng)
+				seat = game.state.permission.approver if game.state.phase == "permission" else game.state.turn
+				action = ai.choose(game.view(seat), rng)
 			check(game.act(seat, action), "exported engine accepts complete match actions")
 			steps += 1
 		check(game.state.phase == "finished", "exported %d-player match finishes" % count)
@@ -103,8 +104,22 @@ func run() -> void:
 	session.engine.state.phase = "playing"; session.engine.state.turn = 0
 	session.engine.state.hands = [[40, 0, 4], [1, 5], [2, 6]]
 	check(session.engine.act(0, {"type": "play", "cards": [40], "rank": 13, "revision": 0}), "packaged known-K fixture plays through authority")
-	check(session.engine.act(1, {"type": "challenge", "revision": 1}), "packaged known-K reveal")
+	check(not session.engine.act(1, {"type": "challenge", "revision": 1}), "packaged low-hand protection rejects direct opening")
+	check(session.engine.act(1, {"type": "request_challenge", "revision": 1}), "packaged known-K opening asks protected seat")
+	check(session.engine.act(2, {"type": "challenge_permission", "allow": true, "revision": 2}), "packaged known-K reveal after consent")
 	check(session.engine.view(2).memory.hands[1][13] == 1, "exported memory knows failed caller received K")
+	for allow in [false, true]:
+		session.start({"players": 3}, 8750)
+		session.engine.state.phase = "playing"; session.engine.state.turn = 1
+		session.engine.state.hands = [[0, 1, 2], range(3, 28), range(28, 54)]
+		check(session.engine.act(1, {"type": "play", "cards": [3], "rank": 14, "revision": 0}), "package consent target plays")
+		check(session.engine.act(2, {"type": "request_challenge", "revision": 1}), "package bot requests human permission")
+		session._publish()
+		check(app.bluff.table.permission_buttons.size() == 2 and app.bluff.table.report_labels.size() == 1, "package renders report and both permission choices")
+		await capture("package-low-hand-consent")
+		app.bluff.table.permission_buttons[1 if allow else 0].pressed.emit()
+		check(session.engine.state.phase == ("review" if allow else "playing"), "packaged UI choice resolves through actual session")
+		if not allow: check(session.engine.state.turn == 2 and not session.engine.can_request_challenge(2), "packaged denial resumes original turn without repeated request")
 	session.start({"players": 6}, 8714)
 	session.engine.state.phase = "playing"; session.engine.state.turn = 0
 	session.engine.state.hands = [range(80), range(80, 86), range(86, 92), range(92, 98), range(98, 103), range(103, 108)]
@@ -117,6 +132,13 @@ func run() -> void:
 	check(app.current_screen == "lobby", "packaged return works")
 	app._open_doudizhu(); await process_frame
 	check(app.doudizhu.table.hand_cards.size() == 17, "existing Dou Dizhu still uses shared poker renderer")
+	var ddz = app.doudizhu.session
+	ddz.set_process(false)
+	ddz.engine.state.phase = "playing"; ddz.engine.state.turn = 0; ddz.engine.state.landlord = 0; ddz.engine.state.highest_bid = 1
+	ddz.engine.state.hands = [[0, 4, 8, 12], [1, 5, 9], [2, 6]]
+	check(ddz.submit({"type": "play", "cards": [0], "revision": ddz.engine.state.revision}), "package DDZ plays down to three")
+	check(ddz.engine.state.turn == 1 and app.doudizhu.voice.clip_keys(ddz.current_view()).has("remaining_3"), "package DDZ warning preserves normal next turn")
+	await capture("package-ddz-low-hand")
 	app.free(); await process_frame
 	print("BLUFF_PACKAGE_RESULT: %d failures; %d checks" % [failures.size(), checks])
 	quit(0 if failures.is_empty() else 1)

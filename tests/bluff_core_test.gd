@@ -14,6 +14,11 @@ func check(value: bool, message: String) -> void:
 		failures.append(message); printerr("BLUFF FAIL: ", message)
 
 func act(game, seat: int, action: Dictionary) -> bool:
+	# Existing reveal fixtures explicitly grant any newly required consent.
+	# The dedicated low-hand suite exercises rejection and consent boundaries.
+	if action.get("type", "") == "challenge" and game.can_request_challenge(seat):
+		if not game.act(seat, {"type": "request_challenge", "revision": game.state.revision}): return false
+		return game.act(game.state.permission.approver, {"type": "challenge_permission", "allow": true, "revision": game.state.revision})
 	action["revision"] = game.state.revision
 	return game.act(seat, action)
 
@@ -152,7 +157,7 @@ func run() -> void:
 				if game.state.phase == "rps": check(act(game, 0, {"type": "rps", "gesture": random.randi_range(0, 2)}), "simulated RPS")
 				elif game.state.phase == "review": check(act(game, 0, {"type": "continue"}), "review continues")
 				else:
-					var seat = game.state.turn
+					var seat = game.state.permission.approver if game.state.phase == "permission" else game.state.turn
 					check(game.act(seat, AI.choose(game.view(seat), random)), "AI chooses a legal action from cropped view")
 				invariant(game)
 				moves += 1

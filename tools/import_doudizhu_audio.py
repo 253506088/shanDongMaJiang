@@ -55,6 +55,7 @@ def phrases() -> dict[str, str]:
         "bomb": "炸弹", "rocket": "王炸", "bid_0": "不叫", "bid_1": "一分",
         "bid_2": "两分", "bid_3": "三分", "pass": "不要", "redeal": "无人叫分，重新发牌",
         "spring": "春天", "counter_spring": "反春天",
+        "remaining_3": "我就剩三张牌了", "remaining_2": "我就剩两张牌了", "remaining_1": "我就剩一张牌了",
     })
     return result
 
@@ -128,7 +129,7 @@ def extract_model(archive: Path, scratch: Path) -> Path:
     return model_root
 
 
-def generate(model_root: Path) -> None:
+def generate(model_root: Path, only_missing: bool = False) -> None:
     import numpy as np
     import sherpa_onnx
 
@@ -150,12 +151,19 @@ def generate(model_root: Path) -> None:
     if not config.validate(): raise RuntimeError("Invalid Kokoro model configuration")
     tts = sherpa_onnx.OfflineTts(config)
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    previous = json.loads(MANIFEST.read_text(encoding="utf-8")) if only_missing and MANIFEST.exists() else {}
+    existing = {(c["profile"], c["key"]): c for c in previous.get("clips", [])}
     entries = []
     for profile, settings in PROFILES.items():
         directory = OUTPUT / settings["directory"]
         directory.mkdir(parents=True, exist_ok=True)
         for key, text in phrases().items():
             spoken = synthesis_text(key, text)
+            old = existing.get((profile, key))
+            path = directory / (key + ".wav")
+            if old and old["text"] == text and old["synthesis_text"] == spoken and path.exists() and sha256(path) == old["sha256"]:
+                entries.append(old)
+                continue
             audio = tts.generate(spoken, sid=settings["speaker_id"], speed=SPEED)
             samples = np.asarray(audio.samples, dtype=np.float64)
             rate = audio.sample_rate
@@ -178,7 +186,7 @@ def generate(model_root: Path) -> None:
                             "bytes": path.stat().st_size, "duration_seconds": round(len(pcm) / rate, 6)})
             print(f"Generated {profile}/{key}: {spoken} ({len(pcm) / rate:.2f}s)", flush=True)
     metadata = {
-        "format_version": 2, "generated_date": "2026-11-05", "method": "offline open-model speech synthesis",
+        "format_version": 2, "generated_date": "2026-11-05", "updated_date": "2026-11-07", "method": "offline open-model speech synthesis",
         "model": {"id": MODEL_REPO, "revision": MODEL_REVISION, "license": "Apache-2.0",
                   "model_card": f"https://huggingface.co/{MODEL_REPO}/blob/{MODEL_REVISION}/README.md",
                   "onnx_archive": ARCHIVE_URL, "archive_sha256": ARCHIVE_SHA,
@@ -222,7 +230,7 @@ def verify() -> None:
             if max(abs(value) for value in samples) >= 32767: raise RuntimeError(f"Clipped WAV: {path}")
             if clip["text"] != phrases()[clip["key"]]: raise RuntimeError(f"Phrase catalog mismatch: {path}")
             if clip["synthesis_text"] != synthesis_text(clip["key"], clip["text"]): raise RuntimeError(f"Synthesis wording mismatch: {path}")
-    print(f"Verified {len(expected)} offline voice clips (60 male + 60 female); SHA-256, PCM formats, durations, phrases and signal levels match.")
+    print(f"Verified {len(expected)} offline voice clips ({len(phrases())} per profile); SHA-256, PCM formats, durations, phrases and signal levels match.")
 
 
 def main() -> None:
@@ -232,6 +240,7 @@ def main() -> None:
     parser.add_argument("--model-dir", type=Path)
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--only-missing", action="store_true", help="Preserve verified existing clips; synthesize new or changed phrases only")
     args = parser.parse_args()
     if args.verify: verify(); return
     if args.packages_root: sys.path.insert(0, str(args.packages_root.resolve()))
@@ -239,7 +248,7 @@ def main() -> None:
     model_root = args.model_dir
     if args.download: model_root = extract_model(download_model(args.scratch), args.scratch)
     if model_root is None: parser.error("Use --model-dir or --download, or --verify to inspect shipped clips")
-    generate(model_root)
+    generate(model_root, args.only_missing)
     verify()
 
 

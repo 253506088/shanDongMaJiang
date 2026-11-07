@@ -13,6 +13,7 @@ var delay = 0.0
 var round_id = 0
 var pace = 2.8
 var calls_checked_revision = -1
+var calls_checked_seats: Array = []
 
 func _ready() -> void:
 	rng.randomize()
@@ -22,6 +23,7 @@ func start(config: Dictionary = {}, seed_value: int = -1) -> void:
 	engine.start(rng.randi() if seed_value < 0 else seed_value, config)
 	active = true; paused = false; delay = pace
 	calls_checked_revision = -1
+	calls_checked_seats.clear()
 	_publish()
 
 func current_view() -> Dictionary:
@@ -52,17 +54,26 @@ func _process(delta: float) -> void:
 			delay = pace
 			_publish()
 		return
+	if engine.state.phase == "permission":
+		var approver = engine.state.permission.approver
+		if approver == 0: return # Human consent has no timeout or default answer.
+		if engine.act(approver, AI.permission_response(engine.view(approver))):
+			delay = pace; _publish()
+		return
 	if engine.state.phase != "playing": return
 	var seat = engine.state.turn
 	# In free-call rooms any bot can call before the next declaration.
 	var claim_revision = engine.state.last.get("revision", engine.state.revision)
-	if engine.state.config.challenge == "any" and calls_checked_revision != claim_revision:
-		calls_checked_revision = claim_revision
+	if engine.state.config.challenge == "any":
+		if calls_checked_revision != claim_revision:
+			calls_checked_revision = claim_revision; calls_checked_seats.clear()
 		for candidate in range(1, engine.state.config.players):
-			if not engine.can_challenge(candidate): continue
+			if candidate in calls_checked_seats: continue
+			calls_checked_seats.append(candidate)
+			if not (engine.can_challenge(candidate) or engine.can_request_challenge(candidate)): continue
 			var candidate_view = engine.view(candidate)
 			if AI.wants_challenge(candidate_view, rng):
-				var call = {"type": "challenge", "revision": candidate_view.revision}
+				var call = AI.challenge_action(candidate_view)
 				if engine.act(candidate, call):
 					delay = pace; _publish()
 				return

@@ -6,7 +6,7 @@
 
 `scripts/bluff/` 按用户提供的规则独立实现，没有复制第三方唬牌源码。牌面使用下述既有 SVG-cards／用户交付国风素材，保留各自来源，不重复复制牌图。
 
-`assets/bluff/audio/` 新增 254 段由同一固定 Kokoro / sherpa-onnx 开放模型生成的离线宣言（男／女各 127 段）。数量和点数顺序播放，只朗读公开宣言；不是商业游戏录音或真人配音。模型、SHA-256、生成参数、台词和文件校验见 `assets/licenses/bluff-voice-manifest.json`，署名见 `bluff-voice-NOTICE.txt`，完整 Apache-2.0 正文共用 `doudizhu-Apache-2.0.txt`。生成脚本为 `tools/generate_bluff_audio.py`；模型、依赖和测试日志不进入游戏包。
+`assets/bluff/audio/` 现有256段由同一固定 Kokoro / sherpa-onnx 开放模型生成的离线宣言（男／女各128段）。数量和点数顺序播放，只朗读公开宣言；不是商业游戏录音或真人配音。模型、SHA-256、生成参数、台词和文件校验见 `assets/licenses/bluff-voice-manifest.json`，署名见 `bluff-voice-NOTICE.txt`，完整 Apache-2.0 正文共用 `doudizhu-Apache-2.0.txt`。生成脚本为 `tools/generate_bluff_audio.py`；模型、依赖和测试日志不进入游戏包。
 
 ## 斗地主与离线中文报牌（2026-11-05）
 
@@ -81,3 +81,5 @@ Git 保存运行素材与来源清单。原始导出、备选和放大图不入 
 ## 八花 SVG
 
 作者 Cangjie6，Wikimedia Commons，CC BY-SA 4.0。沿用莲花麻将裁切后的八花 SVG，保留同许可，完整许可证在 `assets/licenses/flowers-CC-BY-SA-4.0.txt`，逐图来源、修改说明和原始 SHA-256 在 `assets/licenses/flowers-sources.json`。此许可仅适用花牌素材。春夏秋冬梅兰竹菊原图为 MJh1-、MJh2-、MJh3-、MJh4-、MJh5-、MJh6-、MJh8-、MJh7-.svg；来源 https://commons.wikimedia.org/wiki/User:Cangjie6 。
+
+2026-11-07补充：复用既有固定模型，为唬牌新增两段「报牌三张」、斗地主新增六段剩3／2／1张提醒。斗地主现共126段，原有374段音频均保持原哈希；两份来源清单新增台词和文件哈希。

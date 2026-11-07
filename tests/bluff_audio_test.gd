@@ -16,7 +16,7 @@ func run() -> void:
 	AudioServer.set_bus_mute(0, true)
 	for profile in ["male", "female"]:
 		voice.set_profile(profile)
-		var keys: Array = ["pass", "challenge", "truth", "lie", "dead", "win"]
+		var keys: Array = ["pass", "challenge", "truth", "lie", "dead", "win", "report_three"]
 		for count in range(1, 109): keys.append("count_%d" % count)
 		for rank in range(3, 16): keys.append("rank_%d" % rank)
 		for key in keys:
@@ -24,6 +24,9 @@ func run() -> void:
 			check(clip != null and clip.get_length() > 0.15 and clip.get_length() < 8, "load nonempty " + profile + "/" + key)
 	var view = {"round_id": 1, "revision": 1, "phase": "playing", "event": {"type": "play", "rank": 8, "count": 37}}
 	check(voice.keys(view) == ["count_37", "rank_8"], "speak declared count and rank, never actual cards")
+	view.event["report_seat"] = 2
+	check(voice.keys(view) == ["count_37", "rank_8", "report_three"], "low-hand warning follows declaration")
+	view.event.erase("report_seat")
 	check(voice.announce(view, false) > 1 and voice.playing and voice.queue.size() == 1, "declaration queues count then rank")
 	await process_frame
 	await process_frame

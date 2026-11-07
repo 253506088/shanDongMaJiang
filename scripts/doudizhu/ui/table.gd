@@ -250,7 +250,9 @@ func _draw_opponent(seat: int, left: bool) -> void:
 	Kit.portrait(player, Vector2(16, 16), 68, seat)
 	_label(player, Rect2(99, 13, 106, 41), _seat_name(seat), 26)
 	var counts: Array = view.get("hand_counts", [0, 0, 0])
-	_label(player, Rect2(99, 54, 106, 30), "%d 张" % int(counts[seat]), 24, Kit.CORAL if int(counts[seat]) <= 2 else Kit.ACCENT)
+	_label(player, Rect2(99, 54, 106, 30), "%d 张" % int(counts[seat]), 24, Kit.CORAL if int(counts[seat]) <= 3 else Kit.ACCENT)
+	var report = remaining_text(int(counts[seat])) if view.get("phase", "") == "playing" else ""
+	if not report.is_empty(): _label(content, Rect2(x - 12, 407, 238, 31), report, 23, Kit.CORAL, true)
 	_label(player, Rect2(16, 100, 190, 30), _role(seat), 22, Kit.ACCENT if int(view.get("landlord", -1)) == seat else Kit.MUTED)
 	if active: _label(content, Rect2(x, 216, 214, 32), "正在叫分…" if str(view.get("phase", "")) == "bidding" else "正在出牌…", 23, Kit.ACCENT, true)
 	var latest: Array = view.get("last_actions", [{}, {}, {}])
@@ -292,9 +294,14 @@ func _draw_target() -> void:
 	status_label = _label(content, Rect2(413, 528, 774, 39), status, 29, Kit.ACCENT if my_turn else Kit.TEXT, true)
 
 func _draw_self() -> void:
+	var report = remaining_text(view.get("hand", []).size()) if view.get("phase", "") == "playing" else ""
+	if not report.is_empty(): _label(content, Rect2(52, 656, 310, 35), report, 24, Kit.CORAL)
 	Kit.portrait(content, Vector2(81, 699), 82, int(view.get("seat", 0)))
 	_label(content, Rect2(63, 788, 118, 31), "我", 25, Kit.TEXT, true)
 	_label(content, Rect2(51, 823, 143, 29), _role(int(view.get("seat", 0))).replace(" · 队友", ""), 22, Kit.ACCENT, true)
+
+static func remaining_text(count: int) -> String:
+	return {3: "我就剩三张牌了", 2: "我就剩两张牌了", 1: "我就剩1张牌了"}.get(count, "")
 
 func _card(parent: Node, id: int, at: Vector2, dimensions: Vector2, interactive: bool = false) -> CardFace:
 	var card = CardFace.new()
@@ -678,6 +685,7 @@ func show_rules() -> void:
 	body.add_theme_constant_override("separation", 20)
 	scroll.add_child(body)
 	var sections = [
+		["余牌提醒", "任意一家出牌后剩3、2、1张时提示并播报对应张数。只作提醒，其他人照常出牌；过牌不重复播报。"],
 		["一副牌，三个人", "54 张牌，每人先拿 17 张，留下 3 张底牌。依次叫 1、2、3 分或不叫，后叫必须高于前者；叫 3 分立即当地主。全不叫则重新发牌。"],
 		["地主先出，农民合作", "地主拿到底牌后共 20 张，先出牌。轮到自己可压过上手或不要；连续两人不要，由最后出牌者重新领出。地主先出完获胜，任一农民先出完则两位农民共同获胜。"],
 		["牌型与大小", "单张、对子、三张、三带一、三带一对、顺子（至少 5 张）、连对（至少 3 对）、飞机及带翅膀、四带二、炸弹和王炸。通常须同牌型、同张数才能比较，按主体点数比较。3 最小，依次到 A、2、小王、大王；顺子、连对和飞机主体不含 2 与王。"],

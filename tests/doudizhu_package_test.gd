@@ -14,7 +14,7 @@ func check(value: bool, message: String) -> void:
 		printerr("DDZ PACKAGE FAIL: ", message)
 
 func run() -> void:
-	check(str(ProjectSettings.get_setting("application/config/version")) == "0.8.2", "package version")
+	check(str(ProjectSettings.get_setting("application/config/version")) == "0.8.3", "package version")
 	check(not FileAccess.file_exists("res://tests/doudizhu_package_test.gd"), "development tests are excluded")
 	check(not FileAccess.file_exists("res://tools/import_doudizhu_audio.py"), "voice generator is excluded")
 	check(FileAccess.file_exists("res://assets/licenses/doudizhu-voice-manifest.json"), "voice provenance ships with package")
@@ -62,9 +62,9 @@ func run() -> void:
 		var path = capture_args[capture_index + 1].path_join("package-guofeng.png")
 		check(root.get_texture().get_image().save_png(path) == OK, "capture actual exported Guofeng table")
 	app.doudizhu.table.pause_menu()
-	check(app.doudizhu.voice.clips.size() == 60, "all sixty offline voice clips load from PCK")
+	check(app.doudizhu.voice.clips.size() == 63, "all 63 offline voice clips load from PCK")
 	app.doudizhu.set_voice_profile("female")
-	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 60, "female voice also loads completely from PCK")
+	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 63, "female voice also loads completely from PCK")
 	check(app.doudizhu.table.voice_profile_button.text == "女声报牌", "packaged voice picker reflects its selection")
 	app.doudizhu.set_voice_profile("male")
 	for clip in app.doudizhu.voice.clips.values():

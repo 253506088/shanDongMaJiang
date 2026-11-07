@@ -33,6 +33,7 @@ func _load_profile() -> void:
 	for kind in COMBOS: _load_clip(kind)
 	for value in range(4): _load_clip("bid_%d" % value)
 	for key in ["pass", "redeal", "spring", "counter_spring"]: _load_clip(key)
+	for count in range(1, 4): _load_clip("remaining_%d" % count)
 
 func _load_clip(key: String) -> void:
 	var path = AUDIO_ROOT + ("female/" if profile == "female" else "") + key + ".wav"
@@ -50,6 +51,9 @@ func clip_keys(view: Dictionary) -> Array[String]:
 		if kind in ["single", "pair", "triple"]:
 			keys.append("%s_%d" % [kind, int(combo.get("main", 3))])
 		elif kind in COMBOS: keys.append(kind)
+		var remaining = int(event.get("remaining", 0))
+		if view.get("phase", "") == "playing" and remaining >= 1 and remaining <= 3:
+			keys.append("remaining_%d" % remaining)
 		if view.get("phase", "") == "finished":
 			var spring = str(view.get("result", {}).get("spring", ""))
 			if spring in ["spring", "counter_spring"]: keys.append(spring)

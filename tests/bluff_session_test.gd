@@ -48,6 +48,15 @@ func run() -> void:
 				check(state.revision == revision and session.delay > 0, "inspection pauses the review countdown")
 				session.paused = false; session._process(0.3)
 				check(state.phase == "playing" and state.revision == revision + 1, "review automatically resumes one new trick when timer expires")
+			elif state.phase == "permission":
+				if state.permission.approver == 0:
+					var before_permission = state.duplicate(true)
+					session._process(100)
+					check(state == before_permission, "human permission never times out")
+					check(submit(session, AI.permission_response(session.current_view())), "human answers request")
+				else:
+					session._process(100)
+					check(state.phase != "permission", "bot answers permission request")
 			elif state.turn == 0:
 				if state.config.challenge == "turn":
 					var revision = state.revision
@@ -104,6 +113,7 @@ func run() -> void:
 	check(session.engine.act(2, {"type": "play", "cards": [card], "rank": 3, "revision": 0}), "free-call identity fixture")
 	var claim_revision = session.engine.state.last.revision
 	session.calls_checked_revision = claim_revision
+	session.calls_checked_seats = [1, 2]
 	var rng_state = session.rng.state
 	session._process(100)
 	check(session.rng.state == rng_state, "idle human turn never rerolls a checked free-call claim")

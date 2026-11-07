@@ -31,6 +31,7 @@ func act(seat: int, action: Dictionary) -> bool:
 	state.target = combo
 	state.target_seat = seat
 	state.event = {"type": "play", "seat": seat, "cards": combo.cards.duplicate(), "combo": combo.duplicate(true)}
+	state.event["remaining"] = state.hands[seat].size()
 	state.last_actions[seat] = state.event.duplicate(true)
 	if combo.kind in ["bomb", "rocket"]:
 		state.bomb_count += 1
