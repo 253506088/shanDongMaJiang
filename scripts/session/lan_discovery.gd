@@ -5,7 +5,7 @@ extends Node
 signal rooms_changed(rooms: Array)
 
 const DISCOVERY_PORT = 32142
-const PROTOCOL = 4
+const PROTOCOL = 5
 const MAGIC = "qingyu-lan"
 const MAX_PACKET = 2048
 const ROOM_TTL_MS = 6500

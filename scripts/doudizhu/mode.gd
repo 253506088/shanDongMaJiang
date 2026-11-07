@@ -6,13 +6,13 @@ const VoiceScript = preload("res://scripts/doudizhu/audio/voice.gd")
 const CardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 signal exit_requested
 signal mute_changed(enabled: bool)
-signal voice_profile_changed(profile: String)
+signal character_requested
 signal card_theme_changed(theme_id: String)
 var session: DdzSession
 var table: Control
 var voice: AudioStreamPlayer
 var muted = false
-var voice_profile = "male"
+var character_id = Characters.DEFAULT
 var card_theme = "traditional"
 var qa_mode = false
 var notice_label: Label
@@ -22,15 +22,14 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	session = SessionScript.new()
+	session.character_id = character_id
 	add_child(session)
 	voice = VoiceScript.new()
-	voice.profile = "female" if voice_profile == "female" else "male"
 	add_child(voice)
 	table = TableScript.new()
 	add_child(table)
 	table.set_muted(muted)
-	table.set_voice_profile(voice_profile)
-	table.voice_profile_requested.connect(set_voice_profile)
+	table.character_requested.connect(func():character_requested.emit())
 	card_theme = CardThemes.normalize(card_theme)
 	table.set_card_theme(card_theme)
 	table.card_theme_requested.connect(set_card_theme)
@@ -57,13 +56,9 @@ func _changed(view: Dictionary) -> void:
 	table.set_view(view)
 	session.hold_presentation(voice.announce(view, muted))
 
-func set_voice_profile(value: String) -> void:
-	var chosen = "female" if value == "female" else "male"
-	if chosen == voice_profile: return
-	voice_profile = chosen
-	voice.set_profile(chosen)
-	table.set_voice_profile(chosen)
-	voice_profile_changed.emit(chosen)
+func set_character(id: String) -> void:
+	character_id = Characters.normalize(id)
+	if is_instance_valid(session): session.set_character(character_id)
 
 func set_card_theme(value: String) -> bool:
 	if not CardThemes.available(value): return false

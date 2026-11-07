@@ -1481,3 +1481,9 @@ J/Q/K由单向人物按腰线裁切制作双头，双王单向，青玉牌背保
 角标和点阵由程序制作，英文JOKER竖排，字形使用Noto Sans SC Bold（SIL OFL）。
 交付未说明生成模型或独立许可文本，不套用传统SVG-cards的LGPL或莲花MIT。
 原图、仓库外备份和运行图SHA-256见 assets/licenses/doudizhu-guofeng-manifest.json。
+
+
+八角色与麻将男女声（2026-11-07）
+--------------------------------
+运行头像来自用户交付，6张正式图及2张明确临时使用的表情包；不宣称已核实为开源素材。对应ID、待替换文件、原图和处理哈希见 character-art-manifest.json / character-art-NOTICE.txt。
+麻将新增78段（男女各39段）Kokoro / sherpa-onnx开放模型生成的离线报牌，随实际发言角色选择性别；完整Apache-2.0许可与模型来源沿用，逐文件信息见 mahjong-character-voice-manifest.json / mahjong-character-voice-NOTICE.txt。

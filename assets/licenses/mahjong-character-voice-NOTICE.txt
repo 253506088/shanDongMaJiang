@@ -1,0 +1,18 @@
+Mahjong character voices — generated offline speech, 2026-11-07
+
+78 mono PCM16 24 kHz WAV clips: 34 tile names and 5 actions per gender.
+Generated with the same pinned Kokoro-82M-v1.1-zh model and sherpa-onnx 1.12.40
+used by this project's existing poker voices. Male speaker ID 59 (zm_010),
+female speaker ID 3 (zf_001), speed 1.0. Model and runtime: Apache-2.0.
+
+Model: https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh
+Runtime: https://github.com/k2-fsa/sherpa-onnx
+Full license: doudizhu-Apache-2.0.txt, shipped alongside this file.
+Pinned model revision, hashes, phrases, processing and individual WAV hashes:
+mahjong-character-voice-manifest.json.
+
+Generator: tools/generate_mahjong_character_audio.py (development only).
+The game ships WAV files and chooses gender from each event's character.
+It uses no microphone, system voice or network synthesis service.
+These are model-generated voices, not a commercial-game recording pack or
+human voice acting. Legacy Lotus MP3 assets and provenance remain separate.

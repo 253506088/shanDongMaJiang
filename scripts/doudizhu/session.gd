@@ -18,6 +18,13 @@ var worker_revision = -1
 var worker_round = -1
 var worker_seat = -1
 var worker_hint = false
+var character_id = Characters.DEFAULT
+
+func set_character(id: String) -> bool:
+	if not Characters.valid(id): return false
+	character_id = id
+	if active: _publish()
+	return true
 
 func _ready() -> void:
 	rng.randomize()
@@ -35,7 +42,7 @@ func current_view() -> Dictionary:
 	if not active: return {}
 	var result: Dictionary = engine.view(0)
 	result["round_id"] = round_id
-	return result
+	return Characters.decorate(result, Characters.roster(character_id, 3))
 
 func _publish() -> void:
 	changed.emit(current_view())

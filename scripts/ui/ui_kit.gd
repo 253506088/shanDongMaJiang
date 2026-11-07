@@ -68,11 +68,22 @@ static func texture(parent: Node, rect: Rect2, image: Texture2D) -> TextureRect:
 	node.mouse_filter = Control.MOUSE_FILTER_IGNORE; parent.add_child(node)
 	return node
 
-static func portrait(parent: Node, position: Vector2, diameter: float, seat: int) -> TextureRect:
-	var ring=panel(parent,Rect2(position-Vector2.ONE*2,Vector2.ONE*(diameter+4)),Color("294a40"),Color("dbc59688"),int(diameter/2+2))
+static func portrait(parent: Node, position: Vector2, diameter: float, seat: int, character_id: String = "", border: Color = Characters.NORMAL_BORDER) -> TextureRect:
+	var ring=panel(parent,Rect2(position,Vector2.ONE*diameter),Color("193e38"),border,int(diameter/2))
 	ring.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var names=["self","tingsong","guanlan","zhiqiu"]
-	return texture(parent,Rect2(position,Vector2.ONE*diameter),load("res://assets/ui/avatars/"+names[seat]+".png"))
+	ring.get_theme_stylebox("panel").set_border_width_all(3)
+	var node=texture(parent,Rect2(position+Vector2.ONE*3,Vector2.ONE*(diameter-6)),null)
+	node.name="CharacterPortrait";node.set_meta("portrait_ring",weakref(ring))
+	configure_portrait(node,Characters.default_for_seat(seat) if character_id.is_empty() else character_id,border)
+	return node
+
+static func configure_portrait(node: TextureRect, id: String, border: Color = Characters.NORMAL_BORDER) -> void:
+	var character=Characters.info(id)
+	node.texture=load(character.avatar) if ResourceLoader.exists(character.avatar) else null
+	node.set_meta("character_id",character.id);node.set_meta("border_color",border)
+	node.tooltip_text=character.name+" · "+("女" if character.gender=="female" else "男")
+	var ring=node.get_meta("portrait_ring").get_ref()
+	if is_instance_valid(ring):ring.get_theme_stylebox("panel").border_color=border
 
 static func table_style(active: bool = false, radius: int = 14) -> StyleBoxFlat:
 	var box = style(Color("25483fec") if active else TABLE_SURFACE,TABLE_GOLD if active else TABLE_LINE,radius)

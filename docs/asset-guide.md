@@ -37,3 +37,9 @@ python tools/prepare_delivered_art.py --source-dir artifacts/art-delivery-2026-1
 ```
 
 `tools/prepare_delivered_art.py` 需要 Pillow 和 NumPy，原图目录可通过 `--source-dir` 指定。`tools/make_assets.py` 检测到导入清单后，不再覆盖现成牌面。图片和语音已保存在项目内，玩家不需要 Python、原项目或网络。
+
+## 2026-11-07 八角色与按性别报牌
+
+当前运行头像改用`assets/ui/characters/`的8张512px圆形图，含6张正式图和2张用户指定的临时表情包。两项补图对应必须保留：female_03为提示词第5位32岁女性，male_04为第8位50岁男性；详见`docs/characters.md`及`assets/licenses/character-art-manifest.json`。本轮原图、原提示词及仓库外备份保留；旧四张头像同样保留历史来源。
+
+麻将现按角色性别播放78段新离线WAV，使用与扑克相同的固定Kokoro音色，旧莲花MP3与许可保留。新音频在`assets/audio/characters/`，台词与SHA-256见`mahjong-character-voice-manifest.json`。

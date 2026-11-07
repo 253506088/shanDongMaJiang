@@ -83,3 +83,9 @@ Git 保存运行素材与来源清单。原始导出、备选和放大图不入 
 作者 Cangjie6，Wikimedia Commons，CC BY-SA 4.0。沿用莲花麻将裁切后的八花 SVG，保留同许可，完整许可证在 `assets/licenses/flowers-CC-BY-SA-4.0.txt`，逐图来源、修改说明和原始 SHA-256 在 `assets/licenses/flowers-sources.json`。此许可仅适用花牌素材。春夏秋冬梅兰竹菊原图为 MJh1-、MJh2-、MJh3-、MJh4-、MJh5-、MJh6-、MJh8-、MJh7-.svg；来源 https://commons.wikimedia.org/wiki/User:Cangjie6 。
 
 2026-11-07补充：复用既有固定模型，为唬牌新增两段「报牌三张」、斗地主新增六段剩3／2／1张提醒。斗地主现共126段，原有374段音频均保持原哈希；两份来源清单新增台词和文件哈希。
+
+## 2026-11-07 八角色和麻将男女声
+
+用户提供6张正式角色头像和2张明确临时使用的表情包，运行图仅裁切、缩放、加圆形透明遮罩。来源、原始尺寸、哈希、外部备份和两项待替换映射见`assets/licenses/character-art-manifest.json`；不将临时表情包宣称为已核实开源授权。
+
+麻将新增男女各39段Kokoro／sherpa-onnx离线语音（78段），复用既有固定Apache-2.0模型和运行时，仅分发WAV。原MP3保留其来源；新台词、哈希、生成参数及署名见`assets/licenses/mahjong-character-voice-manifest.json`和同名NOTICE。男女声按每位发言者角色选择，原斗地主和唬牌音频不重复生成。

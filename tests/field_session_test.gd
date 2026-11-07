@@ -39,7 +39,7 @@ func run() -> void:
 
 func _test_wire_contract() -> void:
 	var session = LanSession.new()
-	check(LanSession.PROTOCOL == 4 and LanDiscovery.PROTOCOL == 4, "discovery and ENet reject clients without personal mutation rules")
+	check(LanSession.PROTOCOL == 5 and LanDiscovery.PROTOCOL == 5, "discovery and ENet reject clients without personal mutation rules")
 	check(not session._settings({}).field_rules, "nearby room defaults to ordinary play")
 	check(session._settings({}).field_selection == "random", "missing selection keeps compatible random default")
 	check(session._settings({"field_rules": true}).field_rules, "host field toggle survives sanitization")

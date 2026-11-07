@@ -23,6 +23,8 @@ func tagged(node: Node, key: String, value: Variant) -> Node:
 func finish(code: int) -> void:
 	app.queue_free();app=null
 	await pause_frames(4)
+	RenderingServer.force_draw(false)
+	await create_timer(.2).timeout
 	for name in ["current_match.json","current_match.json.bak","current_match.json.tmp"]:
 		var path=ProjectSettings.globalize_path(save_directory+name)
 		if FileAccess.file_exists(path):DirAccess.remove_absolute(path)

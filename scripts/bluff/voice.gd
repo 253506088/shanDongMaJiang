@@ -14,26 +14,35 @@ func set_profile(value: String) -> void:
 	if value == profile: return
 	profile = value; stop_all(); clips.clear()
 
-func clip(key: String) -> AudioStream:
-	if not clips.has(key):
-		var path = "res://assets/bluff/audio/%s/%s.wav" % [profile, key]
+func clip(key: String, speaker_profile: String = "") -> AudioStream:
+	if speaker_profile.is_empty(): speaker_profile = profile
+	var cache_key = speaker_profile + "/" + key
+	if not clips.has(cache_key):
+		var path = "res://assets/bluff/audio/%s/%s.wav" % [speaker_profile, key]
 		if not ResourceLoader.exists(path): return null
-		clips[key] = load(path)
-	return clips[key]
+		clips[cache_key] = load(path)
+	return clips[cache_key]
 
 func keys(view: Dictionary) -> Array:
+	return calls(view).map(func(call):return call.key)
+
+func calls(view: Dictionary) -> Array:
 	var event: Dictionary = view.get("event", {})
 	var result: Array = []
+	var seat = int(event.get("seat", 0))
 	match event.get("type", ""):
-		"play": result = ["count_%d" % event.count, "rank_%d" % event.rank]
-		"pass": result = ["pass"]
-		"challenge": result = ["challenge", "truth" if event.truthful else "lie"]
-		"dead": result = ["dead"]
-	if event.get("report_seat", -1) >= 0 and view.get("phase", "") != "finished": result.append("report_three")
+		"play": result = [{"key":"count_%d" % event.count,"seat":seat},{"key":"rank_%d" % event.rank,"seat":seat}]
+		"pass": result = [{"key":"pass","seat":seat}]
+		"challenge":
+			# The opener speaks both the call and the revealed verdict.
+			var caller = int(event.get("caller", 0))
+			result = [{"key":"challenge","seat":caller},{"key":"truth" if event.truthful else "lie","seat":caller}]
+		"dead": result = [{"key":"dead","seat":seat}]
+	if event.get("report_seat", -1) >= 0 and view.get("phase", "") != "finished": result.append({"key":"report_three","seat":event.report_seat})
 	if view.get("phase", "") == "finished":
 		# Accepting a final declaration may retain its preceding play event.
 		if view.get("finish_reason", "") == "accepted": result = []
-		result.append("win")
+		result.append({"key":"win","seat":int(view.get("winner",seat))})
 	return result
 
 func announce(view: Dictionary, silent: bool) -> float:
@@ -42,8 +51,8 @@ func announce(view: Dictionary, silent: bool) -> float:
 		last_key = key; stop_all(); return 0
 	if key == last_key: return 0
 	last_key = key
-	for name in keys(view):
-		var stream = clip(name)
+	for call in calls(view):
+		var stream = clip(call.key, Characters.voice_for(view, call.seat, profile))
 		if stream: queue.append(stream)
 	var length = maxf(0, stream.get_length() - get_playback_position()) if playing and stream else 0.0
 	for item in queue: length += item.get_length()

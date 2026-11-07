@@ -104,16 +104,16 @@ func _check_voice_preferences() -> void:
 	app.qa_mode = false
 	app._open_doudizhu()
 	var revision = app.doudizhu.session.engine.state.revision
-	app.doudizhu.set_voice_profile("female")
-	check(app.doudizhu_voice == "female" and app.doudizhu.voice.profile == "female", "voice picker updates playback and application preference")
-	check(app.doudizhu.table.voice_profile_button.text == "女声报牌", "picker reflects selected voice")
-	check(app.doudizhu.session.engine.state.revision == revision, "voice changes do not advance the game")
+	app._set_character("female_02")
+	check(app.character_id == "female_02" and Characters.voice_for(app.doudizhu.session.current_view(),0) == "female", "character picker updates playback and application preference")
+	check(app.doudizhu.table.character_button.text == "角色 · 观澜", "picker reflects selected character")
+	check(app.doudizhu.session.engine.state.revision == revision, "character changes do not advance the game")
 	check(app.doudizhu.set_card_theme("traditional"), "available card theme is accepted")
 	check(app.doudizhu.set_card_theme("guofeng"), "delivered theme is accepted at mode boundary")
 	check(not app.doudizhu.set_card_theme("missing"), "unknown theme is rejected at mode boundary")
 	check(app.doudizhu.session.engine.state.revision == revision and app.doudizhu.card_theme == "guofeng", "theme configuration does not change game state")
 	var preferences = JSON.parse_string(FileAccess.get_file_as_string(app.preferences_path))
-	check(preferences.get("doudizhu_voice") == "female" and preferences.get("muted") == true, "voice is saved alongside the existing sound setting")
+	check(preferences.get("character_id") == "female_02" and not preferences.has("doudizhu_voice") and preferences.get("muted") == true, "voice is saved alongside the existing sound setting")
 	check(preferences.get("doudizhu_card_theme") == "guofeng", "card theme is saved independently of voice")
 	app.free()
 	await process_frame
@@ -121,13 +121,13 @@ func _check_voice_preferences() -> void:
 	app.qa_mode = false
 	app.preferences_path = qa_path + "preferences.json"
 	root.add_child(app)
-	check(app.doudizhu_voice == "female", "new app restores selected voice")
+	check(app.character_id == "female_02", "new app restores selected character")
 	check(app.doudizhu_card_theme == "guofeng", "new app restores delivered card theme")
 	app._open_doudizhu()
 	check(app.doudizhu.table.hand_cards.all(func(card): return "guofeng/" in card._face().resource_path), "new mode draws persisted theme from its first hand")
-	check(app.doudizhu.voice.profile == "female" and app.doudizhu.voice.clips.size() == 63, "new mode loads complete persisted voice")
-	app.doudizhu.set_voice_profile("male")
-	check(app.doudizhu.voice.profile == "male" and app.doudizhu.voice.clips.size() == 63, "both complete voice catalogs can be selected")
+	check(Characters.voice_for(app.doudizhu.session.current_view(),0) == "female" and app.doudizhu.voice.clips.size() == 63, "new mode loads complete persisted voice")
+	app._set_character("male_01")
+	check(Characters.voice_for(app.doudizhu.session.current_view(),0) == "male" and app.doudizhu.voice.clips.size() == 63, "character determines the matching voice catalog")
 	preferences.doudizhu_card_theme = "missing"
 	var file = FileAccess.open(app.preferences_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(preferences))
@@ -138,7 +138,7 @@ func _check_voice_preferences() -> void:
 	app.qa_mode = false
 	app.preferences_path = qa_path + "preferences.json"
 	root.add_child(app)
-	check(app.doudizhu_card_theme == "traditional" and app.doudizhu_voice == "female", "unknown persisted theme falls back without losing voice preference")
+	check(app.doudizhu_card_theme == "traditional" and app.character_id == "female_02", "unknown persisted theme falls back without losing character preference")
 	app.free()
 	await process_frame
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(qa_path + "preferences.json"))

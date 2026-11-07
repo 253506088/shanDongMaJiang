@@ -48,6 +48,8 @@ func click(button: Control) -> void:
 	check(is_instance_valid(button), "click target exists")
 	if not is_instance_valid(button): return
 	var at = button.get_global_rect().get_center()
+	var hover = InputEventMouseMotion.new(); hover.position = at
+	root.push_input(hover, true); await frames()
 	await mouse(at, true); await mouse(at, false)
 
 func motion(at: Vector2) -> void:

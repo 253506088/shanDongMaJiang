@@ -14,6 +14,13 @@ var round_id = 0
 var pace = 2.8
 var calls_checked_revision = -1
 var calls_checked_seats: Array = []
+var character_id = Characters.DEFAULT
+
+func set_character(id: String) -> bool:
+	if not Characters.valid(id): return false
+	character_id = id
+	if active: changed.emit(current_view())
+	return true
 
 func _ready() -> void:
 	rng.randomize()
@@ -30,7 +37,7 @@ func current_view() -> Dictionary:
 	var view = engine.view(0)
 	view["round_id"] = round_id
 	view["review_remaining"] = delay if engine.state.phase == "review" else 0.0
-	return view
+	return Characters.decorate(view, Characters.roster(character_id, engine.state.config.players))
 
 func _publish() -> void:
 	if engine.state.phase == "review":

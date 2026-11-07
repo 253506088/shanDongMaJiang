@@ -15,7 +15,7 @@ signal next_requested
 signal exit_requested
 signal pause_changed(paused: bool)
 signal mute_requested
-signal voice_profile_requested(profile: String)
+signal character_requested
 signal card_theme_requested(theme_id: String)
 
 const NAMES = ["我", "听松", "观澜"]
@@ -49,8 +49,7 @@ var _result_hidden: bool = false
 var recorder_expanded = true
 var recorder: Control
 var recorder_button: Button
-var voice_profile = "male"
-var voice_profile_button: Button
+var character_button: Button
 var card_theme = "traditional"
 var card_theme_button: Button
 var theme_apply_button: Button
@@ -135,10 +134,6 @@ func set_muted(value: bool) -> void:
 	muted = value
 	if is_instance_valid(mute_button): mute_button.text = "声音关" if muted else "声音开"
 
-func set_voice_profile(value: String) -> void:
-	voice_profile = "female" if value == "female" else "male"
-	if is_instance_valid(voice_profile_button): voice_profile_button.text = "女声报牌" if voice_profile == "female" else "男声报牌"
-
 func set_card_theme(value) -> void:
 	card_theme = CardThemes.normalize(value)
 	_cancel_drag()
@@ -193,8 +188,8 @@ func _render() -> void:
 	recorder_button.tooltip_text = "只统计你手牌之外尚未打出的牌；叫分时包含未揭底牌。"
 	card_theme_button = _button(content, Rect2(495, 31, 124, 51), "牌面", show_card_themes)
 	_label(content, Rect2(631, 28, 338, 57), "斗 地 主", 30, Kit.ACCENT, true)
-	voice_profile_button = _button(content, Rect2(1180, 31, 193, 51), "女声报牌" if voice_profile == "female" else "男声报牌", func(): voice_profile_requested.emit("female" if voice_profile == "male" else "male"))
-	voice_profile_button.tooltip_text = "点击切换男声／女声，下次报牌使用所选声音。"
+	character_button = _button(content, Rect2(1180, 31, 193, 51), "角色 · " + Characters.info(Characters.at(view, 0)).name, func(): character_requested.emit())
+	character_button.tooltip_text = "选择角色，头像与播报性别随角色变化。"
 	mute_button = _button(content, Rect2(1385, 31, 163, 51), "声音关" if muted else "声音开", func(): mute_requested.emit())
 	if view.is_empty(): return
 	_draw_bottom()
@@ -241,13 +236,15 @@ func _role(seat: int) -> String:
 	return "农民 · 队友" if int(view.get("seat", 0)) != landlord and seat != int(view.get("seat", 0)) else "农民"
 
 func _seat_name(seat: int) -> String:
+	if seat == 0: return "我"
+	if view.has("characters"): return str(Characters.info(Characters.at(view, seat)).name)
 	return NAMES[seat] if seat >= 0 and seat < NAMES.size() else "牌友"
 
 func _draw_opponent(seat: int, left: bool) -> void:
 	var x = 82.0 if left else 1303.0
 	var active = int(view.get("turn", -1)) == seat and str(view.get("phase", "")) != "finished"
 	var player = _passive_panel(content, Rect2(x, 253, 214, 149), Color("102d2ddf"), Kit.ACCENT if active else Kit.TABLE_LINE, 17)
-	Kit.portrait(player, Vector2(16, 16), 68, seat)
+	Kit.portrait(player, Vector2(16, 16), 68, seat, Characters.at(view, seat), Characters.border(view, seat))
 	_label(player, Rect2(99, 13, 106, 41), _seat_name(seat), 26)
 	var counts: Array = view.get("hand_counts", [0, 0, 0])
 	_label(player, Rect2(99, 54, 106, 30), "%d 张" % int(counts[seat]), 24, Kit.CORAL if int(counts[seat]) <= 3 else Kit.ACCENT)
@@ -296,7 +293,7 @@ func _draw_target() -> void:
 func _draw_self() -> void:
 	var report = remaining_text(view.get("hand", []).size()) if view.get("phase", "") == "playing" else ""
 	if not report.is_empty(): _label(content, Rect2(52, 656, 310, 35), report, 24, Kit.CORAL)
-	Kit.portrait(content, Vector2(81, 699), 82, int(view.get("seat", 0)))
+	Kit.portrait(content, Vector2(81, 699), 82, 0, Characters.at(view, 0), Characters.border(view, 0))
 	_label(content, Rect2(63, 788, 118, 31), "我", 25, Kit.TEXT, true)
 	_label(content, Rect2(51, 823, 143, 29), _role(int(view.get("seat", 0))).replace(" · 队友", ""), 22, Kit.ACCENT, true)
 
@@ -725,7 +722,7 @@ func _show_result() -> void:
 	for seat in range(3):
 		var x = 46 + seat * 277
 		_passive_panel(panel, Rect2(x, 163, 263, 205), Color("1b3b35"), Color("c7b17e32"), 15)
-		Kit.portrait(panel, Vector2(x + 22, 183), 61, seat)
+		Kit.portrait(panel, Vector2(x + 22, 183), 61, seat, Characters.at(view, seat), Characters.border(view, seat))
 		_label(panel, Rect2(x + 99, 180, 145, 35), _seat_name(seat), 25)
 		_label(panel, Rect2(x + 99, 215, 145, 29), "地主" if seat == int(view.get("landlord", -1)) else "农民", 20, Kit.MUTED)
 		_label(panel, Rect2(x + 16, 270, 231, 73), "%+d 分" % int(scores[seat]), 36, Kit.ACCENT if int(scores[seat]) > 0 else Kit.MUTED, true)

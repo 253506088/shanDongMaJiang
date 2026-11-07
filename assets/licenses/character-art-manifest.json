@@ -1,0 +1,153 @@
+{
+  "delivered_date": "2026-11-07",
+  "source_directory": "D:\\code\\my\\2\\山东麻将\\头像生成",
+  "backup_directory": "D:\\code\\my\\2\\山东麻将-美术备份\\art-delivery-characters-2026-11-07\\raw",
+  "source": "User-delivered portraits and two explicitly temporary meme stand-ins; no claim of third-party open licensing for the stand-ins.",
+  "processing": "EXIF orientation; centered square crop; 512px RGBA; antialiased circular alpha, no generative edits",
+  "pending_replacements": [
+    "female_03",
+    "male_04"
+  ],
+  "avatars": [
+    {
+      "id": "male_01",
+      "name": "听松",
+      "gender": "male",
+      "prompt_index": 2,
+      "source_file": "avatar_02_male_18.jpg",
+      "source_sha256": "27bae2642e76e2560d0a7783f9eb1b6cc26864fbbb9ceeb8de97df5e87c6c907",
+      "source_dimensions": [
+        1024,
+        1024
+      ],
+      "temporary": false,
+      "expected_replacement": null,
+      "replacement_note": "",
+      "path": "assets/ui/characters/male_01.png",
+      "sha256": "246bf6f1915a2587144d6da45b80c3f16c01fc1d54ee1663a57a06b83ab08500"
+    },
+    {
+      "id": "male_02",
+      "name": "知秋",
+      "gender": "male",
+      "prompt_index": 4,
+      "source_file": "avatar_04_male_28.jpg",
+      "source_sha256": "8ae70feafac961abef852c98ec3743afd8850f3347d7dec7506a9268f8136e0c",
+      "source_dimensions": [
+        1024,
+        1024
+      ],
+      "temporary": false,
+      "expected_replacement": null,
+      "replacement_note": "",
+      "path": "assets/ui/characters/male_02.png",
+      "sha256": "7a44030cf1e469fb97d3373e4e13724592e30c71770fd740d5ad4374e6c1c291"
+    },
+    {
+      "id": "male_03",
+      "name": "怀竹",
+      "gender": "male",
+      "prompt_index": 6,
+      "source_file": "avatar_06_male_38.jpg",
+      "source_sha256": "3a271f74f7cc215fc87d1f7b988325ce63c325e3410b8d20b360c7a3286f9962",
+      "source_dimensions": [
+        1024,
+        1024
+      ],
+      "temporary": false,
+      "expected_replacement": null,
+      "replacement_note": "",
+      "path": "assets/ui/characters/male_03.png",
+      "sha256": "3c26518585f2159aa3cd23ad44217945996d1ed86f2083cd3a4d7cae446b8790"
+    },
+    {
+      "id": "male_04",
+      "name": "行舟",
+      "gender": "male",
+      "prompt_index": 8,
+      "source_file": "临时顶替2.png",
+      "source_sha256": "be9585e9fbcca8f2050542113a960d611b80cbff9578441289b6b8d11cc779b6",
+      "source_dimensions": [
+        504,
+        385
+      ],
+      "temporary": true,
+      "expected_replacement": "avatar_08_male_50.jpg",
+      "replacement_note": "提示词第8位，50岁男性",
+      "path": "assets/ui/characters/male_04.png",
+      "sha256": "2628ea6d1dce2777d0392aee023017b9830e8faff441e2c2be77c15eae433c2d"
+    },
+    {
+      "id": "female_01",
+      "name": "清和",
+      "gender": "female",
+      "prompt_index": 1,
+      "source_file": "avatar_01_female_16.jpg",
+      "source_sha256": "3dce3c6f51bbbe2a5aafdd86b743913c6abf001046ef8775766085557edf599f",
+      "source_dimensions": [
+        1024,
+        1024
+      ],
+      "temporary": false,
+      "expected_replacement": null,
+      "replacement_note": "",
+      "path": "assets/ui/characters/female_01.png",
+      "sha256": "5319ddb26ccbc96e99532de58b93464f9babd27597398c97d0857eb57de62b78"
+    },
+    {
+      "id": "female_02",
+      "name": "观澜",
+      "gender": "female",
+      "prompt_index": 3,
+      "source_file": "avatar_03_female_24.jpg",
+      "source_sha256": "57176d87fe535878c522773d72c29fae4faa1bd199c3eb6245b9b92f0ce72bbf",
+      "source_dimensions": [
+        1024,
+        1024
+      ],
+      "temporary": false,
+      "expected_replacement": null,
+      "replacement_note": "",
+      "path": "assets/ui/characters/female_02.png",
+      "sha256": "dc379785091619d5adfa58efe9d31b70d859eefe11b961682f2b8aed077a9329"
+    },
+    {
+      "id": "female_03",
+      "name": "望舒",
+      "gender": "female",
+      "prompt_index": 5,
+      "source_file": "临时顶替.png",
+      "source_sha256": "e7a4d6caebec340cc49d9a7548ca6c5edde493f117706aea2d04110e58343703",
+      "source_dimensions": [
+        1080,
+        1031
+      ],
+      "temporary": true,
+      "expected_replacement": "avatar_05_female_32.jpg",
+      "replacement_note": "提示词第5位，32岁女性",
+      "path": "assets/ui/characters/female_03.png",
+      "sha256": "02314bb4520d636b20668ba1f1b3fc0110ea745127de1276d868683d460f79cd"
+    },
+    {
+      "id": "female_04",
+      "name": "映雪",
+      "gender": "female",
+      "prompt_index": 7,
+      "source_file": "avatar_07_female_45.jpg",
+      "source_sha256": "ac681facf69266353c749e50ce9303949e7c583d333ed0947d3ca6fa79627bdf",
+      "source_dimensions": [
+        1024,
+        1024
+      ],
+      "temporary": false,
+      "expected_replacement": null,
+      "replacement_note": "",
+      "path": "assets/ui/characters/female_04.png",
+      "sha256": "ea73514ef6404abdc39e8e9c71fab2aade2d43667b914813e86887696c4642cc"
+    }
+  ],
+  "prompt_file": {
+    "name": "3d_cg_avatar_prompts.md",
+    "sha256": "f43ffbffe77c5436bc0a4892641779e6fb642562baf789d9b3d011bcfb51f811"
+  }
+}

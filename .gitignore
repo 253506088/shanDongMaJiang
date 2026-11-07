@@ -33,6 +33,11 @@ build/
 # artifacts/field-mutation-2026-11-07/. Track source tests, fixed replay fixtures
 # and reviewed verification notes; installers and local captures stay excluded.
 artifacts/
+# User-delivered character originals, two explicitly temporary meme stand-ins,
+# and original generation prompts. Keep this folder and its verified external
+# backup; these are not caches. Curated circular PNGs and the replacement map
+# in assets/licenses/character-art-manifest.json belong in Git.
+/头像生成/
 # Superseded procedural cloth/floor previews are reproducible with
 # tools/make_table_texture.py. Keep local copies for design comparison;
 # the delivered cloth and courtyard are the runtime assets tracked in Git.

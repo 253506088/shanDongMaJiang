@@ -146,13 +146,13 @@ func app_isolation() -> void:
 	app.bluff.table.settings.players = 6
 	app.bluff.table.settings.challenge = "any"
 	app.bluff.table.settings.theme = "guofeng"
-	app.bluff.table.settings.voice = "female"
+	app._set_character("female_02")
 	app.bluff.table.settings_changed.emit(app.bluff.table.settings)
 	check(not FileAccess.file_exists(app.preferences_path), "QA mode never writes preferences")
 	app.qa_mode = false # Isolated path only; no read/write of real preferences.
 	app.bluff.table.settings_changed.emit(app.bluff.table.settings)
 	var prefs = JSON.parse_string(FileAccess.get_file_as_string(app.preferences_path))
-	check(prefs.bluff_settings.players == 6 and prefs.bluff_settings.theme == "guofeng" and prefs.bluff_settings.voice == "female", "independent settings persist")
+	check(prefs.bluff_settings.players == 6 and prefs.bluff_settings.theme == "guofeng" and prefs.character_id == "female_02" and not prefs.bluff_settings.has("voice"), "independent settings persist")
 	app.bluff.table.start_requested.emit({"players": 6, "challenge": "any"})
 	check(app.bluff.session.current_view().hand_counts.size() == 6, "configuration reaches engine")
 	app.bluff.pause_on_background(); app.bluff.pause_on_background()
@@ -164,7 +164,7 @@ func app_isolation() -> void:
 	app = load("res://scenes/main.tscn").instantiate()
 	app.qa_mode = false; app.preferences_path = directory + "preferences.json"
 	root.add_child(app)
-	check(app.bluff_settings.players == 6 and app.bluff_settings.challenge == "any" and app.bluff_settings.voice == "female", "new app restores settings")
+	check(app.bluff_settings.players == 6 and app.bluff_settings.challenge == "any" and app.character_id == "female_02", "new app restores settings")
 	app._open_bluff()
 	check(app.bluff.table.settings.theme == "guofeng" and app.bluff.table.view.is_empty(), "restoring preferences never restores a discarded round")
 	app.free(); await process_frame

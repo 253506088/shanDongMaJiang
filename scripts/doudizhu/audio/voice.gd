@@ -8,6 +8,7 @@ var queue: Array[AudioStream] = []
 var last_key = ""
 var profile: String = "male"
 var _loaded_profile: String = ""
+var gender_clips: Dictionary = {}
 
 func _ready() -> void:
 	volume_db = -3.0
@@ -39,6 +40,15 @@ func _load_clip(key: String) -> void:
 	var path = AUDIO_ROOT + ("female/" if profile == "female" else "") + key + ".wav"
 	if ResourceLoader.exists(path): clips[key] = load(path)
 
+func clip_for(speaker_profile: String, key: String) -> AudioStream:
+	if speaker_profile == profile: return clips.get(key)
+	var cache_key = speaker_profile + "/" + key
+	if not gender_clips.has(cache_key):
+		var path = AUDIO_ROOT + ("female/" if speaker_profile == "female" else "") + key + ".wav"
+		if not ResourceLoader.exists(path): return null
+		gender_clips[cache_key] = load(path)
+	return gender_clips[cache_key]
+
 func clip_keys(view: Dictionary) -> Array[String]:
 	var keys: Array[String] = []
 	var event: Dictionary = view.get("event", {})
@@ -68,9 +78,11 @@ func announce(view: Dictionary, silent: bool) -> float:
 	if key == last_key: return 0.0
 	last_key = key
 	var added = false
+	var speaker_profile = Characters.voice_for(view, int(view.get("event", {}).get("seat", 0)), profile)
 	for clip_key in clip_keys(view):
-		if clips.has(clip_key):
-			queue.append(clips[clip_key])
+		var spoken = clip_for(speaker_profile, clip_key)
+		if spoken:
+			queue.append(spoken)
 			added = true
 	var duration = maxf(0.0, stream.get_length() - get_playback_position()) if playing and stream else 0.0
 	for clip in queue: duration += clip.get_length()
@@ -85,3 +97,4 @@ func _next() -> void:
 func stop_all() -> void:
 	stop()
 	queue.clear()
+	stream = null

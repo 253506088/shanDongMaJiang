@@ -7,7 +7,7 @@ signal room_changed(room: Dictionary)
 signal connection_closed(reason: String)
 
 const GAME_PORT = 32141
-const PROTOCOL = 4
+const PROTOCOL = 5
 const APP_ID = "qingyu-shandong-lan"
 const MAX_PACKET = 65536
 const HEARTBEAT_SECONDS = 2.0
@@ -38,6 +38,21 @@ var _control_epoch = 0
 var _worker_epoch = -1
 var _worker_round = -1
 var _last_autopilot = false
+var _character_revision = 0
+
+func set_character(id: String) -> bool:
+	if not Characters.valid(id): return false
+	character_id = id
+	if connected:
+		if is_host: _update_character(0, id)
+		else: _send(1, {"kind":"character", "character_id":id})
+	return true
+
+func _update_character(seat: int, id: String) -> void:
+	if not Characters.valid(id) or _members[seat].character_id == id: return
+	_members[seat].character_id = id; _character_revision += 1
+	_publish_room()
+	if not engine.state.is_empty(): _publish()
 
 # ENet close() resets the transport immediately; a flushed reliable packet
 # still needs acknowledgements/retransmissions. This short-lived node survives
@@ -93,11 +108,14 @@ func host_room(settings: Dictionary, player_name: String = "房主", port: int =
 	is_host = true; connected = true; local_seat = 0; _port = port
 	_player_name = _safe_name(player_name, "房主")
 	_token = _new_token()
+	_character_revision = 0
 	_members = []
 	for seat in range(4):
 		_members.append({"seat": seat, "name": ["房主", "听松", "观澜", "知秋"][seat], "occupied": false,
-			"connected": false, "ready": false, "autopilot": false, "token": "", "peer": 0})
+			"connected": false, "ready": false, "autopilot": false, "token": "", "peer": 0,
+			"character_id": Characters.default_for_seat(seat)})
 	_members[0].merge({"name": _player_name, "occupied": true, "connected": true, "ready": true, "token": _token, "peer": 1}, true)
+	_members[0].character_id = Characters.normalize(character_id)
 	var addresses = LanDiscovery.local_addresses()
 	room = {"id": _new_token().left(12), "name": _player_name + "的房间", "port": port, "host_addresses": addresses,
 		"settings": _settings(settings), "started": false, "disconnect_autoplay": false, "seats": [], "can_start": true}
@@ -197,7 +215,8 @@ func _public_room() -> Dictionary:
 	result.seats = []
 	for member in _members:
 		result.seats.append({"seat": member.seat, "name": member.name, "occupied": member.occupied,
-			"connected": member.connected, "ready": member.ready, "bot": not member.occupied, "autopilot": member.autopilot})
+			"connected": member.connected, "ready": member.ready, "bot": not member.occupied, "autopilot": member.autopilot,
+			"character_id": member.character_id})
 	return result
 
 func _publish_room() -> void:
@@ -217,7 +236,8 @@ func _seat_view(seat: int) -> Dictionary:
 		result.players[index].name = _members[index].name
 		result.players[index].bot = not _members[index].occupied
 		result.players[index].connected = _members[index].connected
-	return result
+	result["character_revision"] = _character_revision
+	return Characters.decorate(result, _members.map(func(member):return member.character_id))
 
 func _publish() -> void:
 	if not is_host or engine.state.is_empty(): return
@@ -285,6 +305,8 @@ func _receive_host(id: int, message: Dictionary) -> void:
 		_reject(id, "请先加入房间。"); return
 	var seat = int(_peer_seats[id])
 	match message.get("kind"):
+		"character":
+			if Characters.valid(message.get("character_id")): _update_character(seat, message.character_id)
 		"ping": _send(id, {"kind": "pong"})
 		"ready":
 			if not room.started and message.get("value") is bool:
@@ -301,12 +323,16 @@ func _receive_host(id: int, message: Dictionary) -> void:
 			_peer_seats.erase(id); _last_seen.erase(id); _rates.erase(id)
 			_members[seat].merge({"occupied": false, "connected": false, "ready": false, "autopilot": false,
 				"name": ["房主", "听松", "观澜", "知秋"][seat], "token": "", "peer": 0}, true)
+			_members[seat].character_id = Characters.default_for_seat(seat); _character_revision += 1
 			_control_epoch += 1; _publish_room()
+			if not engine.state.is_empty(): _publish()
 			_peer.disconnect_peer(id)
 
 func _admit(id: int, message: Dictionary) -> void:
 	if _peer_seats.has(id): return
 	if not message.get("name") is String or not message.get("token", "") is String: return
+	if not Characters.valid(message.get("character_id", Characters.DEFAULT)):
+		_reject(id, "角色信息无效，请重新选择角色后加入。"); return
 	var token: String = message.get("token", "")
 	var seat = -1
 	if not token.is_empty():
@@ -330,11 +356,12 @@ func _admit(id: int, message: Dictionary) -> void:
 		token = _new_token()
 		_members[seat].name = _safe_name(message.name, "牌友%d" % seat)
 	_members[seat].merge({"occupied": true, "connected": true, "ready": false, "autopilot": false, "token": token, "peer": id}, true)
+	_members[seat].character_id = message.get("character_id", Characters.DEFAULT); _character_revision += 1
 	_peer_seats[id] = seat; _control_epoch += 1
 	room = _public_room()
 	_send(id, {"kind": "welcome", "seat": seat, "token": token, "room": room})
 	_publish_room()
-	if room.started: _send(id, {"kind": "view", "view": _seat_view(seat)})
+	if room.started: _publish()
 
 func _receive_client(message: Dictionary) -> void:
 	match message.get("kind"):
@@ -350,7 +377,11 @@ func _receive_client(message: Dictionary) -> void:
 			if not connected or not message.get("view") is Dictionary: return
 			var state: Dictionary = message.view
 			if not _valid_view(state): return
-			if not current_view.is_empty() and (int(state.round) < int(current_view.round) or (int(state.round) == int(current_view.round) and int(state.revision) <= int(current_view.revision))): return
+			if not current_view.is_empty():
+				if int(state.round) < int(current_view.round): return
+				if int(state.round) == int(current_view.round):
+					if int(state.revision) < int(current_view.revision): return
+					if int(state.revision) == int(current_view.revision) and int(state.get("character_revision", 0)) <= int(current_view.get("character_revision", 0)): return
 			current_view = SeatView.for_seat(state, local_seat); paused = false
 			changed.emit(current_view.duplicate(true))
 		"notice": notice.emit(str(message.get("message", "操作未完成。")).left(120))
@@ -363,6 +394,7 @@ func _valid_room(value: Variant) -> bool:
 	if value.seats.size() != 4 or not value.get("started") is bool: return false
 	for seat in value.seats:
 		if not seat is Dictionary or not seat.get("name") is String: return false
+		if seat.has("character_id") and not Characters.valid(seat.character_id): return false
 	return true
 
 func _valid_view(value: Dictionary) -> bool:
@@ -375,6 +407,9 @@ func _valid_view(value: Dictionary) -> bool:
 		if not value.settings.get("field_rules", false) or not FieldRules.valid_assignment(field.get("seat_rules")): return false
 	if value.get("phase") not in ["turn", "claim", "settled", "draw_choice", "gift_choice", "exchange"] or not value.get("revision") is int or not value.get("round") is int: return false
 	if not value.get("players") is Array or value.players.size() != 4 or not value.get("pending") is Array: return false
+	if value.has("characters"):
+		if not value.characters is Array or value.characters.size() != 4 or not value.characters.all(Characters.valid): return false
+		if not value.get("character_revision") is int or value.character_revision < 0: return false
 	for player in value.players:
 		if not player is Dictionary or not player.get("hand") is Array or not player.get("melds") is Array or not player.get("discards") is Array: return false
 	return true
@@ -400,7 +435,7 @@ func _poll_network(delta: float) -> void:
 			_connection_lost("连接已断开，请确认仍在同一 Wi-Fi 或热点下，再点重新连接。"); return
 		if _peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and not _hello_sent:
 			_hello_sent = true
-			_send(1, {"kind": "hello", "name": _player_name, "token": _token, "room_id": _remembered_room})
+			_send(1, {"kind": "hello", "name": _player_name, "token": _token, "room_id": _remembered_room, "character_id": Characters.normalize(character_id)})
 	var remaining = 64
 	while _peer != null and _peer.get_available_packet_count() > 0 and remaining > 0:
 		remaining -= 1

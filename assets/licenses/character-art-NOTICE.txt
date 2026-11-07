@@ -1,0 +1,13 @@
+Eight character avatar slots — user delivery, 2026-11-07
+
+Six portraits and two temporary meme stand-ins were supplied by the user.
+Processed only by centered cropping, resizing and antialiased circular alpha.
+Source filenames, original dimensions, SHA-256 and backup directory are listed
+in character-art-manifest.json. No general open-source license is asserted for
+the user-supplied portraits or for the temporary meme images.
+
+TEMPORARY REPLACEMENTS:
+female_03 / 望舒: 临时顶替.png, awaiting prompt 5, the 32-year-old female portrait.
+male_04 / 行舟: 临时顶替2.png, awaiting prompt 8, the 50-year-old male portrait.
+Keep these stable character IDs when replacing images so saved choices and
+voice gender remain unchanged. See docs/characters.md and AGENTS.md.

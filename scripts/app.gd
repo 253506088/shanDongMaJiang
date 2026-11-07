@@ -3,9 +3,13 @@ const DoudizhuMode = preload("res://scripts/doudizhu/mode.gd")
 const DoudizhuCardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 const BluffMode = preload("res://scripts/bluff/mode.gd")
 var bluff: Control
-var bluff_settings = {"players": 3, "challenge": "turn", "theme": "traditional", "pace": 2.8, "voice": "male", "muted": false}
+var bluff_settings = {"players": 3, "challenge": "turn", "theme": "traditional", "pace": 2.8, "muted": false}
 var doudizhu: Control
-var doudizhu_voice = "male"
+var character_id = Characters.DEFAULT
+var character_picker: Control
+var character_button: Button
+var _character_restore: Dictionary = {}
+var _quitting = false
 var doudizhu_card_theme = "traditional"
 var session: LocalSession
 var table: Table3D
@@ -90,6 +94,7 @@ func _ready() -> void:
 	root = Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.mouse_filter = Control.MOUSE_FILTER_IGNORE; canvas.add_child(root)
 	root.theme=Theme.new();root.theme.default_font=UI.font();root.theme.default_font_size=18
 	_load_preferences()
+	session.character_id = character_id
 	if qa_mode:session.storage_root="user://qa/";muted=true
 	_show_lobby()
 	get_tree().auto_accept_quit = false
@@ -147,6 +152,7 @@ func _show_lobby() -> void:
 	var backdrop=GradientTexture2D.new();backdrop.gradient=gradient;backdrop.width=1600;backdrop.height=900
 	backdrop.fill_from=Vector2.ZERO;backdrop.fill_to=Vector2(1,0.35)
 	var bg = UI.texture(lobby,Rect2(0,0,1600,900),backdrop);bg.stretch_mode = TextureRect.STRETCH_SCALE
+	character_button = UI.table_button(lobby,Rect2(1030,40,270,46),"角色 · "+str(Characters.info(character_id).name),_show_character_picker)
 	UI.table_button(lobby,Rect2(1314,40,110,46),"玩法",_show_rules,false,"help")
 	UI.table_button(lobby,Rect2(1436,40,110,46),"设置",_show_settings,false,"settings")
 	UI.button(lobby,Rect2(105,90,180,46),"山东麻将",func(): pass,true)
@@ -165,7 +171,7 @@ func _show_lobby() -> void:
 	for seat in range(1,4):
 		var x=32+(seat-1)*128
 		UI.portrait(companions,Vector2(x,14),56,seat)
-		var caption=UI.label(companions,Rect2(x-12,77,80,26),["","听松","观澜","知秋"][seat],16,UI.TABLE_TEXT)
+		var caption=UI.label(companions,Rect2(x-12,77,80,26),str(Characters.info(Characters.default_for_seat(seat)).name),16,UI.TABLE_TEXT)
 		caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	var options = UI.table_panel(lobby,Rect2(104,465,720,249),false,18)
 	UI.label(options,Rect2(25,17,240,32),"本桌约定",22,UI.TEXT)
@@ -208,12 +214,12 @@ func _open_doudizhu() -> void:
 	modal = null; lobby = null; hud = null; toast_label = null
 	doudizhu = DoudizhuMode.new()
 	doudizhu.muted = muted
-	doudizhu.voice_profile = doudizhu_voice
+	doudizhu.character_id = character_id
 	doudizhu.card_theme = doudizhu_card_theme
 	doudizhu.qa_mode = qa_mode
 	doudizhu.exit_requested.connect(_show_lobby)
 	doudizhu.mute_changed.connect(func(value): muted = value; _save_preferences())
-	doudizhu.voice_profile_changed.connect(func(value): doudizhu_voice = value; _save_preferences())
+	doudizhu.character_requested.connect(_show_character_picker)
 	doudizhu.card_theme_changed.connect(func(value): doudizhu_card_theme = value; _save_preferences())
 	root.add_child(doudizhu)
 
@@ -227,9 +233,11 @@ func _open_bluff() -> void:
 	modal = null; lobby = null; hud = null; toast_label = null
 	bluff = BluffMode.new()
 	bluff.qa_mode = qa_mode
+	bluff.character_id = character_id
+	bluff.character_requested.connect(_show_character_picker)
 	bluff.settings = bluff_settings.duplicate(true)
 	bluff.exit_requested.connect(_show_lobby)
-	bluff.settings_changed.connect(func(value): bluff_settings = value.duplicate(true); _save_preferences())
+	bluff.settings_changed.connect(func(value): bluff_settings = value.duplicate(true); bluff_settings.erase("voice"); _save_preferences())
 	root.add_child(bluff)
 
 func _toggle(parent: Node, rect: Rect2, text: String, on: bool, callback: Callable) -> void:
@@ -248,7 +256,7 @@ func _replace_session(next: LocalSession) -> void:
 		previous.connection_closed.disconnect(_lan_closed)
 		previous.leave_room()
 	previous.set_process(false); previous.queue_free()
-	session = next; session.speed = previous_speed
+	session = next; session.speed = previous_speed; session.character_id = character_id
 	if qa_mode: session.storage_root = "user://qa/"
 	add_child(session)
 	session.changed.connect(_changed); session.hint_ready.connect(_hint); session.notice.connect(_toast)
@@ -261,7 +269,8 @@ func _make_lan_screen() -> void:
 	current_screen = "lan"; table.visible = false; desktop_window.set_frame_limit(60)
 	voice.stop_all(); _clear(root); modal = null; hud = null; lobby = null; toast_label = null
 	opponent_waits_panels.clear(); opponent_waits_cache.clear(); opponent_waits_round = -1
-	lan_lobby = LanLobby.new(); root.add_child(lan_lobby)
+	lan_lobby = LanLobby.new(); lan_lobby.character_id = character_id; root.add_child(lan_lobby)
+	lan_lobby.character_requested.connect(_show_character_picker)
 	lan_lobby.back_requested.connect(func():
 		lan_player_name = lan_lobby.nickname; lan_address = lan_lobby.address
 		if _is_lan(): _leave_lan()
@@ -407,6 +416,7 @@ func _build_hud() -> void:
 	# field entry in the top toolbar band, beside the centred round information.
 	field_button = UI.table_button(hud,Rect2(28,23,300,42),"",_show_current_field)
 	field_button.visible = false
+	character_button = UI.table_button(hud,Rect2(342,23,220,42),"角色 · "+str(Characters.info(character_id).name),_show_character_picker)
 	UI.table_button(hud,Rect2(1245,23,96,42),"玩法",_show_rules,false,"help")
 	UI.table_button(hud,Rect2(1351,23,96,42),"设置",_show_settings,false,"settings")
 	UI.table_button(hud,Rect2(1457,23,115,42),"房间" if _is_lan() else "暂停  II",_pause).tooltip_text="查看房间（Esc）" if _is_lan() else "暂停对局（Esc）"
@@ -418,7 +428,7 @@ func _build_hud() -> void:
 	for seat in range(4):
 		var pos = [Vector2(28,778),Vector2(1396,386),Vector2(1242,108),Vector2(28,386)][seat]
 		var panel = UI.table_panel(hud,Rect2(pos,Vector2(176,92)))
-		UI.portrait(panel,Vector2(12,12),54,(seat+(session as LanSession).local_seat)%4 if _is_lan() else seat)
+		var portrait = UI.portrait(panel,Vector2(12,12),54,seat,character_id if seat==0 else Characters.default_for_seat(seat))
 		var name_label = UI.label(panel,Rect2(78,6,58,28),["我","听松","观澜","知秋"][seat],20,UI.TABLE_TEXT)
 		name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		var state_label = UI.label(panel,Rect2(135,12,24,22),"",15,UI.TABLE_GOLD)
@@ -429,7 +439,7 @@ func _build_hud() -> void:
 		personal_rule.name="PersonalField";personal_rule.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;personal_rule.visible=false
 		var turn_dot=UI.panel(panel,Rect2(160,10,5,5),UI.TABLE_GOLD,Color.TRANSPARENT,3)
 		turn_dot.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		players_ui.append({"panel":panel,"state":state_label,"score":score,"info":info,"name":name_label,"turn":turn_dot,"field":personal_rule})
+		players_ui.append({"panel":panel,"state":state_label,"score":score,"info":info,"name":name_label,"turn":turn_dot,"field":personal_rule,"portrait":portrait})
 	var recent = UI.table_panel(hud,Rect2(28,224,152,126))
 	recent_panel=recent
 	last_actor_label = UI.label(recent,Rect2(6,7,140,23),"等待出牌",15,UI.TABLE_MUTED); last_actor_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
@@ -492,6 +502,7 @@ func _changed(new_view: Dictionary) -> void:
 	for seat in range(4):
 		var p = view.players[seat]; var info = players_ui[seat]
 		info.name.text = str(p.name); info.panel.tooltip_text = str(p.name)
+		UI.configure_portrait(info.portrait,Characters.at(view,seat),Characters.border(view,seat))
 		info.score.text = str(p.score)
 		info.field.visible = _mutation()
 		info.field.text = str(FieldRules.info(_field_id(seat)).name) if _mutation() else ""
@@ -1298,7 +1309,7 @@ func _show_field_picker(kind: String, reset_selection: bool = false) -> void:
 			var ink=Color("342e21") if active else UI.TEXT
 			if kind=="field_peek_waits":
 				var target=int(move.target)
-				UI.portrait(card,Vector2(18,21),67,(target+int(view.get("local_seat",0)))%4)
+				UI.portrait(card,Vector2(18,21),67,target,Characters.at(view,target),Characters.border(view,target))
 				UI.label(card,Rect2(102,25,pitch-132,43),str(view.players[target].name),23,ink,true)
 				UI.label(card,Rect2(102,72,pitch-132,27),"已选目标" if active else "点击选择",18,ink)
 			elif gift:
@@ -1398,7 +1409,7 @@ func _display_changed(_enabled: bool) -> void:
 
 func _about() -> void:
 	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n山东麻将 / 附近同桌 · 单机斗地主 / 唬牌\n\n麻将规则、牌面和语音参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
+	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n山东麻将 / 附近同桌 · 单机斗地主 / 唬牌\n\n麻将规则和牌面参考／沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n男女声报牌：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
 	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
 	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 
@@ -1476,6 +1487,9 @@ func _process(delta: float) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:return
+	if is_instance_valid(character_picker):
+		if event.keycode==KEY_ESCAPE:_close_character_picker()
+		get_viewport().set_input_as_handled();return
 	if current_screen=="bluff":
 		if event.keycode==KEY_ESCAPE and is_instance_valid(bluff): bluff.pause_menu()
 		return
@@ -1495,8 +1509,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_WM_CLOSE_REQUEST:
-		if _is_lan(): (session as LanSession).leave_room()
-		get_tree().quit()
+		_request_quit()
 	if what==NOTIFICATION_APPLICATION_PAUSED or what==NOTIFICATION_WM_GO_BACK_REQUEST:
 		if current_screen=="bluff" and is_instance_valid(bluff):
 			if what==NOTIFICATION_APPLICATION_PAUSED: bluff.pause_on_background()
@@ -1509,10 +1522,71 @@ func _notification(what: int) -> void:
 			if _is_lan(): _confirm_leave_lan()
 			else: _show_lobby()
 
+func _show_character_picker() -> void:
+	if is_instance_valid(character_picker): return
+	_character_restore = {"screen":current_screen}
+	if current_screen == "doudizhu" and is_instance_valid(doudizhu):
+		_character_restore.merge({"table":doudizhu.table._paused,"session":doudizhu.session.paused,"audio":doudizhu.voice.stream_paused})
+		doudizhu.table._cancel_drag(); doudizhu.table._paused = true; doudizhu.session.paused = true; doudizhu.voice.stream_paused = true
+	elif current_screen == "bluff" and is_instance_valid(bluff):
+		_character_restore.merge({"table":bluff.table.paused,"session":bluff.session.paused,"audio":bluff.voice.stream_paused})
+		bluff.table.cancel_drag(); bluff.table.paused = true; bluff.session.paused = true; bluff.voice.stream_paused = true
+	elif not _is_lan():
+		_character_restore.merge({"session":session.paused,"audio":voice.stream_paused})
+		session.paused = true; voice.stream_paused = true
+	character_picker = load("res://scripts/ui/character_picker.gd").new()
+	character_picker.current_id = character_id
+	character_picker.selected.connect(func(id): _close_character_picker(); _set_character(id))
+	character_picker.dismissed.connect(_close_character_picker)
+	root.add_child(character_picker)
+
+func _request_quit() -> void:
+	if _quitting: return
+	_quitting = true
+	var tree = get_tree()
+	var closing_lan = _is_lan() and (session as LanSession).connected
+	if is_instance_valid(session):
+		if _is_lan(): (session as LanSession).leave_room()
+		else: session.paused = true; session._join_worker()
+	if is_instance_valid(doudizhu): doudizhu.session.shutdown(); doudizhu.voice.stop_all()
+	if is_instance_valid(bluff): bluff.session.shutdown(); bluff.voice.stop_all()
+	if is_instance_valid(voice): voice.stop_all()
+	# Retire scene resources while the engine is still running. The LAN drain
+	# and audio mixer also get time to finish their already queued work.
+	tree.create_timer(1.15 if closing_lan else .2).timeout.connect(tree.quit)
+	queue_free()
+
+func _close_character_picker() -> void:
+	if is_instance_valid(character_picker): character_picker.queue_free()
+	character_picker = null
+	if _character_restore.get("screen", "") == current_screen and _character_restore.has("session"):
+		if current_screen == "doudizhu" and is_instance_valid(doudizhu):
+			doudizhu.table._paused = _character_restore.table; doudizhu.session.paused = _character_restore.session; doudizhu.voice.stream_paused = _character_restore.audio
+		elif current_screen == "bluff" and is_instance_valid(bluff):
+			bluff.table.paused = _character_restore.table; bluff.session.paused = _character_restore.session; bluff.voice.stream_paused = _character_restore.audio
+		elif not _is_lan():
+			session.paused = _character_restore.session; voice.stream_paused = _character_restore.audio
+	_character_restore = {}
+
+func _set_character(id: String) -> bool:
+	if not Characters.valid(id): return false
+	character_id = id
+	if _is_lan(): session.set_character(id)
+	else:
+		session.character_id = id
+		if current_screen == "table": session.changed.emit(session.presentation_view())
+	if current_screen == "doudizhu" and is_instance_valid(doudizhu): doudizhu.set_character(id)
+	elif current_screen == "bluff" and is_instance_valid(bluff): bluff.set_character(id)
+	elif current_screen == "lobby": _show_lobby()
+	if current_screen == "lan" and is_instance_valid(lan_lobby): lan_lobby.set_character(id)
+	if is_instance_valid(character_button): character_button.text = "角色 · " + str(Characters.info(id).name)
+	_save_preferences()
+	return true
+
 func _save_preferences() -> void:
 	if qa_mode:return
 	var file=FileAccess.open(preferences_path,FileAccess.WRITE)
-	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"doudizhu_voice":doudizhu_voice,"doudizhu_card_theme":doudizhu_card_theme,"bluff_settings":bluff_settings}))
+	if file:file.store_string(JSON.stringify({"config":config,"muted":muted,"low_quality":low_quality,"speed":session.speed,"pace_version":2,"fullscreen":desktop_window.is_fullscreen(),"character_id":character_id,"doudizhu_card_theme":doudizhu_card_theme,"bluff_settings":bluff_settings}))
 
 func _load_preferences() -> void:
 	if qa_mode:return
@@ -1520,14 +1594,13 @@ func _load_preferences() -> void:
 	var prefs=JSON.parse_string(FileAccess.get_file_as_string(preferences_path))
 	if not prefs is Dictionary:return
 	config.merge(prefs.get("config",{}),true); muted=prefs.get("muted",false);low_quality=prefs.get("low_quality",false)
-	doudizhu_voice = "female" if prefs.get("doudizhu_voice", "male") == "female" else "male"
+	character_id = Characters.normalize(prefs.get("character_id", Characters.DEFAULT))
 	doudizhu_card_theme = DoudizhuCardThemes.normalize(prefs.get("doudizhu_card_theme", "traditional"))
 	var saved_bluff = prefs.get("bluff_settings", {})
 	if saved_bluff is Dictionary:
 		bluff_settings.merge(preload("res://scripts/bluff/core/engine.gd").options(saved_bluff), true)
 		bluff_settings.theme = DoudizhuCardThemes.normalize(saved_bluff.get("theme", "traditional"))
 		bluff_settings.pace = 2.0 if saved_bluff.get("pace", 2.8) == 2.0 else 2.8
-		bluff_settings.voice = "female" if saved_bluff.get("voice", "male") == "female" else "male"
 		bluff_settings.muted = saved_bluff.get("muted", false) == true
 	session.speed=clampf(prefs.get("speed",1.0),0.75,1.5) if prefs.get("pace_version",0)==2 else 1.0;table.quality(low_quality)
 	desktop_window.set_fullscreen(prefs.get("fullscreen",false) == true)

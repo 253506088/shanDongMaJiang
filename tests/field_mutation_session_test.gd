@@ -36,7 +36,7 @@ func test_local_and_rotation() -> void:
 	check(local.engine.state.players.all(func(p):return not p.field_used),"new round resets all personal uses")
 	local.free()
 	var wire=LanSession.new()
-	check(LanSession.PROTOCOL==4 and LanDiscovery.PROTOCOL==4,"discovery and game protocol upgraded together")
+	check(LanSession.PROTOCOL==5 and LanDiscovery.PROTOCOL==5,"discovery and game protocol upgraded together")
 	for malformed in [null, [], ["chosen","chosen","rebirth","reclaim"], ["no_honors","chosen","rebirth","reclaim"]]:
 		var view=engine.view(0);view.field.seat_rules=malformed
 		check(not wire._valid_view(view),"invalid assignment rejected before rotating received view")

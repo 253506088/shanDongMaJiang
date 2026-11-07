@@ -17,6 +17,19 @@ var worker_hint = false
 var ai = MahjongAI.new()
 var ai_rng = RandomNumberGenerator.new()
 var presentation_delay = 0.0
+var character_id = Characters.DEFAULT
+
+func presentation_view() -> Dictionary:
+	if engine.state.is_empty(): return {}
+	var result = Characters.decorate(engine.view(0), Characters.roster(character_id, 4))
+	for seat in range(1, 4): result.players[seat].name = Characters.info(result.characters[seat]).name
+	return result
+
+func set_character(id: String) -> bool:
+	if not Characters.valid(id): return false
+	character_id = id
+	if not engine.state.is_empty(): changed.emit(presentation_view())
+	return true
 
 func action_delay(kind: String) -> float:
 	# A readable beat after the visible action, independent of AI compute time.
@@ -37,7 +50,7 @@ func start_match(settings: Dictionary) -> void:
 
 func _publish() -> void:
 	_save()
-	changed.emit(engine.view(0))
+	changed.emit(presentation_view())
 
 func play(action_id: String, revision: int = -1) -> bool:
 	if paused or engine.state.is_empty(): return false
@@ -120,7 +133,7 @@ func resume_match() -> bool:
 		if parser.parse(FileAccess.get_file_as_string(path))!=OK:continue
 		var data=parser.data
 		if not data is Dictionary or not engine.restore(data):continue
-		paused=false;autopilot=false;delay=1.8;presentation_delay=0;changed.emit(engine.view(0))
+		paused=false;autopilot=false;delay=1.8;presentation_delay=0;changed.emit(presentation_view())
 		if suffix==".bak":notice.emit("主存档无法读取，已从上一手备份恢复。")
 		return true
 	notice.emit("存档无法读取。可以开始新对局，原存档备份仍会保留。")

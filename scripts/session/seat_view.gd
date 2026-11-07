@@ -24,6 +24,9 @@ static func for_seat(source: Dictionary, local_seat: int) -> Dictionary:
 			private_field.peek_target = relative(int(private_field.peek_target), local_seat)
 		players.append(player)
 	result.players = players
+	if result.get("characters", []).size() == 4:
+		var ids: Array = result.characters.duplicate()
+		for seat in range(4): result.characters[seat] = ids[(seat + local_seat) % 4]
 	if result.get("field", {}).get("id", "") == "mutation":
 		if not FieldRules.valid_assignment(result.field.get("seat_rules")): return {}
 		var assigned: Array = result.field.seat_rules.duplicate()

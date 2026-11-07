@@ -2,6 +2,7 @@ class_name LanLobby
 extends Control
 ## Room presentation only. The app owns discovery and the authoritative session.
 signal back_requested
+signal character_requested
 signal host_requested(settings: Dictionary, player_name: String)
 signal join_requested(address: String, player_name: String, port: int)
 signal ready_requested(ready: bool)
@@ -29,6 +30,12 @@ var _seat = -1
 var _browser = true
 var _busy = false
 var _rule_buttons: Array[Button] = []
+var character_id = Characters.DEFAULT
+var character_button: Button
+
+func set_character(id: String) -> void:
+	character_id = Characters.normalize(id)
+	if is_instance_valid(character_button): character_button.text = "角色 · " + Characters.info(character_id).name
 
 func _base(title: String, subtitle: String) -> void:
 	_rule_buttons.clear()
@@ -41,6 +48,7 @@ func _base(title: String, subtitle: String) -> void:
 	UI.panel(self, Rect2(0,0,1600,900), Color("081f1be9"), Color.TRANSPARENT, 0)
 	UI.label(self, Rect2(104,55,1180,70), title, 44, UI.TEXT, true)
 	UI.label(self, Rect2(106,140,1330,35), subtitle, 20, UI.MUTED)
+	character_button = UI.button(self, Rect2(950,68,186,52), "角色 · " + Characters.info(character_id).name, func():character_requested.emit())
 	UI.button(self, Rect2(1148,68,184,52), "场地规则", func(): field_catalog_requested.emit())
 	UI.button(self, Rect2(1348,68,148,52), "返回大厅" if _browser else "离开房间", func():
 		if _browser: back_requested.emit()
@@ -183,11 +191,12 @@ func show_room(room: Dictionary, host: bool, local_seat: int) -> void:
 	if port != 32141: address_text += "  端口 %d" % port
 	UI.label(self, Rect2(106,196,1388,33),"房主地址："+address_text,19,UI.GOLD)
 	var seats: Array = room.get("seats",[])
+	var appearance = {"characters": seats.map(func(member):return Characters.normalize(member.get("character_id",Characters.DEFAULT)))}
 	for index in range(4):
 		var seat: Dictionary = seats[index] if index < seats.size() else {}
 		var x = 104+index*354
 		var panel = UI.table_panel(self,Rect2(x,256,330,175),index==local_seat)
-		UI.portrait(panel,Vector2(21,27),72,index)
+		UI.portrait(panel,Vector2(21,27),72,index,Characters.at(appearance,index),Characters.border(appearance,index))
 		var occupied = seat.get("occupied",false)
 		var name_text = str(seat.get("name","牌友")) if occupied else "电脑补位"
 		var name_label = UI.label(panel,Rect2(113,26,198,37),name_text,25,UI.TEXT,true)

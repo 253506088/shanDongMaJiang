@@ -1,0 +1,808 @@
+{
+  "format_version": 1,
+  "generated_date": "2026-11-07",
+  "model": {
+    "id": "hexgrad/Kokoro-82M-v1.1-zh",
+    "revision": "01e7505bd6a7a2ac4975463114c3a7650a9f7218",
+    "license": "Apache-2.0",
+    "model_card": "https://huggingface.co/hexgrad/Kokoro-82M-v1.1-zh/blob/01e7505bd6a7a2ac4975463114c3a7650a9f7218/README.md",
+    "onnx_archive": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-multi-lang-v1_1.tar.bz2",
+    "archive_sha256": "259c9c8bc906d6078e4e0570421885dabb68b539c2f970fcbb890a58eeaf3e9c",
+    "onnx_sha256": "05d793700b0b507f760c183c0e39bdd6a97b43d32fdc7bf7b54a5179f1b11222",
+    "voices_sha256": "e64a5a581d8c2a350d848f51c3121657cd83aa07ed6109172177345874a7244c"
+  },
+  "generation": {
+    "runtime": "sherpa-onnx",
+    "runtime_version": "1.12.40",
+    "profiles": {
+      "male": 59,
+      "female": 3
+    },
+    "speed": 1.0,
+    "format": "mono PCM16 24000 Hz",
+    "processing": "trim <0.003 silence; retain 50ms/120ms; -2dBFS peak, max gain 4; 5ms fades"
+  },
+  "notes": "Offline generated speech, not human recordings. Each event uses its speaker's character gender. Legacy Lotus MP3s retained separately.",
+  "clips": [
+    {
+      "profile": "male",
+      "key": "0",
+      "text": "一万",
+      "synthesis_text": "一万！",
+      "path": "assets/audio/characters/male/00.wav",
+      "sha256": "1f0929ceb6ecd69588ba9abdfd8276c40efcaba283ffd701fc426c75bd07271b",
+      "bytes": 28476,
+      "duration_seconds": 0.592333
+    },
+    {
+      "profile": "male",
+      "key": "1",
+      "text": "二万",
+      "synthesis_text": "二万！",
+      "path": "assets/audio/characters/male/01.wav",
+      "sha256": "9e03ac9d3b25b4e40f74f33842a8d6de6f10aa630c4a831173a5ab1b399d1c3f",
+      "bytes": 31716,
+      "duration_seconds": 0.659833
+    },
+    {
+      "profile": "male",
+      "key": "2",
+      "text": "三万",
+      "synthesis_text": "三万！",
+      "path": "assets/audio/characters/male/02.wav",
+      "sha256": "46d42877c36b5ca79cd20ae71d5e2316dc198d2b748798fa42d23fb8996abb53",
+      "bytes": 31802,
+      "duration_seconds": 0.661625
+    },
+    {
+      "profile": "male",
+      "key": "3",
+      "text": "四万",
+      "synthesis_text": "四万！",
+      "path": "assets/audio/characters/male/03.wav",
+      "sha256": "dc84552ffc64b77030bba7656aeae8663a6f2dc3c0a92474ac21dc44acfad886",
+      "bytes": 32558,
+      "duration_seconds": 0.677375
+    },
+    {
+      "profile": "male",
+      "key": "4",
+      "text": "五万",
+      "synthesis_text": "五万！",
+      "path": "assets/audio/characters/male/04.wav",
+      "sha256": "b6a6e0516f8ce9f7c2f50e12e06973463d02b87cbff589d3edbb57824d62fd7f",
+      "bytes": 29754,
+      "duration_seconds": 0.618958
+    },
+    {
+      "profile": "male",
+      "key": "5",
+      "text": "六万",
+      "synthesis_text": "六万！",
+      "path": "assets/audio/characters/male/05.wav",
+      "sha256": "b352bf8d6460f76bdb6c30874c742904e43c96053b2011667c54816739fd64e0",
+      "bytes": 30124,
+      "duration_seconds": 0.626667
+    },
+    {
+      "profile": "male",
+      "key": "6",
+      "text": "七万",
+      "synthesis_text": "七万！",
+      "path": "assets/audio/characters/male/06.wav",
+      "sha256": "9adf86b85ba6f61e43602cd7ac4e18d6766013151a3a57181790cf642e5056e3",
+      "bytes": 30492,
+      "duration_seconds": 0.634333
+    },
+    {
+      "profile": "male",
+      "key": "7",
+      "text": "八万",
+      "synthesis_text": "八万！",
+      "path": "assets/audio/characters/male/07.wav",
+      "sha256": "73c0aee8e32d1301fea486c093ebe0e6327b985d74caf48aee392016e14fa991",
+      "bytes": 31674,
+      "duration_seconds": 0.658958
+    },
+    {
+      "profile": "male",
+      "key": "8",
+      "text": "九万",
+      "synthesis_text": "九万！",
+      "path": "assets/audio/characters/male/08.wav",
+      "sha256": "770faa709b44175264e2621844f8cef4d3d30d43d15e676e05f574c6903a219d",
+      "bytes": 30348,
+      "duration_seconds": 0.631333
+    },
+    {
+      "profile": "male",
+      "key": "9",
+      "text": "一筒",
+      "synthesis_text": "一筒！",
+      "path": "assets/audio/characters/male/09.wav",
+      "sha256": "12fbbdbfe0d28439164cdc02c87725295867b789775ad693f22e37af86e6be77",
+      "bytes": 30248,
+      "duration_seconds": 0.62925
+    },
+    {
+      "profile": "male",
+      "key": "10",
+      "text": "二筒",
+      "synthesis_text": "二筒！",
+      "path": "assets/audio/characters/male/10.wav",
+      "sha256": "947df3d723b3b07efd0b7dc5fa80cccdc632b1601a7857d7e6d44328d8541d80",
+      "bytes": 32242,
+      "duration_seconds": 0.670792
+    },
+    {
+      "profile": "male",
+      "key": "11",
+      "text": "三筒",
+      "synthesis_text": "三筒！",
+      "path": "assets/audio/characters/male/11.wav",
+      "sha256": "b618060e18f9b95a93db298471a141aa63315ad551c686f9c8a5119250104d3a",
+      "bytes": 34504,
+      "duration_seconds": 0.717917
+    },
+    {
+      "profile": "male",
+      "key": "12",
+      "text": "四筒",
+      "synthesis_text": "四筒！",
+      "path": "assets/audio/characters/male/12.wav",
+      "sha256": "9e903200b001143b58737fb80c60e352406a81cb3bd740a9d163d42fa43e84ab",
+      "bytes": 33014,
+      "duration_seconds": 0.686875
+    },
+    {
+      "profile": "male",
+      "key": "13",
+      "text": "五筒",
+      "synthesis_text": "五筒！",
+      "path": "assets/audio/characters/male/13.wav",
+      "sha256": "bd4037e068f8eb0a4ade9c3697acc5e14a377d1227995a206cd8737f89397dd1",
+      "bytes": 30928,
+      "duration_seconds": 0.643417
+    },
+    {
+      "profile": "male",
+      "key": "14",
+      "text": "六筒",
+      "synthesis_text": "六筒！",
+      "path": "assets/audio/characters/male/14.wav",
+      "sha256": "72e53d0d5a898feb8f4d0e406a2e11430ca202a2ace11ce1f91e436903efaf4e",
+      "bytes": 31062,
+      "duration_seconds": 0.646208
+    },
+    {
+      "profile": "male",
+      "key": "15",
+      "text": "七筒",
+      "synthesis_text": "七筒！",
+      "path": "assets/audio/characters/male/15.wav",
+      "sha256": "7cb04b5b27dd0f7b070a226860a06e7d612ce2ee4870e77c9017302197c757b1",
+      "bytes": 32148,
+      "duration_seconds": 0.668833
+    },
+    {
+      "profile": "male",
+      "key": "16",
+      "text": "八筒",
+      "synthesis_text": "八筒！",
+      "path": "assets/audio/characters/male/16.wav",
+      "sha256": "f505a50854ae4a9c3da1ceb2969602efc7721b59b7566f27caf4ba4a55386c79",
+      "bytes": 30618,
+      "duration_seconds": 0.636958
+    },
+    {
+      "profile": "male",
+      "key": "17",
+      "text": "九筒",
+      "synthesis_text": "九筒！",
+      "path": "assets/audio/characters/male/17.wav",
+      "sha256": "93ac78621aa2223dc47f42d90ed3c897084fa0eb7178dcbb0a6754e10b711dca",
+      "bytes": 32026,
+      "duration_seconds": 0.666292
+    },
+    {
+      "profile": "male",
+      "key": "18",
+      "text": "一条",
+      "synthesis_text": "一条！",
+      "path": "assets/audio/characters/male/18.wav",
+      "sha256": "07bed3e86b1059989d19327c121bda3f89ec1d5c32a725f4e794280e6ec0becd",
+      "bytes": 29838,
+      "duration_seconds": 0.620708
+    },
+    {
+      "profile": "male",
+      "key": "19",
+      "text": "二条",
+      "synthesis_text": "二条！",
+      "path": "assets/audio/characters/male/19.wav",
+      "sha256": "8d444672105548aa716b5dfade475afc9b3205ecebba274a1b7caa2cbafac0fa",
+      "bytes": 30432,
+      "duration_seconds": 0.633083
+    },
+    {
+      "profile": "male",
+      "key": "20",
+      "text": "三条",
+      "synthesis_text": "三条！",
+      "path": "assets/audio/characters/male/20.wav",
+      "sha256": "a650552849760cc0c106713fe99e6c137974d8651bafd0fb3b9fe187671a6e47",
+      "bytes": 34316,
+      "duration_seconds": 0.714
+    },
+    {
+      "profile": "male",
+      "key": "21",
+      "text": "四条",
+      "synthesis_text": "四条！",
+      "path": "assets/audio/characters/male/21.wav",
+      "sha256": "8c64d519ac7bed605dff89a550366ed591f23c100e65f2a075d8970edeffbc8a",
+      "bytes": 31168,
+      "duration_seconds": 0.648417
+    },
+    {
+      "profile": "male",
+      "key": "22",
+      "text": "五条",
+      "synthesis_text": "五条！",
+      "path": "assets/audio/characters/male/22.wav",
+      "sha256": "c7569ef0024e478e189b9c6d6808f3ca0ef30d247f2149a11ead0b09689b30f0",
+      "bytes": 29346,
+      "duration_seconds": 0.610458
+    },
+    {
+      "profile": "male",
+      "key": "23",
+      "text": "六条",
+      "synthesis_text": "六条！",
+      "path": "assets/audio/characters/male/23.wav",
+      "sha256": "9ac4278e04c032b726bfaaf8f50cf2deb46feceb06d3ebcbbf900c33c2a38f8a",
+      "bytes": 32006,
+      "duration_seconds": 0.665875
+    },
+    {
+      "profile": "male",
+      "key": "24",
+      "text": "七条",
+      "synthesis_text": "七条！",
+      "path": "assets/audio/characters/male/24.wav",
+      "sha256": "d66b3c3f426bcd4aaf770afa9bf4072c75167d88843da895d31e1f77603f0635",
+      "bytes": 30880,
+      "duration_seconds": 0.642417
+    },
+    {
+      "profile": "male",
+      "key": "25",
+      "text": "八条",
+      "synthesis_text": "八条！",
+      "path": "assets/audio/characters/male/25.wav",
+      "sha256": "a83bccbebb3c1749f92f3506133e636610cac6a40ec7c86a470c8da2949ef9e1",
+      "bytes": 28848,
+      "duration_seconds": 0.600083
+    },
+    {
+      "profile": "male",
+      "key": "26",
+      "text": "九条",
+      "synthesis_text": "九条！",
+      "path": "assets/audio/characters/male/26.wav",
+      "sha256": "d02b1c3386ed493ba47ccea4d5616721e7e813b827784ad752c7ad070380691d",
+      "bytes": 30142,
+      "duration_seconds": 0.627042
+    },
+    {
+      "profile": "male",
+      "key": "27",
+      "text": "东风",
+      "synthesis_text": "东风！",
+      "path": "assets/audio/characters/male/27.wav",
+      "sha256": "4ea41e04d445542384a0330472392bdd2f36a8b978e7288faccd6e879f16cadd",
+      "bytes": 30500,
+      "duration_seconds": 0.6345
+    },
+    {
+      "profile": "male",
+      "key": "28",
+      "text": "南风",
+      "synthesis_text": "南风！",
+      "path": "assets/audio/characters/male/28.wav",
+      "sha256": "212e6a1f628e074c2bb8c8366b8803d3176b8763b38326e96c6e93429b9e7415",
+      "bytes": 31532,
+      "duration_seconds": 0.656
+    },
+    {
+      "profile": "male",
+      "key": "29",
+      "text": "西风",
+      "synthesis_text": "西风！",
+      "path": "assets/audio/characters/male/29.wav",
+      "sha256": "d3db710d28c03adf983f24d49911a9ec1b28ad80016ce276e47887d0c12ce4db",
+      "bytes": 31534,
+      "duration_seconds": 0.656042
+    },
+    {
+      "profile": "male",
+      "key": "30",
+      "text": "北风",
+      "synthesis_text": "北风！",
+      "path": "assets/audio/characters/male/30.wav",
+      "sha256": "0f3378d962fbfbe02246b161e047b1b74b6160351e324b8d472ecbee3e0d9ae0",
+      "bytes": 33872,
+      "duration_seconds": 0.70475
+    },
+    {
+      "profile": "male",
+      "key": "31",
+      "text": "红中",
+      "synthesis_text": "红中！",
+      "path": "assets/audio/characters/male/31.wav",
+      "sha256": "c18e56d4e08fb2ac07db28f6d5023b8cb9e54e823cda1041de7cf09223d94dfc",
+      "bytes": 31604,
+      "duration_seconds": 0.6575
+    },
+    {
+      "profile": "male",
+      "key": "32",
+      "text": "发财",
+      "synthesis_text": "发财！",
+      "path": "assets/audio/characters/male/32.wav",
+      "sha256": "3d90bb5c8d6e0f0e99d361be371a52b4dc695b59c3aeb4254da79d8fd5d9dac5",
+      "bytes": 33172,
+      "duration_seconds": 0.690167
+    },
+    {
+      "profile": "male",
+      "key": "33",
+      "text": "白板",
+      "synthesis_text": "白板！",
+      "path": "assets/audio/characters/male/33.wav",
+      "sha256": "f4f9288493a4f7b30f5d246f9773566616f8e6cd36f198e344997a946fc2a037",
+      "bytes": 30014,
+      "duration_seconds": 0.624375
+    },
+    {
+      "profile": "male",
+      "key": "chi",
+      "text": "吃",
+      "synthesis_text": "吃！",
+      "path": "assets/audio/characters/male/chi.wav",
+      "sha256": "ba8924deeced02e8f87bb2e9adb43d8bdd01eea6c560c69adc702a5d5a1b1f68",
+      "bytes": 30804,
+      "duration_seconds": 0.640833
+    },
+    {
+      "profile": "male",
+      "key": "peng",
+      "text": "碰",
+      "synthesis_text": "碰！",
+      "path": "assets/audio/characters/male/peng.wav",
+      "sha256": "120c7be852d417d62f6c5e1f664d34c84b660fbea0094cf42e0aa6b56d7581e8",
+      "bytes": 22464,
+      "duration_seconds": 0.467083
+    },
+    {
+      "profile": "male",
+      "key": "gang",
+      "text": "杠",
+      "synthesis_text": "杠！",
+      "path": "assets/audio/characters/male/gang.wav",
+      "sha256": "18bd5c03f9cea8a5d3d16962655d526dfb3d7177ef7d4fccd1d278b822573fb5",
+      "bytes": 20788,
+      "duration_seconds": 0.432167
+    },
+    {
+      "profile": "male",
+      "key": "hu",
+      "text": "胡",
+      "synthesis_text": "胡！",
+      "path": "assets/audio/characters/male/hu.wav",
+      "sha256": "c8ef1149493677d9e9db45cb40a8159902148420cbe0b8c46d058b4807631196",
+      "bytes": 20248,
+      "duration_seconds": 0.420917
+    },
+    {
+      "profile": "male",
+      "key": "zimo",
+      "text": "自摸",
+      "synthesis_text": "自摸！",
+      "path": "assets/audio/characters/male/zimo.wav",
+      "sha256": "e71283e6e84f65a755c4c520bc4be12bc585b653b669e543413c1e732fe55cbc",
+      "bytes": 30310,
+      "duration_seconds": 0.630542
+    },
+    {
+      "profile": "female",
+      "key": "0",
+      "text": "一万",
+      "synthesis_text": "一万！",
+      "path": "assets/audio/characters/female/00.wav",
+      "sha256": "35e0261612ac7eddade93a84aa1c1b6802af145dd61b3c7c80b3f83d5c7c83fa",
+      "bytes": 28900,
+      "duration_seconds": 0.601167
+    },
+    {
+      "profile": "female",
+      "key": "1",
+      "text": "二万",
+      "synthesis_text": "二万！",
+      "path": "assets/audio/characters/female/01.wav",
+      "sha256": "dfc9f7a35539c499bd4ec8d5d5cfbefa55798fa6dd3e34d87c6ec54da4a0e661",
+      "bytes": 30926,
+      "duration_seconds": 0.643375
+    },
+    {
+      "profile": "female",
+      "key": "2",
+      "text": "三万",
+      "synthesis_text": "三万！",
+      "path": "assets/audio/characters/female/02.wav",
+      "sha256": "86675cfe7470a23554d22800a3e9d42418278573d93db1ba6563e9e1d7faf01a",
+      "bytes": 32728,
+      "duration_seconds": 0.680917
+    },
+    {
+      "profile": "female",
+      "key": "3",
+      "text": "四万",
+      "synthesis_text": "四万！",
+      "path": "assets/audio/characters/female/03.wav",
+      "sha256": "141bbe9ee5591b353954443c9cefc0a5100c4f8cd72f970b881537da749c3c26",
+      "bytes": 31952,
+      "duration_seconds": 0.66475
+    },
+    {
+      "profile": "female",
+      "key": "4",
+      "text": "五万",
+      "synthesis_text": "五万！",
+      "path": "assets/audio/characters/female/04.wav",
+      "sha256": "b989b4f05c1ae0d13c34c8f55e0aa9de655f31ca98ac941cf323fc9f7f125d42",
+      "bytes": 28338,
+      "duration_seconds": 0.589458
+    },
+    {
+      "profile": "female",
+      "key": "5",
+      "text": "六万",
+      "synthesis_text": "六万！",
+      "path": "assets/audio/characters/female/05.wav",
+      "sha256": "1a29f131dd7e994b1bdb4b54e93506883ab9c74a55850c8b8eea179a34945d51",
+      "bytes": 29624,
+      "duration_seconds": 0.61625
+    },
+    {
+      "profile": "female",
+      "key": "6",
+      "text": "七万",
+      "synthesis_text": "七万！",
+      "path": "assets/audio/characters/female/06.wav",
+      "sha256": "7660281d21fe071c9745c43505c2287b6ee66eebfc6fe4af7122a122bc6bf8c7",
+      "bytes": 28780,
+      "duration_seconds": 0.598667
+    },
+    {
+      "profile": "female",
+      "key": "7",
+      "text": "八万",
+      "synthesis_text": "八万！",
+      "path": "assets/audio/characters/female/07.wav",
+      "sha256": "3283154b881153e16a2a491f8c9d190be2af7221ca1d2ecda5e5b62515c49a4b",
+      "bytes": 28730,
+      "duration_seconds": 0.597625
+    },
+    {
+      "profile": "female",
+      "key": "8",
+      "text": "九万",
+      "synthesis_text": "九万！",
+      "path": "assets/audio/characters/female/08.wav",
+      "sha256": "bb2a289a4fe8433654367ea5a14d5237517f8127cf499a9e53af9bb125091c80",
+      "bytes": 30244,
+      "duration_seconds": 0.629167
+    },
+    {
+      "profile": "female",
+      "key": "9",
+      "text": "一筒",
+      "synthesis_text": "一筒！",
+      "path": "assets/audio/characters/female/09.wav",
+      "sha256": "1369b2cacf763faeb9ae4eed2fd9820e41dfa3eaa15b0bb7f4d5e0761c360ac8",
+      "bytes": 30240,
+      "duration_seconds": 0.629083
+    },
+    {
+      "profile": "female",
+      "key": "10",
+      "text": "二筒",
+      "synthesis_text": "二筒！",
+      "path": "assets/audio/characters/female/10.wav",
+      "sha256": "171d701696057e058f12a33c038c3cc3f8ff7f4b4f44a6ea46f0ff465634527d",
+      "bytes": 32534,
+      "duration_seconds": 0.676875
+    },
+    {
+      "profile": "female",
+      "key": "11",
+      "text": "三筒",
+      "synthesis_text": "三筒！",
+      "path": "assets/audio/characters/female/11.wav",
+      "sha256": "e54bd4eb5b248b6150333b5a2b7fcbf8c6fa3f3f5b96cc78454defa544af15a6",
+      "bytes": 33880,
+      "duration_seconds": 0.704917
+    },
+    {
+      "profile": "female",
+      "key": "12",
+      "text": "四筒",
+      "synthesis_text": "四筒！",
+      "path": "assets/audio/characters/female/12.wav",
+      "sha256": "e196119f3f4b5824fbf6b2b17ee857eb13130382ccb24184c558071dd521f0f6",
+      "bytes": 33994,
+      "duration_seconds": 0.707292
+    },
+    {
+      "profile": "female",
+      "key": "13",
+      "text": "五筒",
+      "synthesis_text": "五筒！",
+      "path": "assets/audio/characters/female/13.wav",
+      "sha256": "0134d5938d6e5e5f543136dbbc221df5d01a4b83ef135228613a268d1b523927",
+      "bytes": 31124,
+      "duration_seconds": 0.6475
+    },
+    {
+      "profile": "female",
+      "key": "14",
+      "text": "六筒",
+      "synthesis_text": "六筒！",
+      "path": "assets/audio/characters/female/14.wav",
+      "sha256": "13ccbf43e291e73b7c2cc1f42dbe64eb8a3d60976a09c8fdf7c786fbcadbf3d3",
+      "bytes": 31456,
+      "duration_seconds": 0.654417
+    },
+    {
+      "profile": "female",
+      "key": "15",
+      "text": "七筒",
+      "synthesis_text": "七筒！",
+      "path": "assets/audio/characters/female/15.wav",
+      "sha256": "7ba43fa05b3dc005ed8c0812933ac225021f5a44720c6e8447d179241064a6ce",
+      "bytes": 31538,
+      "duration_seconds": 0.656125
+    },
+    {
+      "profile": "female",
+      "key": "16",
+      "text": "八筒",
+      "synthesis_text": "八筒！",
+      "path": "assets/audio/characters/female/16.wav",
+      "sha256": "624958d688790ac270de074bb017a047228e0edad324d365d7f8a2be6b3c4b21",
+      "bytes": 32764,
+      "duration_seconds": 0.681667
+    },
+    {
+      "profile": "female",
+      "key": "17",
+      "text": "九筒",
+      "synthesis_text": "九筒！",
+      "path": "assets/audio/characters/female/17.wav",
+      "sha256": "6952532d4eb8cb7f0cb32006a86ba9782aa01d86f29cd82fdeb52d2d6b4bcea3",
+      "bytes": 32526,
+      "duration_seconds": 0.676708
+    },
+    {
+      "profile": "female",
+      "key": "18",
+      "text": "一条",
+      "synthesis_text": "一条！",
+      "path": "assets/audio/characters/female/18.wav",
+      "sha256": "9ea7ea05bd962403da594f3e5962fc1710416e3768ce3af7ece78cce5fe4f78d",
+      "bytes": 29858,
+      "duration_seconds": 0.621125
+    },
+    {
+      "profile": "female",
+      "key": "19",
+      "text": "二条",
+      "synthesis_text": "二条！",
+      "path": "assets/audio/characters/female/19.wav",
+      "sha256": "1d3edfb5f15bd5e572587866b2179be5adaec7a336ccc530afad60510abf6473",
+      "bytes": 31560,
+      "duration_seconds": 0.656583
+    },
+    {
+      "profile": "female",
+      "key": "20",
+      "text": "三条",
+      "synthesis_text": "三条！",
+      "path": "assets/audio/characters/female/20.wav",
+      "sha256": "40b657197bc734e15983a8051543715c3683c044f585712346648923b5479d36",
+      "bytes": 33286,
+      "duration_seconds": 0.692542
+    },
+    {
+      "profile": "female",
+      "key": "21",
+      "text": "四条",
+      "synthesis_text": "四条！",
+      "path": "assets/audio/characters/female/21.wav",
+      "sha256": "d1df1de94f6f38cf3089dabf4abcf15b7adb216b16f994d1c16ed77143cc5265",
+      "bytes": 32862,
+      "duration_seconds": 0.683708
+    },
+    {
+      "profile": "female",
+      "key": "22",
+      "text": "五条",
+      "synthesis_text": "五条！",
+      "path": "assets/audio/characters/female/22.wav",
+      "sha256": "1e0deab70171785b2b31dab5ea053923734399517f4eb8ea45cadebc261a43ba",
+      "bytes": 29910,
+      "duration_seconds": 0.622208
+    },
+    {
+      "profile": "female",
+      "key": "23",
+      "text": "六条",
+      "synthesis_text": "六条！",
+      "path": "assets/audio/characters/female/23.wav",
+      "sha256": "3f4696cef9483604683c931523c980603026588a801b8627affe33de73309d5f",
+      "bytes": 31190,
+      "duration_seconds": 0.648875
+    },
+    {
+      "profile": "female",
+      "key": "24",
+      "text": "七条",
+      "synthesis_text": "七条！",
+      "path": "assets/audio/characters/female/24.wav",
+      "sha256": "5386f4e8a492d445158e7aff132426db50bfc0c68c0b8ac914791eb3bf3ff5cd",
+      "bytes": 31120,
+      "duration_seconds": 0.647417
+    },
+    {
+      "profile": "female",
+      "key": "25",
+      "text": "八条",
+      "synthesis_text": "八条！",
+      "path": "assets/audio/characters/female/25.wav",
+      "sha256": "04b3e4d76de919bfd6829c8edd85021d8c0a52bded125fe73debaa1ef16294ba",
+      "bytes": 31080,
+      "duration_seconds": 0.646583
+    },
+    {
+      "profile": "female",
+      "key": "26",
+      "text": "九条",
+      "synthesis_text": "九条！",
+      "path": "assets/audio/characters/female/26.wav",
+      "sha256": "53847ad521db372dad288ce254e82d7427ea975ed49723b50b09d02f18064348",
+      "bytes": 32200,
+      "duration_seconds": 0.669917
+    },
+    {
+      "profile": "female",
+      "key": "27",
+      "text": "东风",
+      "synthesis_text": "东风！",
+      "path": "assets/audio/characters/female/27.wav",
+      "sha256": "b78c55a64c882e5388ed3608ee00922346584dc4b0e9ce792bcc27b0be97ee57",
+      "bytes": 31184,
+      "duration_seconds": 0.64875
+    },
+    {
+      "profile": "female",
+      "key": "28",
+      "text": "南风",
+      "synthesis_text": "南风！",
+      "path": "assets/audio/characters/female/28.wav",
+      "sha256": "838bec7977a75bcd223ede731da71117b7b068fe0cca6b5550055b8a288bb88a",
+      "bytes": 31304,
+      "duration_seconds": 0.65125
+    },
+    {
+      "profile": "female",
+      "key": "29",
+      "text": "西风",
+      "synthesis_text": "西风！",
+      "path": "assets/audio/characters/female/29.wav",
+      "sha256": "90a30f950782e489374c611e4f5461328abddfafc689841935bcbebd3225f424",
+      "bytes": 33276,
+      "duration_seconds": 0.692333
+    },
+    {
+      "profile": "female",
+      "key": "30",
+      "text": "北风",
+      "synthesis_text": "北风！",
+      "path": "assets/audio/characters/female/30.wav",
+      "sha256": "0994858ddcaeb253f8a4adc4a321346e6469ac69856d43cd93a7930a514b36ee",
+      "bytes": 33144,
+      "duration_seconds": 0.689583
+    },
+    {
+      "profile": "female",
+      "key": "31",
+      "text": "红中",
+      "synthesis_text": "红中！",
+      "path": "assets/audio/characters/female/31.wav",
+      "sha256": "3d69299dfc9b7d667e90e6540b7fd44abf350e254244a9cc48279eb0337dba38",
+      "bytes": 31272,
+      "duration_seconds": 0.650583
+    },
+    {
+      "profile": "female",
+      "key": "32",
+      "text": "发财",
+      "synthesis_text": "发财！",
+      "path": "assets/audio/characters/female/32.wav",
+      "sha256": "22c330abc3bc0827cc4cbc1f4b746b062a778d87cbe524f453bda312e19c50b3",
+      "bytes": 33718,
+      "duration_seconds": 0.701542
+    },
+    {
+      "profile": "female",
+      "key": "33",
+      "text": "白板",
+      "synthesis_text": "白板！",
+      "path": "assets/audio/characters/female/33.wav",
+      "sha256": "ac2ea9e1fd4522dba660f59f3cced900497ad97a5d18adc363f52256f9d8f598",
+      "bytes": 30082,
+      "duration_seconds": 0.625792
+    },
+    {
+      "profile": "female",
+      "key": "chi",
+      "text": "吃",
+      "synthesis_text": "吃！",
+      "path": "assets/audio/characters/female/chi.wav",
+      "sha256": "b1025ead7b092e6757836a52c4ca132852a7591e6bb816a8951b4d0be15138f4",
+      "bytes": 23080,
+      "duration_seconds": 0.479917
+    },
+    {
+      "profile": "female",
+      "key": "peng",
+      "text": "碰",
+      "synthesis_text": "碰！",
+      "path": "assets/audio/characters/female/peng.wav",
+      "sha256": "52afb677932c4f691d4b11f7f81387d5a57745ddd5d22b3b02584b0aafdac44b",
+      "bytes": 29482,
+      "duration_seconds": 0.613292
+    },
+    {
+      "profile": "female",
+      "key": "gang",
+      "text": "杠",
+      "synthesis_text": "杠！",
+      "path": "assets/audio/characters/female/gang.wav",
+      "sha256": "c557cf933e3801a315d9890d815bada9905dd2f5dc14a27e8571873ca7f76113",
+      "bytes": 27726,
+      "duration_seconds": 0.576708
+    },
+    {
+      "profile": "female",
+      "key": "hu",
+      "text": "胡",
+      "synthesis_text": "胡！",
+      "path": "assets/audio/characters/female/hu.wav",
+      "sha256": "5519d39f52f002624091299174ae7dcd25ea4f018c80bc6bced95064bf8a20d5",
+      "bytes": 21868,
+      "duration_seconds": 0.454667
+    },
+    {
+      "profile": "female",
+      "key": "zimo",
+      "text": "自摸",
+      "synthesis_text": "自摸！",
+      "path": "assets/audio/characters/female/zimo.wav",
+      "sha256": "fb07eef366592bc3b8f811ec8e5cafd3f844d97fc9e7cb012253a6dba801b20c",
+      "bytes": 27926,
+      "duration_seconds": 0.580875
+    }
+  ]
+}

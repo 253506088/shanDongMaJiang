@@ -13,7 +13,7 @@ var pause_events: Array = []
 var hints: int = 0
 var nexts: int = 0
 var exits: int = 0
-var voice_choices: Array = []
+var character_requests = 0
 var theme_choices: Array = []
 
 func _initialize() -> void:
@@ -232,7 +232,7 @@ func run() -> void:
 	table.hint_requested.connect(func(): hints += 1)
 	table.next_requested.connect(func(): nexts += 1)
 	table.exit_requested.connect(func(): exits += 1)
-	table.voice_profile_requested.connect(func(profile): voice_choices.append(profile); table.set_voice_profile(profile))
+	table.character_requested.connect(func(): character_requests += 1)
 	table.card_theme_requested.connect(func(theme_id): theme_choices.append(theme_id); table.set_card_theme(theme_id))
 	table.set_muted(true)
 	var state = fixture()
@@ -289,12 +289,12 @@ func run() -> void:
 	check(table.hand_cards == physical_cards and selected_are([0, 1]) and table.view.revision == revision and actions.is_empty(), "switching preserves physical cards, selection, revision and pending action")
 	check(table.hand_cards.all(func(card): return card.theme_id == "guofeng" and "guofeng/" in card._face().resource_path), "all live hand textures change immediately without stale cache")
 	await capture("ddz-guofeng-selected-hand")
-	await click(table.voice_profile_button)
-	check(voice_choices == ["female"] and table.voice_profile_button.text == "女声报牌", "voice button selects female")
-	check(table.selected_cards.size() == 2 and actions.is_empty(), "voice switch preserves selection without submitting a play")
-	await capture("ddz-female-voice")
-	await click(table.voice_profile_button)
-	check(voice_choices == ["female", "male"] and table.voice_profile_button.text == "男声报牌", "voice button can select male again")
+	await click(table.character_button)
+	check(character_requests == 1 and table.character_button.text.begins_with("角色"), "role entry replaces voice picker")
+	check(table.selected_cards.size() == 2 and actions.is_empty(), "role request preserves selection without submitting")
+	await capture("ddz-character-entry")
+	await click(table.character_button)
+	check(character_requests == 2, "role entry can be reopened")
 	await click(find_card(0))
 	check(table.selected_cards == [1], "click selected card deselects only that physical card")
 	await click(table.clear_button)
