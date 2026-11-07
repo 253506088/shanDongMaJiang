@@ -10,6 +10,8 @@ build/
 # final evidence uses ui-final/, package-*-final/ and full-tests-release.log.
 # Keep original MP3s and historical generated WAV sources tracked; exclude the
 # inactive assets/audio/characters/* from export presets, not from source control.
+# Touch-inspection/credit QA screenshots and logs use artifacts/touch-inspection-2026-11-08/.
+# Keep source regression tests and reviewed verification notes; packages remain in build/.
 # Windows motion bridge DLL, objects, linker outputs: rebuilt by
 # tools/build_native.ps1 from native/windows sources; exported copies ship in
 # build/windows beside the EXE. They are generated binaries, not source assets.

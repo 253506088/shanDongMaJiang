@@ -125,4 +125,6 @@ func run() -> void:
 	check(app.session.engine.state.round==previous_round+1,"next round rotates")
 	check(app.session.engine.state.dealer==1,"dealer rotates")
 	print("UI_RESULT: ",failures.size()," failures")
-	quit(0 if failures.is_empty() else 1)
+	# Close through the game's supported path, including its worker/audio drain.
+	if failures.is_empty(): app._request_quit()
+	else: quit(1)

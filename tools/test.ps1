@@ -5,6 +5,8 @@ $projectDir = Split-Path $PSScriptRoot -Parent
 # Let the importer complete its asynchronous editor work before shutdown.
 & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --import --frame-delay 800
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script res://tests/touch_inspection_test.gd -- --qa
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 foreach ($suite in @('characters_test', 'characters_session_test', 'characters_ui_test', 'characters_launch_test')) {
     & "$PSScriptRoot/run.ps1" -Godot $Godot --headless --script "res://tests/$suite.gd" -- --qa
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

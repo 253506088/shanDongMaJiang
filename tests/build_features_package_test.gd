@@ -32,7 +32,7 @@ func run() -> void:
 	var expected = "--expect-lan" in OS.get_cmdline_user_args()
 	app = load("res://scenes/main.tscn").instantiate(); app.qa_mode = true; root.add_child(app)
 	app.session.set_process(false); app.muted = true
-	check(ProjectSettings.get_setting("application/config/version") == "0.10.3", "current package version")
+	check(ProjectSettings.get_setting("application/config/version") == "0.10.4", "current package version")
 	check(BuildFeatures.lan_enabled() == expected, "package capability matches build choice")
 	check(OS.has_feature("lan") == expected and OS.has_feature("offline") != expected, "explicit export feature tags")
 	check((find_button(app.root, "附近同桌") != null) == expected, "nearby entry follows build choice")

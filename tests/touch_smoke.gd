@@ -1,9 +1,9 @@
 extends "res://tests/ui_smoke.gd"
-var engine: GameEngine
+var engine
 var save_directory = ""
 
 func _fixture() -> void:
-	engine=GameEngine.new();engine.start({},481)
+	engine=load("res://scripts/core/game_engine.gd").new();engine.start({},481)
 	var p=engine.state.players[0]
 	# Four completed runs and a single five bamboo; discarding East can declare.
 	p.hand=[0,1,2,3,4,5,9,10,11,18,19,20,22,27]

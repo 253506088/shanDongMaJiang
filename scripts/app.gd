@@ -2,6 +2,7 @@ extends Node
 const DoudizhuMode = preload("res://scripts/doudizhu/mode.gd")
 const DoudizhuCardThemes = preload("res://scripts/doudizhu/ui/card_themes.gd")
 const BluffMode = preload("res://scripts/bluff/mode.gd")
+const PROJECT_URL = "https://github.com/253506088/shanDongMaJiang"
 var bluff: Control
 var bluff_settings = {"players": 3, "challenge": "turn", "theme": "traditional", "pace": 2.8, "muted": false}
 var doudizhu: Control
@@ -60,6 +61,9 @@ var opponent_waits_cache: Dictionary = {}
 var opponent_waits_round = -1
 var public_tiles_button: Button
 var inspect_layer: Control
+var touch_inspection: Dictionary = {}
+var hand_touch_mode = false
+var hand_generation = 0
 var last_touch_ms = -1000
 var touch_started = Vector2.ZERO
 var touch_started_ms = 0
@@ -89,7 +93,8 @@ func _ready() -> void:
 	discovery.rooms_changed.connect(_lan_rooms_changed)
 	table = Table3D.new(); scene_surface.scene_viewport.add_child(table)
 	table.tile_inspected.connect(func(tile,position):
-		if current_screen=="table" and not is_instance_valid(modal): _inspect_tile(tile,position.x,position.y))
+		if current_screen=="table" and not is_instance_valid(modal):
+			_dismiss_hand_inspection(); _inspect_tile(tile,position.x,position.y))
 	canvas = CanvasLayer.new(); scene_surface.scene_viewport.add_child(canvas)
 	root = Control.new(); root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); root.mouse_filter = Control.MOUSE_FILTER_IGNORE; canvas.add_child(root)
 	root.theme=Theme.new();root.theme.default_font=UI.font();root.theme.default_font_size=18
@@ -411,6 +416,7 @@ func _resume() -> void:
 	if not session.resume_match(): _show_lobby(); _toast("存档校验失败，请开始新对局。")
 
 func _build_hud() -> void:
+	touch_inspection.clear(); hand_touch_mode=false
 	current_screen = "table"; _clear(root); modal = null; lobby = null; toast_label = null
 	voice.stop_all();voice.last_key="";table.last_round=-1;table.last_revision=-1
 	table.visible=true;desktop_window.set_frame_limit(30 if low_quality else 60)
@@ -471,6 +477,7 @@ func _changed(new_view: Dictionary) -> void:
 	if current_screen != "table": return
 	var revision_changed=last_revision!=view.revision
 	if revision_changed:
+		if last_revision < 0: touch_inspection.clear()
 		selected = -1; declare_mode = ""
 		field_exchange_selection.clear()
 		field_picker_selection=-1
@@ -566,6 +573,8 @@ func _celebrate() -> void:
 		_show_result()
 
 func _draw_hand() -> void:
+	hand_generation += 1
+	var generation = hand_generation
 	_clear(hand_layer)
 	if view.is_empty(): return
 	var p = view.players[0]
@@ -598,9 +607,11 @@ func _draw_hand() -> void:
 			_hand_tag(Rect2(left,top-23,70,21),("新摸 · " if p.drawn==i else "")+visibility+(" · 听" if ready_discard and p.drawn!=i else ""))
 		elif p.drawn==i:
 			_hand_tag(Rect2(left,top-23,70,21),"新摸 · 听" if ready_discard else "新摸")
-		button.pressed.connect(func(): _activate_tile(i))
+		button.pressed.connect(func():
+			if generation==hand_generation: _activate_tile(i))
 		button.set_meta("hand_index",i)
 		button.mouse_entered.connect(func():
+			if generation!=hand_generation or hand_touch_mode or is_instance_valid(modal) or is_instance_valid(character_picker): return
 			if selected!=i and legal:
 				face.position.y=-12
 				var plate=shell_ref.get_ref()
@@ -610,7 +621,7 @@ func _draw_hand() -> void:
 			face.position.y=0
 			var plate=shell_ref.get_ref()
 			if plate:plate.position.y=shell_y
-			_clear(inspect_layer))
+			if generation==hand_generation and not hand_touch_mode: _clear(inspect_layer))
 		hand_layer.add_child(button)
 		if selected==i:
 			var line = ColorRect.new(); line.position=Vector2(left+8,top+108); line.size=Vector2(54,3); line.color=UI.TABLE_GOLD; line.mouse_filter=Control.MOUSE_FILTER_IGNORE; hand_layer.add_child(line)
@@ -622,6 +633,24 @@ func _draw_hand() -> void:
 			if a.kind in ["bao","ming"] and a.index==selected: waiting=a.waits
 		detail_label.text = "打出 " + Tiles.title(p.hand[selected]) + (" · 听 " + "、".join(waiting.map(func(t): return Tiles.title(t))) if not waiting.is_empty() else " · 再点一次打出")
 	else: detail_label.text=""
+	_refresh_hand_inspection()
+
+func _dismiss_hand_inspection() -> void:
+	touch_inspection.clear()
+	_clear(inspect_layer)
+
+func _refresh_hand_inspection() -> void:
+	if touch_inspection.is_empty() or current_screen!="table" or not is_instance_valid(inspect_layer): return
+	# A read-only inspection can survive other players' actions, but an index
+	# must never refer to a different hand after drawing, discarding or redealing.
+	if view.is_empty() or view.phase=="settled" or view.round!=touch_inspection.round or view.players[0].hand!=touch_inspection.hand:
+		_dismiss_hand_inspection(); return
+	for button in hand_layer.get_children():
+		if button is TextureButton and not button.is_queued_for_deletion() and button.get_meta("hand_index")==touch_inspection.index:
+			var rect = button.get_global_rect()
+			_inspect_tile(view.players[0].hand[touch_inspection.index],rect.position.x,rect.position.y)
+			return
+	_dismiss_hand_inspection()
 
 func _hand_tag(rect: Rect2, text: String) -> void:
 	var tag=UI.label(hand_layer,rect,text,12,UI.TABLE_GOLD)
@@ -642,22 +671,27 @@ func _activate_tile(index: int) -> void:
 	if now < suppress_click_until or session.paused or view.decision_seat != 0 or view.phase != "turn": return
 	if not view.pending.any(func(a):return a.kind=="discard" and a.index==index): return
 	if now-last_touch_ms > 500:
+		hand_touch_mode=false
 		selected=index; _discard_selected(); return
 	# Touch confirms the visibly selected tile, regardless of time between taps.
 	# Activation stays on button release to avoid handling its paired mouse twice.
 	_select(index)
 
 func _input(event: InputEvent) -> void:
-	if current_screen != "table" or is_instance_valid(modal): return
+	if current_screen != "table" or is_instance_valid(modal) or is_instance_valid(character_picker): return
 	if event is InputEventScreenTouch:
+		hand_touch_mode=true
 		last_touch_ms=Time.get_ticks_msec()
 		if event.pressed:
 			touch_started=event.position;touch_started_ms=Time.get_ticks_msec();touch_index=-1
 			for button in hand_layer.get_children():
-				if button is TextureButton and button.get_global_rect().has_point(event.position): touch_index=button.get_meta("hand_index")
+				if button is TextureButton and not button.is_queued_for_deletion() and button.get_global_rect().has_point(event.position): touch_index=button.get_meta("hand_index")
+			if touch_index>=0:
+				touch_inspection={"index":touch_index,"hand":view.players[0].hand.duplicate(),"round":view.round}
+				_refresh_hand_inspection()
 			if touch_index<0 and not _touch_over_button(event.position):
 				selected=-1;declare_mode=""
-				_draw_hand();_draw_actions();_clear(inspect_layer)
+				_dismiss_hand_inspection();_draw_hand();_draw_actions()
 		elif touch_index>=0:
 			var travel=event.position-touch_started
 			if -travel.y>=28 and -travel.y>absf(travel.x)*1.15 and Time.get_ticks_msec()-touch_started_ms<700:
@@ -665,8 +699,21 @@ func _input(event: InputEvent) -> void:
 				if not session.paused and view.decision_seat==0 and view.pending.any(func(a):return a.kind=="discard" and a.index==touch_index):
 					selected=touch_index;_discard_selected()
 			touch_index=-1
+	elif event is InputEventMouseMotion and event.device!=InputEvent.DEVICE_ID_EMULATION and Time.get_ticks_msec()-last_touch_ms>500 and hand_touch_mode:
+		# A real mouse can take over on a hybrid device; touch-generated hover
+		# and leave events cannot dismiss the persistent mobile inspection.
+		hand_touch_mode=false;_dismiss_hand_inspection()
+		for button in hand_layer.get_children():
+			if button is TextureButton and not button.is_queued_for_deletion() and button.get_global_rect().has_point(event.position):
+				var rect=button.get_global_rect()
+				_inspect_tile(view.players[0].hand[button.get_meta("hand_index")],rect.position.x,rect.position.y)
+				break
 
 func _touch_over_button(point: Vector2) -> bool:
+	# Reading the pinned panel must not click through to the table or an action.
+	if not touch_inspection.is_empty() and is_instance_valid(inspect_layer):
+		for panel in inspect_layer.get_children():
+			if panel is Control and not panel.is_queued_for_deletion() and panel.get_global_rect().has_point(point): return true
 	# Like Lotus's action-row exclusion: touching a control must not remove or
 	# replace it before the emulated mouse release activates that same control.
 	for layer in [hud,action_layer]:
@@ -678,6 +725,7 @@ func _discard_selected() -> void:
 	var kind="discard" if declare_mode.is_empty() else declare_mode
 	for move in view.pending:
 		if move.kind==kind and move.get("index",-1)==selected:
+			_dismiss_hand_inspection()
 			session.play(move.id,view.revision); return
 	_toast("这张牌不能用于报听，请选择标有「听」的牌。")
 
@@ -748,6 +796,7 @@ func _draw_actions() -> void:
 			elif a.has("field_kind"): _open_field_action(a.field_kind)
 			elif a.has("discard"): _discard_selected()
 			else: session.play(a.move.id,view.revision),a.primary)
+	_refresh_hand_inspection()
 
 func _show_move_picker(moves: Array) -> void:
 	if moves.size() == 1:
@@ -784,15 +833,20 @@ func _inspect_tile(tile: int, left: float, top: float) -> void:
 	for move in view.pending:
 		if move.kind in ["bao","ming"] and move.tile==tile: waits=move.waits; break
 	var height = 235 if not waits.is_empty() else 143
-	var panel = UI.table_panel(inspect_layer,Rect2(clampf(left-105,235,1060),maxf(180,top-height-18),300,height),false,16)
+	var panel_top = top-height-18
+	if not touch_inspection.is_empty():
+		for action in action_layer.get_children():
+			if action is BaseButton and not action.is_queued_for_deletion() and action.is_visible_in_tree():
+				panel_top=minf(panel_top,action.global_position.y-height-12)
+	var panel = UI.table_panel(inspect_layer,Rect2(clampf(left-105,235,1060),maxf(180,panel_top),300,height),false,16)
 	var inspection_style=UI.table_style(false,16);inspection_style.bg_color=Color("112f2cf5")
 	panel.add_theme_stylebox_override("panel",inspection_style)
-	panel.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	panel.mouse_filter=Control.MOUSE_FILTER_STOP if not touch_inspection.is_empty() else Control.MOUSE_FILTER_IGNORE
 	for i in range(neighbors.size()):
 		var item = neighbors[i]
 		UI.texture(panel,Rect2(16+i*94,12,45,62),tile_textures[item])
 		UI.label(panel,Rect2(12+i*94,76,92,26),Tiles.spoken_title(item),16,UI.TABLE_GOLD if item==tile else UI.TABLE_TEXT)
-		UI.label(panel,Rect2(12+i*94,106,92,24),_remaining_prefix()+" %d 张" % _visible_remaining(item),13,UI.TABLE_MUTED)
+		UI.label(panel,Rect2(12+i*94,106,92,24),_remaining_prefix()+" %d 张" % _visible_remaining(item),18,UI.TABLE_GOLD)
 	if not waits.is_empty():
 		UI.label(panel,Rect2(12,139,276,25),"打出后可明搂 · 听口" if view.players[0].get("revealed_hand",false) else "打出后可报听 · 听口",15,UI.TABLE_GOLD)
 		for i in range(mini(7,waits.size())): UI.texture(panel,Rect2(12+i*39,173,35,47),tile_textures[waits[i]])
@@ -1415,10 +1469,17 @@ func _display_changed(_enabled: bool) -> void:
 	_save_preferences()
 
 func _about() -> void:
-	_popup("关于青玉台",Vector2(760,453))
-	UI.label(modal,Rect2(43,98,671,235),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.6.0"))+"\n"+_games_description()+"\n\n麻将规则、牌面与语音沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n扑克男女声：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
-	UI.button(modal,Rect2(43,350,324,55),"查看开源许可",_licenses)
-	UI.button(modal,Rect2(381,350,333,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
+	_popup("关于青玉台",Vector2(800,568))
+	UI.label(modal,Rect2(43,92,714,38),"署名：股神墨菲特",24,UI.GOLD)
+	UI.label(modal,Rect2(43,142,714,62),"山东麻将 · 青玉台  "+str(ProjectSettings.get_setting("application/config/version","0.10.4"))+"\n"+_games_description(),18,UI.MUTED)
+	var project_link=LinkButton.new();project_link.position=Vector2(43,214);project_link.size=Vector2(714,38)
+	project_link.text="GitHub："+PROJECT_URL;project_link.set_meta("url",PROJECT_URL)
+	project_link.add_theme_font_override("font",UI.font());project_link.add_theme_font_size_override("font_size",17)
+	project_link.add_theme_color_override("font_color",UI.GOLD)
+	project_link.pressed.connect(func():OS.shell_open(PROJECT_URL));modal.add_child(project_link)
+	UI.label(modal,Rect2(43,276,714,155),"麻将规则、牌面与语音沿用莲花麻将（MIT）。\n花牌 CC BY-SA 4.0；字体 Noto（SIL OFL 1.1）。\n扑克牌面 SVG-cards（LGPL-2.1），原始SVG随包。\n扑克男女声：Kokoro / sherpa-onnx（Apache-2.0）。",20,UI.MUTED)
+	UI.button(modal,Rect2(43,473,344,55),"查看开源许可",_licenses)
+	UI.button(modal,Rect2(413,473,344,55),"打开存档文件夹",func(): OS.shell_open(ProjectSettings.globalize_path("user://")))
 
 func _licenses() -> void:
 	_popup("开源许可",Vector2(950,756))
@@ -1505,7 +1566,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if event.keycode==KEY_ESCAPE:
 		if is_instance_valid(modal):_close_modal()
-		elif is_instance_valid(inspect_layer) and inspect_layer.get_child_count()>0: _clear(inspect_layer)
+		elif is_instance_valid(inspect_layer) and inspect_layer.get_child_count()>0: _dismiss_hand_inspection()
 		elif current_screen=="table":_pause()
 		elif current_screen=="lan":
 			if _is_lan(): _confirm_leave_lan()
