@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-12",
+  "status": "script_ready_audio_pending",
+  "voice_ids": {
+    "female": "Chinese_worker_female",
+    "male": "Chinese_gravelly_storyteller_nv1"
+  },
+  "synthesis_model": null,
+  "synthesis_model_note": "建议 Speech-2.8 HD，实际生成型号待交付后填写。两个用户ID是音色。",
+  "combined_script": "00-整批文稿.txt",
+  "pause_marker": "<#3#>",
+  "pause_seconds": 3,
+  "default_character": "female_03",
+  "planned_clip_filename": "{gender}/{key}.wav",
+  "filename_note": "未来裁剪命名，不代表现有播放器已支持这些变体。",
+  "groups": [
+    {
+      "id": "pass",
+      "speaker": "passing_player",
+      "direction": "随意、短促；要不起带一点无奈"
+    },
+    {
+      "id": "challenge",
+      "speaker": "challenger",
+      "direction": "果断、有挑战感，不怒吼"
+    },
+    {
+      "id": "truth",
+      "speaker": "challenger",
+      "direction": "我去真牌与哎呀为惊讶懊恼，行吧为无奈认栽"
+    },
+    {
+      "id": "lie",
+      "speaker": "challenger",
+      "direction": "抓到假牌的开心得意，逮捕带玩笑感"
+    },
+    {
+      "id": "dead",
+      "speaker": "last_player_to_play",
+      "direction": "松快地催促收牌，进入下一轮"
+    }
+  ],
+  "emotion_hint_note": "web_emotion 是粘贴后在网页选中对应台词应用的情绪，不是正文标签。",
+  "clips": [
+    {
+      "index": 1,
+      "key": "pass_01",
+      "group": "pass",
+      "text": "过",
+      "tts_text": "过！",
+      "web_emotion": "中性"
+    },
+    {
+      "index": 2,
+      "key": "pass_02",
+      "group": "pass",
+      "text": "不要",
+      "tts_text": "不要。",
+      "web_emotion": "中性"
+    },
+    {
+      "index": 3,
+      "key": "pass_03",
+      "group": "pass",
+      "text": "要不起",
+      "tts_text": "要不起……",
+      "web_emotion": "难过"
+    },
+    {
+      "index": 4,
+      "key": "pass_04",
+      "group": "pass",
+      "text": "没有",
+      "tts_text": "没有。",
+      "web_emotion": "中性"
+    },
+    {
+      "index": 5,
+      "key": "challenge_01",
+      "group": "challenge",
+      "text": "开",
+      "tts_text": "开！",
+      "web_emotion": "生动"
+    },
+    {
+      "index": 6,
+      "key": "challenge_02",
+      "group": "challenge",
+      "text": "开牌",
+      "tts_text": "开牌！",
+      "web_emotion": "生动"
+    },
+    {
+      "index": 7,
+      "key": "challenge_03",
+      "group": "challenge",
+      "text": "异议",
+      "tts_text": "异议！",
+      "web_emotion": "生动"
+    },
+    {
+      "index": 8,
+      "key": "truth_01",
+      "group": "truth",
+      "text": "我去真牌",
+      "tts_text": "我去，真牌？！",
+      "web_emotion": "惊讶"
+    },
+    {
+      "index": 9,
+      "key": "truth_02",
+      "group": "truth",
+      "text": "哎呀",
+      "tts_text": "哎呀！",
+      "web_emotion": "难过"
+    },
+    {
+      "index": 10,
+      "key": "truth_03",
+      "group": "truth",
+      "text": "行吧",
+      "tts_text": "(sighs)行吧……",
+      "web_emotion": "难过"
+    },
+    {
+      "index": 11,
+      "key": "lie_01",
+      "group": "lie",
+      "text": "哈哈假牌",
+      "tts_text": "哈哈，假牌！",
+      "web_emotion": "开心"
+    },
+    {
+      "index": 12,
+      "key": "lie_02",
+      "group": "lie",
+      "text": "逮到你了",
+      "tts_text": "(chuckle)逮到你了！",
+      "web_emotion": "开心"
+    },
+    {
+      "index": 13,
+      "key": "lie_03",
+      "group": "lie",
+      "text": "逮捕",
+      "tts_text": "逮捕！",
+      "web_emotion": "开心"
+    },
+    {
+      "index": 14,
+      "key": "dead_01",
+      "group": "dead",
+      "text": "推牌推牌",
+      "tts_text": "推牌推牌！",
+      "web_emotion": "生动"
+    },
+    {
+      "index": 15,
+      "key": "dead_02",
+      "group": "dead",
+      "text": "下一轮",
+      "tts_text": "下一轮！",
+      "web_emotion": "生动"
+    }
+  ],
+  "recommended_synthesis_model": "speech-2.8-hd",
+  "webpage_guide": "https://vrfi1sk8a0.feishu.cn/wiki/Vjkzwad8FigHUakIS24cqaVxnJh"
+}
